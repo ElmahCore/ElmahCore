@@ -1,0 +1,101 @@
+/*!
+  
+   ELMAH - Error Logging Modules and Handlers for ASP.NET
+   Copyright (c) 2004-9 Atif Aziz. All rights reserved.
+  
+    Author(s):
+  
+        Atif Aziz, http://www.raboof.com
+  
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+  
+      http://www.apache.org/licenses/LICENSE-2.0
+  
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+  
+*/
+
+footer {
+  margin-top: 17px;
+  padding-top: 17px;
+  border-top: 1px solid #eee;
+}
+
+#PageTitle 
+{
+    padding-bottom: 0.5em;
+}
+
+.type-col
+{
+    font-weight: bold;
+}
+.code-col 
+{
+    text-align: center;
+}
+.date-col, .time-col
+{
+    text-align: right;
+}
+
+#ErrorDetail
+{
+    font-size: 110%;
+}
+
+.st-type, .st-param-type
+{
+    color: #00008B;
+}
+
+.st-param-name
+{
+    color: #666;
+}
+
+.st-method
+{
+    color: #008B8B;
+    font-weight: bolder;
+}
+
+.st-file, .st-line
+{
+    color: #8B008B;
+}
+
+#ErrorTitle
+{
+    font-weight: bold;
+    font-size: 120%;
+}
+
+#ErrorType, #ErrorMessage
+{
+    display: block;
+}
+
+#ErrorTypeMessageSeparator
+{
+    display: none;
+}
+
+.key-col
+{
+    font-weight: bold;
+}
+
+@media print
+{
+    #topnavbar
+    {
+        display: none;
+    }
+}
