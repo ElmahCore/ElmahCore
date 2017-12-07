@@ -28,7 +28,7 @@ services.AddElmah<XmlFileErrorLog>(options =>
 });
 ```
 ## Using Notifiers
-You can create your own notifiers by implement IErrorNotifier interface adn add notifier to Elmah options:
+You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
 ```sh
 services.AddElmah<XmlFileErrorLog>(options =>
 {
@@ -66,8 +66,9 @@ XML filter config example:
 </elmah>
 ```
 see more [here](https://elmah.github.io/a/error-filtering/examples/)
+
 JavaScript filters not yet impemented :(
 
-Add <notifiers> node to <errorFilter> so that you do not send filtered errors.
-If <notifiers> in <errorFilter>, filtred errors logged, but will not be sent.
+Add notifiers to errorFilte node if you do not want to send notifications
+Filtered errors will be logged, but will not be sent.
 
