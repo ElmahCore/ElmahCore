@@ -20,11 +20,19 @@ You can create your own error log, which will store errors anywhere.
  This ErrorLogs available in board:
  - MemoryErrorLog – store errors in memory (by default)
  - XmlFileErrorLog – store errors in XML files
+ - SqlErrorLog - store errors in MS SQL
 ```sh
 services.AddElmah<XmlFileErrorLog>(options =>
 {
     options.Path = " errors";
     options.LogPath = "~/log"; // OR options.LogPath = "с:\errors";
+});
+```
+```sh
+services.AddElmah<SqlErrorLog>(options =>
+{
+    options.Path = " errors";
+    options.ConnectionString = "connection_string"; // DB structire see here: https://bitbucket.org/project-elmah/main/downloads/ELMAH-1.2-db-SQLServer.sql
 });
 ```
 ## Using Notifiers

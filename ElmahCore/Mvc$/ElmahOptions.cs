@@ -11,6 +11,7 @@ namespace ElmahCore
         public ICollection<IErrorFilter> Filters { get; set; } = new List<IErrorFilter>();
         public ICollection<IErrorNotifier> Notifiers { get; set; } = new List<IErrorNotifier>();
         public ErrorLog EventLog { get; set; }
+        public string ConnectionString { get; set; }
     }
 
 }

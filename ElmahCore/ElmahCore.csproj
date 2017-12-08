@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Mvc\Bootstrap.css" />
-    <None Remove="Mvc\ErrorLog.css" />
+    <None Remove="Mvc%24\Bootstrap.css" />
+    <None Remove="Mvc%24\ErrorLog.css" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,10 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Mvc\Handlers\" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
   </ItemGroup>
 
 </Project>

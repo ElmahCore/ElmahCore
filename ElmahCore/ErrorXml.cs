@@ -39,8 +39,7 @@ namespace ElmahCore
     /// Responsible for encoding and decoding the XML representation of
     /// an <see cref="Error"/> object.
     /// </summary>
-
-    internal static class ErrorXml
+    public static class ErrorXml
     {
         /// <summary>
         /// Decodes an <see cref="Error"/> object from its default XML 
