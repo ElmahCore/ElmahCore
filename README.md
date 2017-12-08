@@ -35,7 +35,7 @@ services.AddElmah<XmlFileErrorLog>(options =>
 services.AddElmah<SqlErrorLog>(options =>
 {
     options.Path = " errors";
-    options.ConnectionString = "connection_string"; // DB structire see here: https://bitbucket.org/project-elmah/main/downloads/ELMAH-1.2-db-SQLServer.sql
+    options.ConnectionString = "connection_string"; // DB structure see here: https://bitbucket.org/project-elmah/main/downloads/ELMAH-1.2-db-SQLServer.sql
 });
 ```
 ## Using Notifiers
