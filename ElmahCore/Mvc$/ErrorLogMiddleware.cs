@@ -25,12 +25,18 @@ namespace ElmahCore
         public event ErrorLoggedEventHandler Logged;
         private readonly string _elmahRoot = @"/elmah";
         private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
+        private ILogger _logger;
 
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
 
         public ErrorLogMiddleware(RequestDelegate next, ErrorLog errorLog,
             ILoggerFactory loggerFactory, IHostingEnvironment hostingEnvironment, IOptions<ElmahOptions> elmahOptions)
         {
+            _errorLog = errorLog ?? throw new ArgumentNullException(nameof(errorLog));
+            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            _hostingEnvironment = hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment));
+
+            _logger = _loggerFactory.CreateLogger<ErrorLogMiddleware>();
 
             //Notifiers
             if (elmahOptions.Value.Notifiers != null)
@@ -49,7 +55,14 @@ namespace ElmahCore
 
             if (!string.IsNullOrEmpty(elmahOptions.Value.FiltersConfig))
             {
-                ConfigureFilters(elmahOptions.Value.FiltersConfig);
+                try
+                {
+                    ConfigureFilters(elmahOptions.Value.FiltersConfig);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError("Error in filters XML file", e);
+                }
             }
 
             if (!string.IsNullOrEmpty(elmahOptions.Value?.Path))
@@ -58,11 +71,8 @@ namespace ElmahCore
             }
             if (!_elmahRoot.StartsWith('/')) _elmahRoot = "/" + _elmahRoot;
             if (_elmahRoot.EndsWith('/')) _elmahRoot = _elmahRoot.Substring(0,_elmahRoot.Length-1);
-            _next = next;
-            _errorLog = errorLog ?? throw new ArgumentNullException(nameof(errorLog));
-            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-            _hostingEnvironment = hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment));
 
+            _next = next;
         }
 
         private void ConfigureFilters(string config)
@@ -174,8 +184,9 @@ namespace ElmahCore
             {
                 throw;
             }
-            catch
+            catch(Exception e)
             {
+                _logger.LogError("Elmah request processing error", e);
             }
         }
 
@@ -240,7 +251,7 @@ namespace ElmahCore
                 // even system ones and potentially let them slip by.
                 //
 
-                Trace.WriteLine(localException);
+                _logger.LogError("Elmah local exception", localException);
             }
             if (entry != null)
                 OnLogged(new ErrorLoggedEventArgs(entry));

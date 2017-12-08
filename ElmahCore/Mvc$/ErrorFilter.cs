@@ -51,5 +51,6 @@ namespace ElmahCore
         private List<string> _notifiers = new List<string>();
 
         public IEnumerable<string> Notifiers => _notifiers;
+
     }
 }
