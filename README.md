@@ -1,4 +1,7 @@
 # Using ElmahCore
+ELMAH for ASP.NET Core
+
+Add nuget package elmahcore
 
 ## Simple usage
  Startup.cs
