@@ -24,11 +24,15 @@
 //[assembly: Elmah.Scc("$Id: Error.cs 923 2011-12-23 22:02:10Z azizatif $")]
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Xml;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Headers;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 
@@ -145,8 +149,8 @@ namespace ElmahCore
                     Form = form, 
                     Cookies = cookies,
                 });
-
-                _serverVariables = CopyCollection(request.Headers);
+                //Load Server Variables
+                _serverVariables = GetServerValiables(context);
                 _serverVariables.Add("HttpStatusCode", _statusCode.ToString());
                 _queryString = CopyCollection(QueryHelpers.ParseQuery(qsfc.QueryString.Value));
                 _form = CopyCollection(qsfc.Form);
@@ -159,6 +163,72 @@ namespace ElmahCore
                 _detail = "# caller: " + callerInfo
                         + System.Environment.NewLine
                         + _detail;
+            }
+        }
+
+        private NameValueCollection GetServerValiables(HttpContext context)
+        {
+            var serverVariables = new NameValueCollection();
+            LoadVariables(serverVariables, () => context.Features, "");
+            LoadVariables(serverVariables, () => context.User, "User_");
+            LoadVariables(serverVariables, () => context.Session, "Session_");
+            LoadVariables(serverVariables, () => context.Items, "Items_");
+            LoadVariables(serverVariables, () => context.Connection, "Connection_");
+            return serverVariables;
+        }
+
+        private void LoadVariables(NameValueCollection serverVariables, Func<object> getObject, string prefix)
+        {
+            object obj = null;
+            try
+            {
+                obj = getObject();
+                if (obj == null) return;
+            }
+            catch {return;}
+            var props = obj.GetType().GetProperties();
+            foreach (var prop in props)
+            {
+                object value = null;
+                try
+                {
+                    value = prop.GetValue(obj);
+                }
+                catch { }
+
+                bool isProcessed = false;
+                if (value is IEnumerable && !(value is string))
+                {
+                    var en = (IEnumerable)value;
+                    foreach (var item in en)
+                    {
+                        try
+                        {
+                            var keyProp = item.GetType().GetProperty("Key");
+                            var valueProp = item.GetType().GetProperty("Value");
+
+                            if (keyProp != null && valueProp != null)
+                            {
+                                isProcessed = true;
+                                var val = valueProp.GetValue(item);
+                                if (val.GetType().ToString() != val.ToString())
+                                {
+                                    var prfix2 = prop.Name.StartsWith("RequestHeaders",StringComparison.InvariantCultureIgnoreCase) ? "Header_" : prop.Name + "_";
+                                    serverVariables.Add(prefix + prfix2 + keyProp.GetValue(item), val.ToString());
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                }
+                if (!isProcessed)
+                {
+                    try
+                    {
+                        if (value == null || value.GetType().ToString() != value.ToString()) serverVariables.Add(prefix + prop.Name, value?.ToString());
+                    }
+                    catch { }
+                }
             }
         }
 
