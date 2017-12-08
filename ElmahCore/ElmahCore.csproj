@@ -3,12 +3,20 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
     <AssemblyName>`</AssemblyName>
     <PackageId>ElmahCore</PackageId>
+    <Authors>ElmahCore</Authors>
+    <Company>ElmahCore</Company>
+    <Product>ElmahCore</Product>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
+    <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
+    <Description>ELMAH for ASP.NET Core</Description>
+    <Copyright>ElmahCore</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
