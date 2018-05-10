@@ -1,4 +1,4 @@
-# Using ElmahCore
+﻿# Using ElmahCore
 ELMAH for ASP.NET Core
 
 Add nuget package **elmahcore**
@@ -21,6 +21,7 @@ You can create your own error log, which will store errors anywhere.
     //implement ErrorLog
 ```
  This ErrorLogs available in board:
+ - RedisErrorLog - store errors in Redis server
  - MemoryErrorLog – store errors in memory (by default)
  - XmlFileErrorLog – store errors in XML files
  - SqlErrorLog - store errors in MS SQL
@@ -34,6 +35,12 @@ services.AddElmah<XmlFileErrorLog>(options =>
 services.AddElmah<SqlErrorLog>(options =>
 {
     options.ConnectionString = "connection_string"; // DB structure see here: https://bitbucket.org/project-elmah/main/downloads/ELMAH-1.2-db-SQLServer.sql
+});
+```
+```sh
+services.AddElmah<RedisErrorLog>(options =>
+{
+    options.ConnectionString = "connection_string"; 
 });
 ```
 ## Using Notifiers
