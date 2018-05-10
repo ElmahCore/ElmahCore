@@ -7,7 +7,7 @@
     <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
     <AssemblyVersion>1.0.5.0</AssemblyVersion>
     <FileVersion>1.0.5.0</FileVersion>
-    <AssemblyName>`</AssemblyName>
+    <AssemblyName>ElmahCore</AssemblyName>
     <PackageId>ElmahCore</PackageId>
     <Authors>ElmahCore</Authors>
     <Company>ElmahCore</Company>
@@ -32,6 +32,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.3" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
+    <PackageReference Include="ServiceStack.Redis.Core" Version="5.1.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.4.3" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
   </ItemGroup>
