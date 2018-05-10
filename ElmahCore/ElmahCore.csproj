@@ -7,7 +7,7 @@
     <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
     <AssemblyVersion>1.0.5.0</AssemblyVersion>
     <FileVersion>1.0.5.0</FileVersion>
-    <AssemblyName>`</AssemblyName>
+    <AssemblyName>ElmahCore</AssemblyName>
     <PackageId>ElmahCore</PackageId>
     <Authors>ElmahCore</Authors>
     <Company>ElmahCore</Company>
