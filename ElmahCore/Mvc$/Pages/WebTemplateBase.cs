@@ -16,8 +16,12 @@ namespace ElmahCore
         public HttpResponse Response { get { return Context.Response; } }
         public HttpRequest Request { get { return Context.Request; } }
         public ErrorLog ErrorLog { get; set; }
-
-        public string ElmahRoot { get; set; }
+        private string elmahRoot = string.Empty;
+        public string ElmahRoot
+        {
+            get { return Request.PathBase + elmahRoot; }
+            set { elmahRoot = value; }
+        }
         //public HttpServerUtilityBase Server { get { return Context.Server; } }
 
 
@@ -35,8 +39,8 @@ namespace ElmahCore
 
         public string Encode(string text)
         {
-            return string.IsNullOrEmpty(text) 
-                 ? string.Empty 
+            return string.IsNullOrEmpty(text)
+                 ? string.Empty
                  : ElmahCore.Html.Encode(text).ToHtmlString();
         }
 
