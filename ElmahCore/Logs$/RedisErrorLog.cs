@@ -150,7 +150,6 @@ namespace ElmahCore
             var redisManager = connections.Count() == 0 ? new RedisManagerPool(this.ConnectionString) : new RedisManagerPool(connections);
             using (var client = redisManager.GetClient())
             {
-                Console.WriteLine(client.Host);
                 var objects = client.As<RedisObject>().GetAll().Take(pageSize).Skip(pageIndex * pageSize).OrderByDescending(x=>x.TimeUtc);
                 foreach (var redisError in objects)
                 {
