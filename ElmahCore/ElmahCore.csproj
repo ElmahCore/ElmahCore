@@ -3,20 +3,21 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5</Version>
-    <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
+    <Version>1.0.5.1</Version>
+    <PackageProjectUrl>https://github.com/funky81/ElmahCore</PackageProjectUrl>
     <AssemblyVersion>1.0.5.0</AssemblyVersion>
     <FileVersion>1.0.5.0</FileVersion>
     <AssemblyName>ElmahCore</AssemblyName>
-    <PackageId>ElmahCore</PackageId>
-    <Authors>ElmahCore</Authors>
-    <Company>ElmahCore</Company>
-    <Product>ElmahCore</Product>
+    <PackageId>ElmahCore.Redis</PackageId>
+    <Authors>Reski Rukmantiyo</Authors>
+    <Company>Reski Rukmantiyo</Company>
+    <Product>ElmahCore with Redis Support</Product>
     <NeutralLanguage>en-001</NeutralLanguage>
-    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
-    <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
+    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore.Redis</RepositoryUrl>
+    <PackageTags>redis net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
     <Description>ELMAH for ASP.NET Core</Description>
-    <Copyright>ElmahCore</Copyright>
+    <Copyright>Copyright EBAYS @2018</Copyright>
+    <PackageReleaseNotes>Branch from Elmah Core. Few addons added into this package</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
