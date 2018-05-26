@@ -102,7 +102,7 @@ namespace ElmahCore
             string errorXml = ErrorXml.EncodeString(error);
             Guid id = Guid.NewGuid();
 
-            var redisManager = new RedisManagerPool(this.ConnectionString);
+            var redisManager = new RedisManagerPool(GetListConnectionString());
             using (var client = redisManager.GetClient())
             {
                 client.As<RedisObject>().Store(new RedisObject()
@@ -121,6 +121,16 @@ namespace ElmahCore
             }
             return id.ToString();
         }
+        private List<string> GetListConnectionString()
+        {
+            var splitConnectionString = this.ConnectionString.Split(',');
+            var listConnectionString = new List<string>();
+            foreach (var connectionString in splitConnectionString)
+            {
+                listConnectionString.Add(ConnectionString);
+            }
+            return listConnectionString;
+        }
         /// <summary>
         /// Returns a page of errors from the databse in descending order 
         /// of logged time.
@@ -131,7 +141,8 @@ namespace ElmahCore
                 throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
             if (pageSize < 0)
                 throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
-            var redisManager = new RedisManagerPool(this.ConnectionString);
+            var listConnectionString = GetListConnectionString();
+            var redisManager = new RedisManagerPool(listConnectionString);
             using (var client = redisManager.GetClient())
             {
                 var objects = client.As<RedisObject>().GetAll().Take(pageSize).Skip(pageIndex * pageSize);
@@ -177,7 +188,7 @@ namespace ElmahCore
                 throw new ArgumentException(e.Message, "id", e);
             }
             string errorXml;
-            var redisManager = new RedisManagerPool(this.ConnectionString);
+            var redisManager = new RedisManagerPool(GetListConnectionString());
             using (var client = redisManager.GetClient())
             {
                 errorXml = client.As<RedisObject>().GetAll().FirstOrDefault(x => x.ErrorId == errorGuid).AllXml;
