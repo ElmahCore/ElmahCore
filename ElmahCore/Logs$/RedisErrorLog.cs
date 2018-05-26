@@ -123,6 +123,16 @@ namespace ElmahCore
             }
             return id.ToString();
         }
+        private List<string> GetListConnectionString()
+        {
+            var splitConnectionString = this.ConnectionString.Split(',');
+            var listConnectionString = new List<string>();
+            foreach (var connectionString in splitConnectionString)
+            {
+                listConnectionString.Add(ConnectionString);
+            }
+            return listConnectionString;
+        }
         /// <summary>
         /// Returns a page of errors from the databse in descending order 
         /// of logged time.
