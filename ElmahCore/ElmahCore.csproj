@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5.2</Version>
+    <Version>1.0.5.3</Version>
     <PackageProjectUrl>https://github.com/funky81/ElmahCore</PackageProjectUrl>
-    <AssemblyVersion>1.0.5.0</AssemblyVersion>
-    <FileVersion>1.0.5.0</FileVersion>
+    <AssemblyVersion>1.0.5.3</AssemblyVersion>
+    <FileVersion>1.0.5.3</FileVersion>
     <AssemblyName>ElmahCore</AssemblyName>
     <PackageId>ElmahCore.Redis</PackageId>
     <Authors>Reski Rukmantiyo</Authors>
@@ -17,7 +17,11 @@
     <PackageTags>redis net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
     <Description>ELMAH for ASP.NET Core</Description>
     <Copyright>Copyright EBAYS @2018</Copyright>
-    <PackageReleaseNotes>Branch from Elmah Core. Few addons added into this package</PackageReleaseNotes>
+    <PackageReleaseNotes>Notes
+1.0.5.3
+- Improve fetch through Redis Id
+1.0.5.2 
+- Branch from Elmah Core. Few addons added into this package</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
