@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5.3</Version>
+    <Version>1.0.5.4</Version>
     <PackageProjectUrl>https://github.com/funky81/ElmahCore</PackageProjectUrl>
-    <AssemblyVersion>1.0.5.3</AssemblyVersion>
-    <FileVersion>1.0.5.3</FileVersion>
+    <AssemblyVersion>1.0.5.4</AssemblyVersion>
+    <FileVersion>1.0.5.4</FileVersion>
     <AssemblyName>ElmahCore</AssemblyName>
     <PackageId>ElmahCore.Redis</PackageId>
     <Authors>Reski Rukmantiyo</Authors>
@@ -15,13 +15,16 @@
     <NeutralLanguage>en-001</NeutralLanguage>
     <RepositoryUrl>https://www.nuget.org/packages/ElmahCore.Redis</RepositoryUrl>
     <PackageTags>redis net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
-    <Description>ELMAH for ASP.NET Core</Description>
+    <Description>ELMAH for ASP.NET Core with Redis Server</Description>
     <Copyright>Copyright EBAYS @2018</Copyright>
     <PackageReleaseNotes>Notes
+1.0.5.4
+- Bug Fix formula to fetch Error List in HTML Table
 1.0.5.3
 - Improve fetch through Redis Id
 1.0.5.2 
 - Branch from Elmah Core. Few addons added into this package</PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
