@@ -108,7 +108,7 @@ namespace ElmahCore
             using (var client = redisManager.GetClient())
             {
                 var redis = client.As<RedisObject>();
-                redis.Store(new RedisObject()
+                redis.AddToRecentsList(new RedisObject()
                 {
                     AllXml = errorXml,
                     Application = this.ApplicationName,
@@ -154,7 +154,7 @@ namespace ElmahCore
             {
                 var redis = client.As<RedisObject>();
                 var index = pageIndex - 1;
-                var objects = redis.GetAll().Skip(index * pageSize).Take(pageSize).OrderByDescending(x => x.TimeUtc);
+                var objects = redis.GetLatestFromRecentsList(index * pageSize, pageSize);
                 foreach (var redisError in objects)
                 {
                     errorEntryList.Add(new ErrorLogEntry(this, redisError.ErrorId.ToString(), ErrorXml.DecodeString(redisError.AllXml)));

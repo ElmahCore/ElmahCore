@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5.4</Version>
+    <Version>1.0.5.5</Version>
     <PackageProjectUrl>https://github.com/funky81/ElmahCore</PackageProjectUrl>
     <AssemblyVersion>1.0.5.4</AssemblyVersion>
     <FileVersion>1.0.5.4</FileVersion>
@@ -18,6 +18,8 @@
     <Description>ELMAH for ASP.NET Core with Redis Server</Description>
     <Copyright>Copyright EBAYS @2018</Copyright>
     <PackageReleaseNotes>Notes
+1.0.5.5
+- Trying to fix memory leaks when large objects taken from Redis
 1.0.5.4
 - Bug Fix formula to fetch Error List in HTML Table
 1.0.5.3
