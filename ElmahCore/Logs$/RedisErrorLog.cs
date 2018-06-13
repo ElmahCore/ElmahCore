@@ -98,14 +98,17 @@ namespace ElmahCore
         {
             if (error == null)
                 throw new ArgumentNullException("error");
-
             string errorXml = ErrorXml.EncodeString(error);
             Guid id = Guid.NewGuid();
-
-            var redisManager = new RedisManagerPool(GetListConnectionString());
+            var connections = new List<string>();
+            if (this.ConnectionString.Contains(","))
+                foreach (var connection in this.ConnectionString.Split(','))
+                    connections.Add(connection);
+            var redisManager = connections.Count() == 0 ? new RedisManagerPool(this.ConnectionString) : new RedisManagerPool(connections);
             using (var client = redisManager.GetClient())
             {
-                client.As<RedisObject>().Store(new RedisObject()
+                var redis = client.As<RedisObject>();
+                var redisObject = new RedisObject()
                 {
                     AllXml = errorXml,
                     Application = this.ApplicationName,
@@ -116,8 +119,11 @@ namespace ElmahCore
                     StatusCode = error.StatusCode,
                     TimeUtc = error.Time.ToUniversalTime(),
                     Type = error.Type,
-                    User = error.User
-                });
+                    User = error.User,
+                    Id = id
+                };
+                redis.AddToRecentsList(redisObject);
+                redis.Store(redisObject);
             }
             return id.ToString();
         }
@@ -141,11 +147,16 @@ namespace ElmahCore
                 throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
             if (pageSize < 0)
                 throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
-            var listConnectionString = GetListConnectionString();
-            var redisManager = new RedisManagerPool(listConnectionString);
+            var connections = new List<string>();
+            if (this.ConnectionString.Contains(","))
+                foreach (var connection in this.ConnectionString.Split(','))
+                    connections.Add(connection);
+            var redisManager = connections.Count() == 0 ? new RedisManagerPool(this.ConnectionString) : new RedisManagerPool(connections);
             using (var client = redisManager.GetClient())
             {
-                var objects = client.As<RedisObject>().GetAll().Take(pageSize).Skip(pageIndex * pageSize).OrderByDescending(x=>x.TimeUtc);
+                var redis = client.As<RedisObject>();
+                var index = pageIndex - 1;
+                var objects = redis.GetLatestFromRecentsList(1, pageSize);
                 foreach (var redisError in objects)
                 {
                     errorEntryList.Add(new ErrorLogEntry(this, redisError.ErrorId.ToString(), ErrorXml.DecodeString(redisError.AllXml)));
@@ -178,29 +189,20 @@ namespace ElmahCore
                 throw new ArgumentNullException("id");
             if (id.Length == 0)
                 throw new ArgumentException(null, "id");
-            Guid errorGuid;
-            try
-            {
-                errorGuid = new Guid(id);
-            }
-            catch (FormatException e)
-            {
-                throw new ArgumentException(e.Message, "id", e);
-            }
-            string errorXml;
-            var redisManager = new RedisManagerPool(GetListConnectionString());
+            string errorXml = string.Empty;
+            var connections = new List<string>();
+            if (this.ConnectionString.Contains(","))
+                foreach (var connection in this.ConnectionString.Split(','))
+                    connections.Add(connection);
+            var redisManager = connections.Count() == 0 ? new RedisManagerPool(this.ConnectionString) : new RedisManagerPool(connections);
             using (var client = redisManager.GetClient())
             {
-                errorXml = client.As<RedisObject>().GetAll().FirstOrDefault(x => x.ErrorId == errorGuid).AllXml;
+                Guid errorGuid = new Guid(id);
+                var redis = client.As<RedisObject>();
+                var redisObject = redis.GetById(errorGuid);
+                if (redisObject != null)
+                    errorXml = redisObject.AllXml;
             }
-            //using (SqlConnection connection = new SqlConnection(this.ConnectionString))
-            //using (SqlCommand command = Commands.GetErrorXml(this.ApplicationName, errorGuid))
-            //{
-            //    command.Connection = connection;
-            //    connection.Open();
-            //    errorXml = (string)command.ExecuteScalar();
-            //}
-
             if (errorXml == null)
                 return null;
 
@@ -248,6 +250,7 @@ namespace ElmahCore
         }
         public class RedisObject
         {
+            public Guid Id { get; set; }
             public Guid ErrorId { get; set; }
             public string Application { get; set; }
             public string Host { get; set; }
