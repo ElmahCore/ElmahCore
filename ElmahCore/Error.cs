@@ -50,7 +50,7 @@ namespace ElmahCore
     /// exception it may be representing).
     /// </summary>
 
-    [ Serializable ]
+    [Serializable]
     public sealed class Error : ICloneable
     {
         private readonly Exception _exception;
@@ -73,7 +73,7 @@ namespace ElmahCore
         /// Initializes a new instance of the <see cref="Error"/> class.
         /// </summary>
 
-        public Error() {}
+        public Error() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Error"/> class
@@ -136,7 +136,7 @@ namespace ElmahCore
             if (context != null)
             {
                 var webUser = context.User;
-                if (webUser != null 
+                if (webUser != null
                     && (webUser.Identity.Name ?? string.Empty).Length > 0)
                 {
                     _user = webUser.Identity.Name;
@@ -146,7 +146,7 @@ namespace ElmahCore
                 var qsfc = request.TryGetUnvalidatedCollections((form, qs, cookies) => new
                 {
                     QueryString = qs,
-                    Form = form, 
+                    Form = form,
                     Cookies = cookies,
                 });
                 //Load Server Variables
@@ -185,7 +185,7 @@ namespace ElmahCore
                 obj = getObject();
                 if (obj == null) return;
             }
-            catch {return;}
+            catch { return; }
             var props = obj.GetType().GetProperties();
             foreach (var prop in props)
             {
@@ -213,7 +213,7 @@ namespace ElmahCore
                                 var val = valueProp.GetValue(item);
                                 if (val.GetType().ToString() != val.ToString())
                                 {
-                                    var prfix2 = prop.Name.StartsWith("RequestHeaders",StringComparison.InvariantCultureIgnoreCase) ? "Header_" : prop.Name + "_";
+                                    var prfix2 = prop.Name.StartsWith("RequestHeaders", StringComparison.InvariantCultureIgnoreCase) ? "Header_" : prop.Name + "_";
                                     serverVariables.Add(prefix + prfix2 + keyProp.GetValue(item), val.ToString());
                                 }
                             }
@@ -253,7 +253,7 @@ namespace ElmahCore
         /// </summary>
 
         public string ApplicationName
-        { 
+        {
             get { return _applicationName ?? string.Empty; }
             set { _applicationName = value; }
         }
@@ -261,19 +261,22 @@ namespace ElmahCore
         /// <summary>
         /// Gets or sets name of host machine where this error occurred.
         /// </summary>
-        
+
         public string HostName
-        { 
-            get { return _hostName ?? string.Empty; }
+        {
+            get
+            {
+                return _hostName ?? Environment.GetEnvironmentVariable("COMPUTERNAME") ?? Environment.GetEnvironmentVariable("HOSTNAME");
+            }
             set { _hostName = value; }
         }
 
         /// <summary>
         /// Gets or sets the type, class or category of the error.
         /// </summary>
-        
+
         public string Type
-        { 
+        {
             get { return _typeName ?? string.Empty; }
             set { _typeName = value; }
         }
@@ -281,7 +284,7 @@ namespace ElmahCore
         /// <summary>
         /// Gets or sets the source that is the cause of the error.
         /// </summary>
-        
+
         public string Source
         { 
             get { return _source ?? string.Empty; }
@@ -291,9 +294,9 @@ namespace ElmahCore
         /// <summary>
         /// Gets or sets a brief text describing the error.
         /// </summary>
-        
-        public string Message 
-        { 
+
+        public string Message
+        {
             get { return _message ?? string.Empty; }
             set { _message = value; }
         }
@@ -304,7 +307,7 @@ namespace ElmahCore
         /// </summary>
 
         public string Detail
-        { 
+        {
             get { return _detail ?? string.Empty; }
             set { _detail = value; }
         }
@@ -313,10 +316,10 @@ namespace ElmahCore
         /// Gets or sets the user logged into the application at the time 
         /// of the error.
         /// </summary>
-        
-        public string User 
-        { 
-            get { return _user ?? string.Empty; }
+
+        public string User
+        {
+            get { return _user ?? Environment.GetEnvironmentVariable("USERDOMAIN") ?? Environment.GetEnvironmentVariable("USERNAME") ?? string.Empty; }
             set { _user = value; }
         }
 
@@ -324,9 +327,9 @@ namespace ElmahCore
         /// Gets or sets the date and time (in local time) at which the 
         /// error occurred.
         /// </summary>
-        
-        public DateTime Time 
-        { 
+
+        public DateTime Time
+        {
             get { return _time; }
             set { _time = value; }
         }
@@ -339,9 +342,9 @@ namespace ElmahCore
         /// For cases where this value cannot always be reliably determined, 
         /// the value may be reported as zero.
         /// </remarks>
-        
-        public int StatusCode 
-        { 
+
+        public int StatusCode
+        {
             get { return _statusCode; }
             set { _statusCode = value; }
         }
@@ -350,7 +353,7 @@ namespace ElmahCore
         /// Gets or sets the HTML message generated by the web host (ASP.NET) 
         /// for the given error.
         /// </summary>
-        
+
         public string WebHostHtmlMessage
         {
             get { return _webHostHtmlMessage ?? string.Empty; }
@@ -361,29 +364,29 @@ namespace ElmahCore
         /// Gets a collection representing the Web server variables
         /// captured as part of diagnostic data for the error.
         /// </summary>
-        
-        public NameValueCollection ServerVariables 
-        { 
-            get { return FaultIn(ref _serverVariables);  }
+
+        public NameValueCollection ServerVariables
+        {
+            get { return FaultIn(ref _serverVariables); }
         }
 
         /// <summary>
         /// Gets a collection representing the Web query string variables
         /// captured as part of diagnostic data for the error.
         /// </summary>
-        
-        public NameValueCollection QueryString 
-        { 
-            get { return FaultIn(ref _queryString); } 
+
+        public NameValueCollection QueryString
+        {
+            get { return FaultIn(ref _queryString); }
         }
 
         /// <summary>
         /// Gets a collection representing the form variables captured as 
         /// part of diagnostic data for the error.
         /// </summary>
-        
-        public NameValueCollection Form 
-        { 
+
+        public NameValueCollection Form
+        {
             get { return FaultIn(ref _form); }
         }
 
@@ -392,7 +395,7 @@ namespace ElmahCore
         /// captured as part of diagnostic data for the error.
         /// </summary>
 
-        public NameValueCollection Cookies 
+        public NameValueCollection Cookies
         {
             get { return FaultIn(ref _cookies); }
         }
@@ -416,7 +419,7 @@ namespace ElmahCore
             // Make a base shallow copy of all the members.
             //
 
-            var copy = (Error) MemberwiseClone();
+            var copy = (Error)MemberwiseClone();
 
             //
             // Now make a deep copy of items that are mutable.

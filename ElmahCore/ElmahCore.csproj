@@ -1,22 +1,34 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.4</Version>
-    <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.4.0</FileVersion>
-    <AssemblyName>`</AssemblyName>
-    <PackageId>ElmahCore</PackageId>
-    <Authors>ElmahCore</Authors>
-    <Company>ElmahCore</Company>
-    <Product>ElmahCore</Product>
+    <Version>1.0.5.6</Version>
+    <PackageProjectUrl>https://github.com/funky81/ElmahCore</PackageProjectUrl>
+    <AssemblyVersion>1.0.5.6</AssemblyVersion>
+    <FileVersion>1.0.5.6</FileVersion>
+    <AssemblyName>ElmahCore</AssemblyName>
+    <PackageId>ElmahCore.Redis</PackageId>
+    <Authors>Reski Rukmantiyo</Authors>
+    <Company>Reski Rukmantiyo</Company>
+    <Product>ElmahCore with Redis Support</Product>
     <NeutralLanguage>en-001</NeutralLanguage>
-    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
-    <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
-    <Description>ELMAH for ASP.NET Core</Description>
-    <Copyright>ElmahCore</Copyright>
+    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore.Redis</RepositoryUrl>
+    <PackageTags>redis net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
+    <Description>ELMAH for ASP.NET Core with Redis Server</Description>
+    <Copyright>Copyright EBAYS @2018</Copyright>
+    <PackageReleaseNotes>Notes
+1.0.5.6
+- Bugfix for un-consistent data load
+1.0.5.5
+- Trying to fix memory leaks when large objects taken from Redis
+1.0.5.4
+- Bug Fix formula to fetch Error List in HTML Table
+1.0.5.3
+- Improve fetch through Redis Id
+1.0.5.2 
+- Branch from Elmah Core. Few addons added into this package</PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,9 +42,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
+    <PackageReference Include="ServiceStack.Redis.Core" Version="5.1.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
   </ItemGroup>
 
 </Project>
