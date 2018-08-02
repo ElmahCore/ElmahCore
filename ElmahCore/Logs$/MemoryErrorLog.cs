@@ -1,44 +1,12 @@
-#region License, Terms and Author(s)
-//
-// ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-#endregion
-
-//[assembly: Elmah.Scc("$Id: MemoryErrorLog.cs 776 2011-01-12 21:09:24Z azizatif $")]
-
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Threading;
-using Mannex;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace ElmahCore
 {
-    #region Imports
-
-    using IDictionary = System.Collections.IDictionary;
-    using CultureInfo = System.Globalization.CultureInfo;
-
-    #endregion
-
     /// <summary>
     /// An <see cref="ErrorLog"/> implementation that uses memory as its 
     /// backing store. 
@@ -56,11 +24,11 @@ namespace ElmahCore
         //
 
         private static EntryCollection _entries;
-        private readonly static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private static readonly ReaderWriterLockSlim Lock = new ReaderWriterLockSlim();
 
         //
         // IMPORTANT! The size must be the same for all instances
-        // for the entires collection to be intialized correctly.
+        // for the entires collection to be initialized correctly.
         //
 
         private readonly int _size;
@@ -94,7 +62,7 @@ namespace ElmahCore
         public MemoryErrorLog(int size)
         {
             if (size < 0 || size > MaximumSize)   
-                throw new ArgumentOutOfRangeException("size", size, string.Format("Size must be between 0 and {0}.", MaximumSize));
+                throw new ArgumentOutOfRangeException(nameof(size), size, $"Size must be between 0 and {MaximumSize}.");
 
             _size = size;
         }
@@ -112,7 +80,7 @@ namespace ElmahCore
             }
             else
             {
-                var sizeString = config.Find("size", string.Empty);
+                var sizeString = Find(config,"size", string.Empty);
 
                 if (sizeString.Length == 0)
                 {
@@ -134,16 +102,19 @@ namespace ElmahCore
             }
         }
 
+	    public static T Find<T>(IDictionary dict, object key, T @default)
+	    {
+		    if (dict == null) throw new ArgumentNullException(nameof(dict));
+		    return (T) (dict[key] ?? @default);
+	    }
+
         /// <summary>
         /// Gets the name of this error log implementation.
         /// </summary>
 
-        public override string Name
-        {
-            get { return "In-Memory Error Log"; }
-        }
+        public override string Name => "In-Memory Error Log";
 
-        /// <summary>
+	    /// <summary>
         /// Logs an error to the application memory.
         /// </summary>
         /// <remarks>
@@ -153,19 +124,19 @@ namespace ElmahCore
         public override string Log(Error error)
         {
             if (error == null)
-                throw new ArgumentNullException("error");
+                throw new ArgumentNullException(nameof(error));
 
             //
             // Make a copy of the error to log since the source is mutable.
             // Assign a new GUID and create an entry for the error.
             //
 
-            error = error.CloneObject();
+            error = error.Clone();
             error.ApplicationName = ApplicationName;
             var newId = Guid.NewGuid();
             var entry = new ErrorLogEntry(this, newId.ToString(), error);
 
-            _lock.EnterWriteLock(); 
+            Lock.EnterWriteLock(); 
 
             try
             {
@@ -174,7 +145,7 @@ namespace ElmahCore
             }
             finally
             {
-                _lock.ExitWriteLock();
+                Lock.ExitWriteLock();
             }
             
             return newId.ToString();
@@ -187,7 +158,7 @@ namespace ElmahCore
 
         public override ErrorLogEntry GetError(string id)
         {
-            _lock.EnterReadLock();
+            Lock.EnterReadLock();
 
             ErrorLogEntry entry;
 
@@ -200,7 +171,7 @@ namespace ElmahCore
             }
             finally
             {
-                _lock.ExitReadLock();
+                Lock.ExitReadLock();
             }
 
             if (entry == null)
@@ -210,7 +181,7 @@ namespace ElmahCore
             // Return a copy that the caller can party on.
             //
 
-            var error = entry.Error.CloneObject();
+            var error = entry.Error.Clone();
             return new ErrorLogEntry(this, entry.Id, error);
         }
 
@@ -221,8 +192,8 @@ namespace ElmahCore
 
         public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
-            if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
+            if (pageIndex < 0) throw new ArgumentOutOfRangeException(nameof(pageIndex), pageIndex, null);
+            if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
 
             //
             // To minimize the time for which we hold the lock, we'll first
@@ -235,7 +206,7 @@ namespace ElmahCore
             ErrorLogEntry[] selectedEntries = null;
             int totalCount;
 
-            _lock.EnterReadLock();
+            Lock.EnterReadLock();
 
             try
             {
@@ -261,7 +232,7 @@ namespace ElmahCore
             }
             finally
             {
-                _lock.ExitReadLock();
+                Lock.ExitReadLock();
             }
 
             if (errorEntryList != null && selectedEntries != null)
@@ -273,7 +244,7 @@ namespace ElmahCore
 
                 foreach (var entry in selectedEntries)
                 {
-                    var error = entry.Error.CloneObject();
+                    var error = entry.Error.Clone();
                     errorEntryList.Add(new ErrorLogEntry(this, entry.Id, error));
                 }
             }
@@ -282,13 +253,13 @@ namespace ElmahCore
         }
 
         /// <summary>
-        /// Used to clear the content of the collection used by this logger. This method is ment
+        /// Used to clear the content of the collection used by this logger. This method is men
         /// for testing and debugging purposes only.
         /// </summary>
 
         internal void Reset()
         {
-            _lock.EnterWriteLock();
+            Lock.EnterWriteLock();
 
             try
             {
@@ -296,7 +267,7 @@ namespace ElmahCore
             }
             finally
             {
-                _lock.ExitWriteLock();
+                Lock.ExitWriteLock();
             }
         }
 

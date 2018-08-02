@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.2.0</Version>
+    <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <AssemblyName>ElmahCore.Mvc</AssemblyName>
+    <PackageId>ElmahCore.Mvc</PackageId>
+    <Authors>ElmahCore</Authors>
+    <Company>ElmahCore</Company>
+    <Product>ElmahCore.Mvc</Product>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
+    <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
+    <Description>ELMAH for ASP.NET Core</Description>
+    <Copyright>ElmahCore</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Bootstrap.css" />
+    <EmbeddedResource Include="ErrorLog.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ElmahCore\ElmahCore.csproj" />
+  </ItemGroup>
+
+</Project>

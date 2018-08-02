@@ -1,43 +1,12 @@
-#region License, Terms and Author(s)
-//
-// ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-#endregion
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Mannex.Threading.Tasks;
 using Microsoft.Extensions.PlatformAbstractions;
-
-//[assembly: Elmah.Scc("$Id: ErrorLog.cs 776 2011-01-12 21:09:24Z azizatif $")]
 
 namespace ElmahCore
 {
-
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Mannex.Threading.Tasks;
-
-    /// <summary>
+	/// <summary>
     /// Represents an error log capable of storing and retrieving errors
     /// generated in an ASP.NET Web application.
     /// </summary>
@@ -46,9 +15,8 @@ namespace ElmahCore
     {
         private string _appName;
         private bool _appNameInitialized;
-        private static readonly object _contextKey = new object();
 
-        /// <summary>
+	    /// <summary>
         /// Logs an error in log for the application.
         /// </summary>
         
@@ -78,7 +46,7 @@ namespace ElmahCore
 
         public virtual Task<string> LogAsync(Error error, CancellationToken cancellationToken)
         {
-            return Async.RunSynchronously(Log, error);
+            return Task.FromResult(Log(error));
         }
         
 
@@ -128,7 +96,7 @@ namespace ElmahCore
 
         public virtual Task<ErrorLogEntry> GetErrorAsync(string id, CancellationToken cancellationToken)
         {
-            return Async.RunSynchronously(GetError, id);
+            return Task.FromResult(GetError(id));
         }
 
 
@@ -178,7 +146,7 @@ namespace ElmahCore
 
         public virtual Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
         {
-            return Async.RunSynchronously(GetErrors, pageIndex, pageSize, errorEntryList);
+            return Task.FromResult(GetErrors(pageIndex, pageSize, errorEntryList));
         }
 
 
@@ -206,20 +174,17 @@ namespace ElmahCore
         /// Get the name of this log.
         /// </summary>
 
-        public virtual string Name
-        {
-            get { return GetType().Name; }   
-        }
+        public virtual string Name => GetType().Name;
 
-        /// <summary>
+	    /// <summary>
         /// Gets the name of the application to which the log is scoped.
         /// </summary>
         
         public string ApplicationName
         {
-            get { return _appName ?? string.Empty; }
-            
-            set
+            get => _appName ?? string.Empty;
+
+		    set
             {
                 if (_appNameInitialized)
                     throw new InvalidOperationException("The application name cannot be reset once initialized.");
@@ -234,14 +199,15 @@ namespace ElmahCore
         {
             if (asyncResult == null) throw new ArgumentNullException(nameof(asyncResult));
             var task = asyncResult as Task<T>;
-            if (task == null) throw new ArgumentException(null, "asyncResult");
+            if (task == null) throw new ArgumentException(null, nameof(asyncResult));
             try
             {
                 return task.Result;
             }
             catch (AggregateException e)
             {
-                throw e.InnerException; // TODO handle stack trace reset?
+	            // ReSharper disable once PossibleNullReferenceException
+	            throw e.InnerException; // TODO handle stack trace reset?
             }
         }
 

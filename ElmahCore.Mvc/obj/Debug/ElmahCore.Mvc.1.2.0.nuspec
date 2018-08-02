@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>ElmahCore.Mvc</id>
+    <version>1.2.0</version>
+    <authors>ElmahCore</authors>
+    <owners>ElmahCore</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectUrl>https://github.com/ElmahCore/ElmahCore</projectUrl>
+    <description>ELMAH for ASP.NET Core</description>
+    <copyright>ElmahCore</copyright>
+    <tags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</tags>
+    <repository url="https://www.nuget.org/packages/ElmahCore" />
+    <dependencies>
+      <group targetFramework=".NETCoreApp2.1">
+        <dependency id="ElmahCore" version="1.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc" version="2.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.PlatformAbstractions" version="1.1.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Sources\ElmahCore\ElmahCore.Mvc\bin\Debug\netcoreapp2.1\ElmahCore.Mvc.dll" target="lib\netcoreapp2.1\ElmahCore.Mvc.dll" />
+  </files>
+</package>

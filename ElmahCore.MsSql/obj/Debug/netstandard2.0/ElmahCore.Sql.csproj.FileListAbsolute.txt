@@ -1,0 +1,12 @@
+C:\Sources\ElmahCore\ElmahCore.MsSql\bin\Debug\netstandard2.0\ElmahCore.Sql.deps.json
+C:\Sources\ElmahCore\ElmahCore.MsSql\bin\Debug\netstandard2.0\ElmahCore.Sql.dll
+C:\Sources\ElmahCore\ElmahCore.MsSql\bin\Debug\netstandard2.0\ElmahCore.Sql.pdb
+C:\Sources\ElmahCore\ElmahCore.MsSql\bin\Debug\netstandard2.0\ElmahCore.dll
+C:\Sources\ElmahCore\ElmahCore.MsSql\bin\Debug\netstandard2.0\ElmahCore.pdb
+C:\Sources\ElmahCore\ElmahCore.MsSql\obj\Debug\netstandard2.0\ElmahCore.Sql.csprojAssemblyReference.cache
+C:\Sources\ElmahCore\ElmahCore.MsSql\obj\Debug\netstandard2.0\ElmahCore.Sql.csproj.CoreCompileInputs.cache
+C:\Sources\ElmahCore\ElmahCore.MsSql\obj\Debug\netstandard2.0\ElmahCore.Sql.AssemblyInfoInputs.cache
+C:\Sources\ElmahCore\ElmahCore.MsSql\obj\Debug\netstandard2.0\ElmahCore.Sql.AssemblyInfo.cs
+C:\Sources\ElmahCore\ElmahCore.MsSql\obj\Debug\netstandard2.0\ElmahCore.Sql.csproj.CopyComplete
+C:\Sources\ElmahCore\ElmahCore.MsSql\obj\Debug\netstandard2.0\ElmahCore.Sql.dll
+C:\Sources\ElmahCore\ElmahCore.MsSql\obj\Debug\netstandard2.0\ElmahCore.Sql.pdb

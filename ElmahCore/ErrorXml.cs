@@ -1,39 +1,12 @@
-#region License, Terms and Author(s)
-//
-// ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-#endregion
-
-//[assembly: Elmah.Scc("$Id: ErrorXml.cs 776 2011-01-12 21:09:24Z azizatif $")]
-
 using System;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Xml;
 
 namespace ElmahCore
 {
-    #region Imports
 
-    using NameValueCollection = System.Collections.Specialized.NameValueCollection;
-
-    #endregion
 
     /// <summary>
     /// Responsible for encoding and decoding the XML representation of
@@ -64,8 +37,8 @@ namespace ElmahCore
 
         public static Error Decode(XmlReader reader)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
-            if (!reader.IsStartElement()) throw new ArgumentException("Reader is not positioned at the start of an element.", "reader");
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (!reader.IsStartElement()) throw new ArgumentException("Reader is not positioned at the start of an element.", nameof(reader));
 
             //
             // Read out the attributes that contain the simple
@@ -101,8 +74,8 @@ namespace ElmahCore
         
         private static void ReadXmlAttributes(XmlReader reader, Error error)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
-            if (!reader.IsStartElement()) throw new ArgumentException("Reader is not positioned at the start of an element.", "reader");
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (!reader.IsStartElement()) throw new ArgumentException("Reader is not positioned at the start of an element.", nameof(reader));
 
             error.ApplicationName = reader.GetAttribute("application");
             error.HostName = reader.GetAttribute("host");
@@ -112,7 +85,7 @@ namespace ElmahCore
             error.Detail = reader.GetAttribute("detail");
             error.User = reader.GetAttribute("user");
             var timeString = reader.GetAttribute("time") ?? string.Empty;
-            error.Time = timeString.Length == 0 ? new DateTime() : XmlConvert.ToDateTime(timeString);
+            error.Time = timeString.Length == 0 ? new DateTime() : XmlConvert.ToDateTime(timeString,XmlDateTimeSerializationMode.Local);
             var statusCodeString = reader.GetAttribute("statusCode") ?? string.Empty;
             error.StatusCode = statusCodeString.Length == 0 ? 0 : XmlConvert.ToInt32(statusCodeString);
             error.WebHostHtmlMessage = reader.GetAttribute("webHostHtmlMessage");
@@ -124,7 +97,7 @@ namespace ElmahCore
 
         private static void ReadInnerXml(XmlReader reader, Error error)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
 
             //
             // Loop through the elements, reading those that we
@@ -191,8 +164,8 @@ namespace ElmahCore
 
         public static void Encode(Error error, XmlWriter writer)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
-            if (writer.WriteState != WriteState.Element) throw new ArgumentException("Writer is not in the expected Element state.", "writer");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            if (writer.WriteState != WriteState.Element) throw new ArgumentException("Writer is not in the expected Element state.", nameof(writer));
 
             //
             // Write out the basic typed information in attributes
@@ -210,7 +183,7 @@ namespace ElmahCore
         private static void WriteXmlAttributes(Error error, XmlWriter writer)
         {
             Debug.Assert(error != null);
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
 
             WriteXmlAttribute(writer, "application", error.ApplicationName);
             WriteXmlAttribute(writer, "host", error.HostName);
@@ -233,7 +206,7 @@ namespace ElmahCore
         private static void WriteInnerXml(Error error, XmlWriter writer)
         {
             Debug.Assert(error != null);
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
 
             WriteCollection(writer, "serverVariables", error.ServerVariables);
             WriteCollection(writer, "queryString", error.QueryString);
@@ -244,7 +217,6 @@ namespace ElmahCore
         private static void WriteCollection(XmlWriter writer, string name, NameValueCollection collection)
         {
             Debug.Assert(writer != null);
-            Debug.AssertStringNotEmpty(name);
 
             if (collection == null || collection.Count == 0) 
                 return;
@@ -257,7 +229,6 @@ namespace ElmahCore
         private static void WriteXmlAttribute(XmlWriter writer, string name, string value)
         {
             Debug.Assert(writer != null);
-            Debug.AssertStringNotEmpty(name);
 
             if (!string.IsNullOrEmpty(value))
                 writer.WriteAttributeString(name, value);
@@ -270,8 +241,8 @@ namespace ElmahCore
 
         private static void Encode(NameValueCollection collection, XmlWriter writer) 
         {
-            if (collection == null) throw new ArgumentNullException("collection");
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
 
             if (collection.Count == 0)
                 return;
@@ -317,8 +288,8 @@ namespace ElmahCore
 
         private static void UpcodeTo(XmlReader reader, NameValueCollection collection)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
-            if (collection == null) throw new ArgumentNullException("collection");
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (collection == null) throw new ArgumentNullException(nameof(collection));
 
             Debug.Assert(!reader.IsEmptyElement);
             reader.Read();
