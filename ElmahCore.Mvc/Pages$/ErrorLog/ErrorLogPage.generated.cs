@@ -86,7 +86,7 @@ WriteLiteral("\r\n");
     const int defaultPageSize = 15;
     const int maximumPageSize = 100;
 
-    var basePageName = Request.PathBase + ElmahRoot;
+    var basePageName = ElmahRoot;
     
     //
     // Get the page index and size parameters within their bounds.

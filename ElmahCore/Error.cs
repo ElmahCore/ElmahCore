@@ -235,7 +235,7 @@ namespace ElmahCore
         
         public string HostName
         { 
-            get => _hostName ?? string.Empty;
+	        get => _hostName ?? Environment.GetEnvironmentVariable("COMPUTERNAME") ?? Environment.GetEnvironmentVariable("HOSTNAME");
 	        set => _hostName = value;
         }
 
@@ -287,7 +287,8 @@ namespace ElmahCore
         
         public string User 
         { 
-            get => _user ?? string.Empty;
+	        get => _user ?? Environment.GetEnvironmentVariable("USERDOMAIN") ?? Environment.GetEnvironmentVariable("USERNAME") ?? string.Empty;
+
 	        set => _user = value;
         }
 

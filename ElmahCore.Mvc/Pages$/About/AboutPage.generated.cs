@@ -62,7 +62,7 @@ WriteLiteral("\r\n");
             
             #line 6 "..\..\AboutPage.cshtml"
   
-    var basePageName = Request.PathBase + ElmahRoot;
+    var basePageName = ElmahRoot;
 
     const string title = "About ELMAHCore";
     Layout = new MasterPage.MasterPage
