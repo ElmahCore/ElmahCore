@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
             
             #line 11 "..\..\MasterPage.cshtml"
   
-    var basePageName = ElmahRoot;
+    var basePageName = Request.PathBase + ElmahRoot;
     
     var now = DateTime.Now;
     var tz = TimeZone.CurrentTimeZone;

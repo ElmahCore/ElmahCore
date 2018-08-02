@@ -52,7 +52,7 @@ WriteLiteral("\r\n");
             
             #line 7 "..\..\ErrorDetailPage.cshtml"
   
-    var basePageName = ElmahRoot;
+    var basePageName = Request.PathBase + ElmahRoot;
     
     //
     // Retrieve the ID of the error to display and read it from 
