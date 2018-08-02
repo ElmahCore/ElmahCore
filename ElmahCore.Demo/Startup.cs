@@ -32,7 +32,10 @@ namespace ElmahCore.Demo
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-	        services.AddElmah();
+	        services.AddElmah(options =>
+	        {
+		        options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
+	        });
 
 
 

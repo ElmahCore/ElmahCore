@@ -9,6 +9,7 @@ using ElmahCore.Assertions;
 using ElmahCore.Mvc.About;
 using ElmahCore.Mvc.ErrorDetail;
 using ElmahCore.Mvc.Handlers;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -29,6 +30,7 @@ namespace ElmahCore.Mvc
         private readonly string _elmahRoot = @"/elmah";
         private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
         private ILogger _logger;
+	    private Func<HttpContext, bool> _сheckPermissionAction;
 
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
 
@@ -40,6 +42,8 @@ namespace ElmahCore.Mvc
             _hostingEnvironment = hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment));
 
             _logger = _loggerFactory.CreateLogger<ErrorLogMiddleware>();
+
+	        _сheckPermissionAction = elmahOptions?.Value?.CheckPermissionAction;
 
             //Notifiers
             if (elmahOptions.Value.Notifiers != null)
@@ -114,8 +118,18 @@ namespace ElmahCore.Mvc
         {
             try
             {
+
                 if (context.Request.Path.Value.Equals(_elmahRoot,StringComparison.InvariantCultureIgnoreCase) || context.Request.Path.Value.StartsWith(_elmahRoot+"/", StringComparison.InvariantCultureIgnoreCase))
                 {
+	                if (_сheckPermissionAction != null)
+	                {
+		                if (!_сheckPermissionAction(context))
+		                {
+			                await context.ChallengeAsync();
+			                return;
+		                }
+	                }
+
                     await ProcessElamhRequest(context);
                     return;
                 }

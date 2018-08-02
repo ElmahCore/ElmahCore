@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore
 {
@@ -12,6 +14,7 @@ namespace ElmahCore
         public ICollection<IErrorNotifier> Notifiers { get; set; } = new List<IErrorNotifier>();
         public ErrorLog EventLog { get; set; }
         public string ConnectionString { get; set; }
+	    public Func<HttpContext,bool> CheckPermissionAction { get; set; }
     }
 
 }
