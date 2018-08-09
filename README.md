@@ -47,7 +47,7 @@ services.AddElmah<XmlFileErrorLog>(options =>
 });
 ```
 Each notifier must have unique name.
-## Using Filers
+## Using Filters
 You can use Elmah XML filter configuration in separate file, create and add custom filters:
 ```sh
 services.AddElmah<XmlFileErrorLog>(options =>
@@ -78,6 +78,6 @@ see more [here](https://elmah.github.io/a/error-filtering/examples/)
 
 JavaScript filters not yet impemented :(
 
-Add notifiers to errorFilte node if you do not want to send notifications
+Add notifiers to errorFilter node if you do not want to send notifications
 Filtered errors will be logged, but will not be sent.
 
