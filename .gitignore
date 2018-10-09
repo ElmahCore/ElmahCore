@@ -3,7 +3,12 @@
 ################################################################################
 
 /.vs/ElmahCore/v15/Server/sqlite3
-/ElmahCore/bin/Debug
-/ElmahCore/obj
 /.vs/ElmahCore/v15
-/.vs
+/.vsElmahCore/bin/**/*
+.idea/**/*
+ElmahCore/obj/**/*
+ElmahCore.Demo/bin/**/*
+ElmahCore.Demo/obj/**/*
+ElmahCore.Mvc/bin/**/*
+ElmahCore.Mvc/obj/**/*
+ElmahCore.Demo/bin/Debug/**/*.*
