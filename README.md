@@ -9,6 +9,7 @@ Add nuget package **elmahcore**
 1)	services.AddElmah() in ConfigureServices 
 2)	app.UseElmah(); in Configure
 ```
+Default elmah path `~/elmah`.
 
 ## Change URL path
 ```sh
