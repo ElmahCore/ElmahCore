@@ -23,7 +23,7 @@ You can create your own error log, which will store errors anywhere.
  This ErrorLogs available in board:
  - MemoryErrorLog – store errors in memory (by default)
  - XmlFileErrorLog – store errors in XML files
- - SqlErrorLog - store errors in MS SQL
+ - SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
 ```sh
 services.AddElmah<XmlFileErrorLog>(options =>
 {
@@ -35,6 +35,14 @@ services.AddElmah<SqlErrorLog>(options =>
 {
     options.ConnectionString = "connection_string"; // DB structure see here: https://bitbucket.org/project-elmah/main/downloads/ELMAH-1.2-db-SQLServer.sql
 });
+```
+## Rise exception
+```sh
+public IActionResult Test()
+{
+    HttpContext.RiseError(new InvalidOperationException("Test"));
+    ...
+}
 ```
 ## Using Notifiers
 You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
