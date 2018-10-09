@@ -95,44 +95,53 @@ namespace ElmahCore.Mvc
             var token = new StringBuilder();
 
             var e = format.GetEnumerator();
-            while (e.MoveNext())
+            try
             {
-                var ch = e.Current;
-                if (ch == '{')
+                while (e.MoveNext())
                 {
-                    while (true)
+                    var ch = e.Current;
+                    if (ch == '{')
                     {
-                        if (!e.MoveNext())
-                            throw new FormatException();
-
-                        ch = e.Current;
-                        if (ch == '}')
+                        while (true)
                         {
-                            if (token.Length == 0)
+                            if (!e.MoveNext())
                                 throw new FormatException();
 
-                            result.Append(binder(token.ToString(), args, provider));
-                            token.Length = 0;
-                            break;
+                            ch = e.Current;
+                            if (ch == '}')
+                            {
+                                if (token.Length == 0)
+                                    throw new FormatException();
+
+                                result.Append(binder(token.ToString(), args, provider));
+                                token.Length = 0;
+                                break;
+                            }
+
+                            if (ch == '{')
+                            {
+                                result.Append(ch);
+                                break;
+                            }
+
+                            token.Append(ch);
                         }
-                        if (ch == '{')
-                        {
-                            result.Append(ch);
-                            break;
-                        }
-                        token.Append(ch);
+                    }
+                    else if (ch == '}')
+                    {
+                        if (!e.MoveNext() || e.Current != '}')
+                            throw new FormatException();
+                        result.Append('}');
+                    }
+                    else
+                    {
+                        result.Append(ch);
                     }
                 }
-                else if (ch == '}')
-                {
-                    if (!e.MoveNext() || e.Current != '}')
-                        throw new FormatException();
-                    result.Append('}');
-                }
-                else
-                {
-                    result.Append(ch);
-                }
+            }
+            finally
+            {
+                e.Dispose();
             }
 
             return result.ToString();

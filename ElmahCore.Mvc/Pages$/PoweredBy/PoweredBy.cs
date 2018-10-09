@@ -87,7 +87,7 @@ namespace ElmahCore.Mvc.PoweredBy
             // the medium trust level in ASP.NET.
             //
 
-            var assembly = typeof(ElmahCore.ErrorLog).Assembly;
+            var assembly = typeof(ErrorLog).Assembly;
 
             var attributes = new
             {

@@ -159,8 +159,8 @@ namespace ElmahCore.Sql
 
             string errorXml;
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
-            using (SqlCommand command = CommandExtension.GetErrorXml(this.ApplicationName, errorGuid))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (SqlCommand command = CommandExtension.GetErrorXml(ApplicationName, errorGuid))
             {
                 command.Connection = connection;
                 connection.Open();

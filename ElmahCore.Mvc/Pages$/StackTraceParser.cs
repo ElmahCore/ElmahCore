@@ -34,7 +34,7 @@ namespace ElmahCore.Mvc
 
     static class StackTraceParser
     {
-        static readonly Regex _regex = new Regex(@"
+        static readonly Regex Regex = new Regex(@"
             ^
             \s*
             \w+ \s+ 
@@ -75,7 +75,7 @@ namespace ElmahCore.Mvc
             Func<TToken, TToken, TSourceLocation> sourceLocationSelector,
             Func<TToken, TMethod, TParameters, TSourceLocation, TFrame> selector)
         {
-            return from Match m in _regex.Matches(text)
+            return from Match m in Regex.Matches(text)
                    select m.Groups into groups
                    let pt = groups["pt"].Captures
                    let pn = groups["pn"].Captures

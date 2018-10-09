@@ -1,8 +1,5 @@
 @* Generator: Template TypeVisibility: Internal *@
 @using System.Globalization
-@using System.IO
-@using System.Web
-@using Elmah
 @using ElmahCore.Mvc.MasterPage
 @using ElmahCore.Mvc.MoreLinq
 @inherits WebTemplateBase

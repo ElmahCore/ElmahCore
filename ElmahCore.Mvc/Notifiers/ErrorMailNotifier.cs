@@ -27,13 +27,12 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Mail;
-using ApplicationException = ElmahCore.ApplicationException;
 
 namespace ElmahCore.Mvc.Notifiers
 {
     #region Imports
 
-	using MailAttachment = System.Net.Mail.Attachment;
+	using MailAttachment = Attachment;
 	using ThreadPool = System.Threading.ThreadPool;
 	using Encoding = System.Text.Encoding;
     using NetworkCredential = System.Net.NetworkCredential;
@@ -281,9 +280,9 @@ namespace ElmahCore.Mvc.Notifiers
             // MailSender and MailRecipient properties.
             //
 
-            var sender = this.MailSender ?? string.Empty;
-            var recipient = this.MailRecipient ?? string.Empty;
-            var copyRecipient = this.MailCopyRecipient ?? string.Empty;
+            var sender = MailSender ?? string.Empty;
+            var recipient = MailRecipient ?? string.Empty;
+            var copyRecipient = MailCopyRecipient ?? string.Empty;
 
             if (recipient.Length == 0)
                 return;
@@ -293,7 +292,7 @@ namespace ElmahCore.Mvc.Notifiers
             //
 
             var mail = new MailMessage();
-            mail.Priority = this.MailPriority;
+            mail.Priority = MailPriority;
 
             mail.From = new MailAddress(sender);
             mail.To.Add(recipient);

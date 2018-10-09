@@ -58,7 +58,7 @@ WriteLiteral("\r\n");
     var basePageName = ElmahRoot;
     
     var now = DateTime.Now;
-    var tz = TimeZone.CurrentTimeZone;
+            var tz = TimeZoneInfo.Local;// TimeZone.CurrentTimeZone;
     
     var speedBarItems = (SpeedBarItems ?? Enumerable.Empty<SpeedBar.FormattedItem>()).ToArray();
 

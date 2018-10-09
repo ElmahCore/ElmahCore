@@ -396,8 +396,10 @@ namespace ElmahCore
         }
         private static NameValueCollection CopyCollection(IEnumerable<KeyValuePair<String, StringValues>> collection)
         {
+	        // ReSharper disable once PossibleMultipleEnumeration
 	        if (collection == null || !collection.Any())
 		        return null;
+	        // ReSharper disable once PossibleMultipleEnumeration
 	        var keyValuePairs = collection as KeyValuePair<string, StringValues>[] ?? collection.ToArray();
 	        if (!keyValuePairs.Any())
                 return null;

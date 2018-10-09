@@ -71,7 +71,7 @@ namespace ElmahCore.Mvc.Handlers
             //
 
             using (var sw = new StreamWriter(response.Body))
-                ErrorJson.Encode(entry.Error, sw);
+                ErrorJson.Encode(entry?.Error, sw);
         }
     }
 }

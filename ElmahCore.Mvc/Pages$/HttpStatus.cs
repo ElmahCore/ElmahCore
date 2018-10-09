@@ -115,8 +115,8 @@ namespace ElmahCore.Mvc
             Reason = reason ?? "HTTP Status Code " + code.ToString(CultureInfo.InvariantCulture);
         }
 
-        public int Code { get; private set; }
-        public string Reason { get; private set; }
+        public int Code { get; }
+        public string Reason { get; }
 
         public string StatusLine
         {

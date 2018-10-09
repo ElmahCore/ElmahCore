@@ -40,7 +40,7 @@ namespace ElmahCore.Mvc
     internal static class StyleSheetHelper
     {
         static string _styleSheetHash;
-        static readonly ReadOnlyCollection<string> _styleSheetResourceNames = Array.AsReadOnly(new[] {"Bootstrap.css", "ErrorLog.css"});
+        static readonly ReadOnlyCollection<string> AllStyleSheetResourceNames = Array.AsReadOnly(new[] {"Bootstrap.css", "ErrorLog.css"});
 
         public static void LoadStyleSheets(HttpContext context, IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding, bool cacheResponse)
         {
@@ -57,13 +57,13 @@ namespace ElmahCore.Mvc
 
         public static IEnumerable<string> StyleSheetResourceNames
         {
-            get { return _styleSheetResourceNames; }
+            get { return AllStyleSheetResourceNames; }
         }
 
         private static string CalculateHash()
         {
             var memoryStream = new MemoryStream();
-            foreach (var resourceName in _styleSheetResourceNames)
+            foreach (var resourceName in AllStyleSheetResourceNames)
                 ManifestResourceHelper.WriteResourceToStream(memoryStream, typeof(StyleSheetHelper), resourceName);
 
             return MD5.Create()

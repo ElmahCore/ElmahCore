@@ -44,7 +44,7 @@ namespace ElmahCore.Mvc
         {
             if (string.IsNullOrEmpty(textToAppend))
                 return;
-            _generatingEnvironment.Append(textToAppend); ;
+            _generatingEnvironment.Append(textToAppend); 
         }
 
         public virtual void Write(object value)

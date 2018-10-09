@@ -52,7 +52,6 @@ namespace ElmahCore.Mvc.Handlers
         {
             var log = errorLog;
 
-            var request = context.Request;
             var response = context.Response;
             
             response.ContentType = "application/xml";

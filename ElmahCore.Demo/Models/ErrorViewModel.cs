@@ -1,5 +1,3 @@
-using System;
-
 namespace ElmahCore.Demo.Models
 {
     public class ErrorViewModel

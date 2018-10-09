@@ -24,7 +24,6 @@
 //[assembly: Elmah.Scc("$Id: AssertionFactory.cs 640 2009-06-01 17:22:02Z azizatif $")]
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -137,6 +136,7 @@ namespace ElmahCore.Assertions
             if (!dontCompile)
                 options |= RegexOptions.Compiled;
 
+            // ReSharper disable once AssignNullToNotNullAttribute
             return new RegexMatchAssertion(binding, new Regex(pattern, options));
         }
 
@@ -220,7 +220,7 @@ namespace ElmahCore.Assertions
             
             Type factoryType;
 
-            var xmlns = config.NamespaceURI ?? string.Empty;
+            var xmlns = config.NamespaceURI;
 
             if (xmlns.Length > 0)
             {
@@ -277,7 +277,7 @@ namespace ElmahCore.Assertions
             return args;
         }
 
-        private static readonly string[] _truths = new[] { "true", "yes", "on", "1" }; // TODO Remove duplication with SecurityConfiguration
+        private static readonly string[] Truths = new[] { "true", "yes", "on", "1" }; // TODO Remove duplication with SecurityConfiguration
         
         private static object ParseArgument(ParameterInfo parameter, XmlElement config) 
         {
@@ -311,7 +311,7 @@ namespace ElmahCore.Assertions
             if (type == typeof(bool))
             {
                 text = text.Trim().ToLowerInvariant();
-                return bool.TrueString.Equals(Array.IndexOf(_truths, text) >= 0 ? bool.TrueString : text);
+                return bool.TrueString.Equals(Array.IndexOf(Truths, text) >= 0 ? bool.TrueString : text);
 
 	            
             }
@@ -333,26 +333,26 @@ namespace ElmahCore.Assertions
             assemblyName = string.Empty;
             typeNamespace = string.Empty;
 
-            const string assemblyNS = "http://schemas.microsoft.com/clr/assem/";
-            const string namespaceNS = "http://schemas.microsoft.com/clr/ns/";
-            const string fullNS = "http://schemas.microsoft.com/clr/nsassem/";
+            const string assemblyNs = "http://schemas.microsoft.com/clr/assem/";
+            const string namespaceNs = "http://schemas.microsoft.com/clr/ns/";
+            const string fullNs = "http://schemas.microsoft.com/clr/nsassem/";
             
-            if (OrdinalStringStartsWith(xmlns, assemblyNS))
+            if (OrdinalStringStartsWith(xmlns, assemblyNs))
             {
-                assemblyName = Uri.UnescapeDataString(xmlns.Substring(assemblyNS.Length));
+                assemblyName = Uri.UnescapeDataString(xmlns.Substring(assemblyNs.Length));
                 return assemblyName.Length > 0;
             }
             
-            if (OrdinalStringStartsWith(xmlns, namespaceNS))
+            if (OrdinalStringStartsWith(xmlns, namespaceNs))
             {
-                typeNamespace = xmlns.Substring(namespaceNS.Length);
+                typeNamespace = xmlns.Substring(namespaceNs.Length);
                 return typeNamespace.Length > 0;
             }
             
-            if (OrdinalStringStartsWith(xmlns, fullNS))
+            if (OrdinalStringStartsWith(xmlns, fullNs))
             {
-                var index = xmlns.IndexOf("/", fullNS.Length);
-                typeNamespace = xmlns.Substring(fullNS.Length, index - fullNS.Length);
+                var index = xmlns.IndexOf("/", fullNs.Length, StringComparison.InvariantCultureIgnoreCase);
+                typeNamespace = xmlns.Substring(fullNs.Length, index - fullNs.Length);
                 assemblyName = Uri.UnescapeDataString(xmlns.Substring(index + 1));
                 return assemblyName.Length > 0 && typeNamespace.Length > 0;
             }
@@ -367,24 +367,6 @@ namespace ElmahCore.Assertions
             
             return s.Length >= prefix.Length && 
                 string.CompareOrdinal(s.Substring(0, prefix.Length), prefix) == 0;
-        }
-
-        private static string[] DeserializeStringArray(XmlElement config,
-            string containerName, string elementName, string valueName)
-        {
-            Debug.Assert(config != null);
-
-            var list = new List<string>(4);
-
-            var xpath = containerName + "/" + elementName + "/@" + valueName;
-            foreach (XmlAttribute attribute in config.SelectNodes(xpath))
-            {
-                var value = attribute.Value ?? string.Empty;
-                if (value.Length > 0)
-                    list.Add(attribute.Value);
-            }
-
-            return list.ToArray();
         }
     }
 }

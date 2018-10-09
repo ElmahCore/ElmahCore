@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using ElmahCore.Mvc.About;
 using ElmahCore.Mvc.ErrorDetail;
 using ElmahCore.Mvc.Handlers;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,9 +20,6 @@ namespace ElmahCore.Mvc
         private readonly RequestDelegate _next;
         private readonly ErrorLog _errorLog;
         private readonly IEnumerable<IErrorNotifier> _notifiers;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly DiagnosticSource _diagnosticSource;
         public event ExceptionFilterEventHandler Filtering;
         public event ErrorLoggedEventHandler Logged;
         private readonly string _elmahRoot = @"/elmah";
@@ -35,22 +30,21 @@ namespace ElmahCore.Mvc
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
 
         public ErrorLogMiddleware(RequestDelegate next, ErrorLog errorLog,
-            ILoggerFactory loggerFactory, IHostingEnvironment hostingEnvironment, IOptions<ElmahOptions> elmahOptions)
+            ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
         {
             _errorLog = errorLog ?? throw new ArgumentNullException(nameof(errorLog));
-            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-            _hostingEnvironment = hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment));
+            var loggerFactory1 = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 
-            _logger = _loggerFactory.CreateLogger<ErrorLogMiddleware>();
+            _logger = loggerFactory1.CreateLogger<ErrorLogMiddleware>();
 
 	        _сheckPermissionAction = elmahOptions?.Value?.CheckPermissionAction;
 
             //Notifiers
-            if (elmahOptions.Value.Notifiers != null)
+            if (elmahOptions?.Value?.Notifiers != null)
                 _notifiers = elmahOptions.Value.Notifiers.ToList();
 
             //Filters
-            if (elmahOptions.Value.Filters != null)
+            if (elmahOptions?.Value?.Filters != null)
             {
                 _filters = elmahOptions.Value.Filters.ToList();
                 foreach (var errorFilter in _filters)
@@ -60,7 +54,7 @@ namespace ElmahCore.Mvc
             }
 
 
-            if (!string.IsNullOrEmpty(elmahOptions.Value.FiltersConfig))
+            if (!string.IsNullOrEmpty(elmahOptions?.Value?.FiltersConfig))
             {
                 try
                 {
@@ -72,7 +66,7 @@ namespace ElmahCore.Mvc
                 }
             }
 
-            if (!string.IsNullOrEmpty(elmahOptions.Value?.Path))
+            if (!string.IsNullOrEmpty(elmahOptions?.Value?.Path))
             {
                 _elmahRoot = elmahOptions.Value.Path.ToLower();
             }

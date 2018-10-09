@@ -78,7 +78,7 @@ namespace ElmahCore.Mvc.Handlers
 
             writer.WriteStartDocument();
             writer.WriteStartElement("error");
-            ErrorXml.Encode(entry.Error, writer);
+            ErrorXml.Encode(entry?.Error, writer);
             writer.WriteEndElement(/* error */);
             writer.WriteEndDocument();
             writer.Flush();

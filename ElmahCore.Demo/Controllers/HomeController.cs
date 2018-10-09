@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ElmahCore.Demo.Models;
 
@@ -13,7 +10,7 @@ namespace ElmahCore.Demo.Controllers
         public IActionResult Index()
         {
 	        throw new InvalidOperationException("Test");
-            return View();
+            //return View();
         }
 
         public IActionResult About()

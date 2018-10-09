@@ -44,9 +44,9 @@ namespace ElmahCore.Mvc.Handlers
 
     static class ErrorLogDownloadHandler
     {
-        private static readonly TimeSpan _beatPollInterval = TimeSpan.FromSeconds(3);
+        private static readonly TimeSpan BeatPollInterval = TimeSpan.FromSeconds(3);
 
-        private const int _pageSize = 100;
+        private const int PageSize = 100;
 
         public static IEnumerable<AsyncResultOr<string>> ProcessRequest(ErrorLog errorLog,
             HttpContext context, 
@@ -102,12 +102,12 @@ namespace ElmahCore.Mvc.Handlers
             foreach (var text in format.Header())
                 await output.WriteAsync(text);
 
-            var errorEntryList = new List<ErrorLogEntry>(_pageSize);
+            var errorEntryList = new List<ErrorLogEntry>(PageSize);
             var downloadCount = 0;
 
             for (var pageIndex = 0; ; pageIndex++)
             {
-                var total = await log.GetErrorsAsync(pageIndex, _pageSize, errorEntryList);
+                var total = await log.GetErrorsAsync(pageIndex, PageSize, errorEntryList);
                 var count = errorEntryList.Count;
 
                 if (maxDownloadCount > 0)
@@ -158,12 +158,12 @@ namespace ElmahCore.Mvc.Handlers
                 yield return AsyncResultOr.Value(text);
 
             var lastBeatTime = DateTime.Now;
-            var errorEntryList = new List<ErrorLogEntry>(_pageSize);
+            var errorEntryList = new List<ErrorLogEntry>(PageSize);
             var downloadCount = 0;
 
             for (var pageIndex = 0; ; pageIndex++)
             {
-                var ar = log.BeginGetErrors(pageIndex, _pageSize, errorEntryList,
+                var ar = log.BeginGetErrors(pageIndex, PageSize, errorEntryList,
                                             getAsyncCallback(), null);
                 yield return AsyncResultOr.InsteadOf<string>(ar);
 
@@ -205,7 +205,7 @@ namespace ElmahCore.Mvc.Handlers
                 // only performed at certain intervals.
                 //
 
-                if (DateTime.Now - lastBeatTime > _beatPollInterval)
+                if (DateTime.Now - lastBeatTime > BeatPollInterval)
                 {
                     lastBeatTime = DateTime.Now;
                 }
@@ -318,7 +318,7 @@ namespace ElmahCore.Mvc.Handlers
 
         private sealed class JsonPaddingFormat : Format
         {
-            private static readonly Regex _callbackExpression = new Regex(@"^ 
+            private static readonly Regex CallbackExpression = new Regex(@"^ 
                      [a-z_] [a-z0-9_]+ ( \[ [0-9]+ \] )?
                 ( \. [a-z_] [a-z0-9_]+ ( \[ [0-9]+ \] )? )* $",
                 RegexOptions.IgnoreCase
@@ -347,7 +347,7 @@ namespace ElmahCore.Mvc.Handlers
                 if (callback.Length == 0)
                     throw new Exception("The JSONP callback parameter is missing.");
 
-                if (!_callbackExpression.IsMatch(callback))
+                if (!CallbackExpression.IsMatch(callback))
                     throw new Exception("The JSONP callback parameter is not in an acceptable format.");
 
                 _callback = callback;
@@ -450,7 +450,7 @@ namespace ElmahCore.Mvc.Handlers
             private readonly TextWriter _writer;
             private int _column;
 
-            private static readonly char[] _reserved = new char[] { '\"', ',', '\r', '\n' };
+            private static readonly char[] Reserved = new char[] { '\"', ',', '\r', '\n' };
 
             public CsvWriter(TextWriter writer)
             {
@@ -459,6 +459,7 @@ namespace ElmahCore.Mvc.Handlers
                 _writer = writer;
             }
 
+            // ReSharper disable once UnusedMethodReturnValue.Local
             public CsvWriter Record()
             {
                 _writer.WriteLine();
@@ -476,7 +477,7 @@ namespace ElmahCore.Mvc.Handlers
                 // need to be enclosed in double-quotes. 
                 //
 
-                var index = value.IndexOfAny(_reserved);
+                var index = value.IndexOfAny(Reserved);
 
                 if (index < 0)
                 {

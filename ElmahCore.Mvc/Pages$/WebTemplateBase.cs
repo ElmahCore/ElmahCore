@@ -12,7 +12,7 @@ namespace ElmahCore.Mvc
         public HttpContext Context { get; set; }
         public HttpResponse Response { get { return Context.Response; } }
         public HttpRequest Request { get { return Context.Request; } }
-        public ElmahCore.ErrorLog ErrorLog { get; set; }
+        public ErrorLog ErrorLog { get; set; }
 
 	    private string _elmahRoot = string.Empty;
 	    public string ElmahRoot
