@@ -17,7 +17,6 @@ namespace ElmahCore.Mvc
 {
     internal class ErrorLogMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly ErrorLog _errorLog;
         private readonly IEnumerable<IErrorNotifier> _notifiers;
         public event ExceptionFilterEventHandler Filtering;
@@ -29,13 +28,12 @@ namespace ElmahCore.Mvc
 
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
 
-        public ErrorLogMiddleware(RequestDelegate next, ErrorLog errorLog,
-            ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
+        public ErrorLogMiddleware(ErrorLog errorLog,ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
         {
             _errorLog = errorLog ?? throw new ArgumentNullException(nameof(errorLog));
-            var loggerFactory1 = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            var lf = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 
-            _logger = loggerFactory1.CreateLogger<ErrorLogMiddleware>();
+            _logger = lf.CreateLogger<ErrorLogMiddleware>();
 
 	        _сheckPermissionAction = elmahOptions?.Value?.CheckPermissionAction;
 
@@ -72,8 +70,6 @@ namespace ElmahCore.Mvc
             }
             if (!_elmahRoot.StartsWith('/')) _elmahRoot = "/" + _elmahRoot;
             if (_elmahRoot.EndsWith('/')) _elmahRoot = _elmahRoot.Substring(0,_elmahRoot.Length-1);
-
-            _next = next;
         }
 
         private void ConfigureFilters(string config)
@@ -108,7 +104,7 @@ namespace ElmahCore.Mvc
 
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, Func<Task> next)
         {
             try
             {
@@ -128,7 +124,7 @@ namespace ElmahCore.Mvc
                     return;
                 }
 
-                await _next.Invoke(context);
+                await next();
 
                 if (context.Response.HasStarted
                     || context.Response.StatusCode < 400
@@ -210,7 +206,7 @@ namespace ElmahCore.Mvc
         }
 
 
-        protected void LogException(Exception e, HttpContext context)
+        internal void LogException(Exception e, HttpContext context)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));

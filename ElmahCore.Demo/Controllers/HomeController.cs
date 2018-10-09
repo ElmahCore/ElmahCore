@@ -15,6 +15,7 @@ namespace ElmahCore.Demo.Controllers
 
         public IActionResult About()
         {
+            HttpContext.RiseError(new InvalidOperationException("Test"));
             ViewData["Message"] = "Your application description page.";
 
             return View();

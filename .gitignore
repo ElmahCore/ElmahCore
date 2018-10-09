@@ -7,8 +7,10 @@
 /.vsElmahCore/bin/**/*
 .idea/**/*
 ElmahCore/obj/**/*
+ElmahCore/bin/**/*
 ElmahCore.Demo/bin/**/*
 ElmahCore.Demo/obj/**/*
 ElmahCore.Mvc/bin/**/*
 ElmahCore.Mvc/obj/**/*
-ElmahCore.Demo/bin/Debug/**/*.*
+ElmahCore.MsSql/bin/**/*
+ElmahCore.MsSql/obj/**/*

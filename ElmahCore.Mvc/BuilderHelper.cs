@@ -8,7 +8,12 @@ namespace ElmahCore.Mvc
     {
         public static IApplicationBuilder UseElmah(this IApplicationBuilder app)
         {
-            app.UseMiddleware<ErrorLogMiddleware>();
+            //app.UseMiddleware<ErrorLogMiddleware>();
+            app.Use(async (ctx, next) =>
+            {
+                var middleware = ctx.RequestServices.GetService<ErrorLogMiddleware>();
+                await middleware.Invoke(ctx, next);
+            });
             return app;
         }
 
@@ -19,6 +24,7 @@ namespace ElmahCore.Mvc
 
         public static IServiceCollection AddElmah<T>(this IServiceCollection services) where T : ErrorLog
         {
+            services.AddSingleton<ErrorLogMiddleware>();
             return services.AddSingleton<ErrorLog, T>();
         }
 
@@ -46,5 +52,4 @@ namespace ElmahCore.Mvc
         }
 
     }
-
 }
