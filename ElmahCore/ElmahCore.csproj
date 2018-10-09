@@ -7,7 +7,7 @@
 	  <AssemblyVersion>1.2.0.0</AssemblyVersion>
 	  <FileVersion>1.2.0.0</FileVersion>
 	  <AssemblyName>ElmahCore</AssemblyName>
-	  <PackageId>ElmahCore</PackageId>
+	  <PackageId>ElmahCore.Common</PackageId>
 	  <Authors>ElmahCore</Authors>
 	  <Company>ElmahCore</Company>
 	  <Product>ElmahCore</Product>
@@ -17,6 +17,7 @@
 	  <Description>ELMAH for ASP.NET Core</Description>
 	  <Copyright>ElmahCore</Copyright>
 	  <RootNamespace>ElmahCore</RootNamespace>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

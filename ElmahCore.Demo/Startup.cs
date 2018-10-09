@@ -29,8 +29,8 @@ namespace ElmahCore.Demo
 
 	        services.AddElmah(options =>
 	        {
-		        options.CheckPermissionAction = context => true;//context.User.Identity.IsAuthenticated;
-	            options.Path = "el/mah";
+		        options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
+	            options.Path = "elmah";
 	        });
 
 
