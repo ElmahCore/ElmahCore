@@ -15,6 +15,13 @@ Default elmah path `~/elmah`.
 ```sh
 services.AddElmah(options => option.Path = "you_path_here")
 ```
+## Restrict access to the Elmah url
+```sh
+services.AddElmah(options =>
+{
+        options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
+});
+```
 ## Change Error Log type
 You can create your own error log, which will store errors anywhere.
 ```sh
