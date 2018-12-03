@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	  <Version>1.2.0</Version>
+	  <Version>1.2.1</Version>
 	  <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-	  <AssemblyVersion>1.2.0.0</AssemblyVersion>
-	  <FileVersion>1.2.0.0</FileVersion>
+	  <AssemblyVersion>1.2.1.0</AssemblyVersion>
+	  <FileVersion>1.2.1.0</FileVersion>
 	  <AssemblyName>ElmahCore.Sql</AssemblyName>
 	  <PackageId>ElmahCore.Sql</PackageId>
 	  <Authors>ElmahCore</Authors>

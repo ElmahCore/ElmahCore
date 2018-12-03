@@ -116,7 +116,7 @@ namespace ElmahCore
                 _serverVariables = GetServerValiables(context);
                 _serverVariables.Add("HttpStatusCode", StatusCode.ToString());
                 _queryString = CopyCollection(QueryHelpers.ParseQuery(request.QueryString.Value));
-                _form = CopyCollection(string.IsNullOrEmpty(request.ContentType) ? null : request.Form);
+                _form = CopyCollection(request.HasFormContentType ? request.Form : null);
                 _cookies = CopyCollection(request.Cookies);
             }
 

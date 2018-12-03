@@ -81,7 +81,7 @@ namespace ElmahCore.Mvc.Notifiers
             _smtpPort = options.SmtpPort;
             _authUserName = options.AuthUserName;
             _authPassword = options.AuthPassword;
-            _noYsod = options.SendYsod;
+            _noYsod = !options.SendYsod;
             _useSsl = options.UseSsl;
         }
         
