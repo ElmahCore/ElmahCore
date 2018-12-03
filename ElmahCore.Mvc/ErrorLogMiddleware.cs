@@ -60,7 +60,7 @@ namespace ElmahCore.Mvc
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Error in filters XML file", e);
+                    _logger.LogError(e, "Error in filters XML file");
                 }
             }
 
@@ -193,7 +193,7 @@ namespace ElmahCore.Mvc
             }
             catch(Exception e)
             {
-                _logger.LogError("Elmah request processing error", e);
+                _logger.LogError(e, "Elmah request processing error");
             }
         }
 
@@ -258,7 +258,7 @@ namespace ElmahCore.Mvc
                 // even system ones and potentially let them slip by.
                 //
 
-                _logger.LogError("Elmah local exception", localException);
+                _logger.LogError(localException, "Elmah local exception");
             }
             if (entry != null)
                 OnLogged(new ErrorLoggedEventArgs(entry));
