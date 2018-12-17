@@ -30,6 +30,7 @@ namespace ElmahCore.Mvc
 
         public ErrorLogMiddleware(ErrorLog errorLog,ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
         {
+            ElmahExtensions.LogMiddleware = this;
             _errorLog = errorLog ?? throw new ArgumentNullException(nameof(errorLog));
             var lf = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 

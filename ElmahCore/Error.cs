@@ -135,7 +135,7 @@ namespace ElmahCore
             LoadVariables(serverVariables, () => context.Features, "");
             LoadVariables(serverVariables, () => context.User, "User_");
 
-	        var ss = context.RequestServices.GetService(typeof(ISession));
+	        var ss = context.RequestServices?.GetService(typeof(ISession));
 			if (ss != null)
 				LoadVariables(serverVariables, () => context.Session, "Session_");
             LoadVariables(serverVariables, () => context.Items, "Items_");
