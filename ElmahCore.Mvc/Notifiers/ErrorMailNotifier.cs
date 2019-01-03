@@ -295,10 +295,20 @@ namespace ElmahCore.Mvc.Notifiers
             mail.Priority = MailPriority;
 
             mail.From = new MailAddress(sender);
-            mail.To.Add(recipient);
-            
+            var recipients = recipient.Split(";");
+            foreach (var r in recipients)
+            {
+                mail.To.Add(r);
+            }
+
             if (copyRecipient.Length > 0)
-                mail.CC.Add(copyRecipient);
+            {
+                recipients = copyRecipient.Split(";");
+                foreach (var r in recipients)
+                {
+                    mail.CC.Add(r);
+                }
+            }
 
             //
             // Format the mail subject.

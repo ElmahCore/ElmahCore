@@ -1,4 +1,5 @@
 ﻿using ElmahCore.Mvc;
+using ElmahCore.Mvc.Notifiers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,7 @@ namespace ElmahCore.Demo
 	        {
 		        options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
 	            options.Path = "elmah";
+                options.Notifiers.Add(new ErrorMailNotifier("test",new EmailOptions{MailSender = "a@mail.ru", MailRecipient = "test@email.com"}));
 	        });
 
 
