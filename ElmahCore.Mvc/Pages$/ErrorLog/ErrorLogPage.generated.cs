@@ -147,7 +147,7 @@ WriteLiteral("\r\n");
     if (string.Compare(simpleName, Request.Path,
         true, CultureInfo.InvariantCulture) == 0)
     {
-        var lastSlashIndex = simpleName.LastIndexOf('/');
+        var lastSlashIndex = simpleName.LastIndexOf("/");
 
         if (lastSlashIndex > 0)
         {

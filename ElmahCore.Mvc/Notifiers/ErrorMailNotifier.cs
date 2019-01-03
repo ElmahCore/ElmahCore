@@ -295,7 +295,7 @@ namespace ElmahCore.Mvc.Notifiers
             mail.Priority = MailPriority;
 
             mail.From = new MailAddress(sender);
-            var recipients = recipient.Split(";");
+            var recipients = recipient.Split(';');
             foreach (var r in recipients)
             {
                 mail.To.Add(r);
@@ -303,7 +303,7 @@ namespace ElmahCore.Mvc.Notifiers
 
             if (copyRecipient.Length > 0)
             {
-                recipients = copyRecipient.Split(";");
+                recipients = copyRecipient.Split(';');
                 foreach (var r in recipients)
                 {
                     mail.CC.Add(r);

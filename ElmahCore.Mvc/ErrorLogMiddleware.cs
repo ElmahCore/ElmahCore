@@ -69,8 +69,8 @@ namespace ElmahCore.Mvc
             {
                 _elmahRoot = elmahOptions.Value.Path.ToLower();
             }
-            if (!_elmahRoot.StartsWith('/')) _elmahRoot = "/" + _elmahRoot;
-            if (_elmahRoot.EndsWith('/')) _elmahRoot = _elmahRoot.Substring(0,_elmahRoot.Length-1);
+            if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
+            if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0,_elmahRoot.Length-1);
         }
 
         private void ConfigureFilters(string config)

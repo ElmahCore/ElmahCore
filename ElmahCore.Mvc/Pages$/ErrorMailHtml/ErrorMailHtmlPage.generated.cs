@@ -169,7 +169,7 @@ WriteLiteral("</pre>\r\n");
             let data = collection.Items
             where data != null && data.Count > 0
             let items = from i in Enumerable.Range(0, data.Count)
-                        select KeyValuePair.Create(data.GetKey(i), data[i])
+                        select new KeyValuePair<string,string>(data.GetKey(i), data[i])
             select new
             {
                 collection.Id, 
