@@ -14,25 +14,25 @@ using System.Reflection;
 
 namespace ElmahCore.Mvc.About
 {
-#line 2 "..\..\AboutPage.cshtml"
-#line default
-    #line hidden
-#line 3 "..\..\AboutPage.cshtml"
-#line default
-    #line hidden
+//#line 2 "..\..\AboutPage.cshtml"
+//#line default
+    //#line hidden
+//#line 3 "..\..\AboutPage.cshtml"
+//#line default
+    //#line hidden
 
-#line 4 "..\..\AboutPage.cshtml"
+//#line 4 "..\..\AboutPage.cshtml"
     
     
-    #line default
-    #line hidden
+    //#line default
+    //#line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     internal partial class AboutPage : WebTemplateBase
     {
-#line hidden
+//#line hidden
 
-        #line 72 "..\..\AboutPage.cshtml"
+        //#line 72 "..\..\AboutPage.cshtml"
 
     private Version GetVersion()
     {
@@ -45,8 +45,8 @@ namespace ElmahCore.Mvc.About
         return version != null ? new Version(version.Version) : new Version();
     }
 
-        #line default
-        #line hidden
+        //#line default
+        //#line hidden
 
         public override void Execute()
         {
@@ -60,7 +60,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 6 "..\..\AboutPage.cshtml"
+            //#line 6 "..\..\AboutPage.cshtml"
   
     var basePageName = ElmahRoot;
 
@@ -69,7 +69,7 @@ WriteLiteral("\r\n");
     {
         Context  = Context, /* TODO Consider not requiring this */
         Title    = title,
-        ElmahRoot = ElmahRoot,
+        ElmahRoot = _elmahRoot,
         ErrorLog = ErrorLog,
         SpeedBarItems = new[]
         {
@@ -80,47 +80,47 @@ WriteLiteral("\r\n");
     };
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
 
 WriteLiteral(@"This <strong>");
 
 
             
-            #line 60 "..\..\AboutPage.cshtml"
+            //#line 60 "..\..\AboutPage.cshtml"
             Write("Build.TypeLowercase");
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</strong>\r\n    ");
 
 
             
-            #line 61 "..\..\AboutPage.cshtml"
+            //#line 61 "..\..\AboutPage.cshtml"
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n    build was compiled from the following sources for CLR ");
 
 
             
-            #line 62 "..\..\AboutPage.cshtml"
+            //#line 62 "..\..\AboutPage.cshtml"
                                                      Write("Build.ImageRuntimeVersion");
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(":\r\n</p>\r\n\r\n<ul>\r\n");
 
 
             
-            #line 66 "..\..\AboutPage.cshtml"
+            //#line 66 "..\..\AboutPage.cshtml"
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</ul>\r\n");
 
 

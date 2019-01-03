@@ -14,7 +14,7 @@ namespace ElmahCore.Mvc
         public HttpRequest Request { get { return Context.Request; } }
         public ErrorLog ErrorLog { get; set; }
 
-	    private string _elmahRoot = string.Empty;
+	    internal string _elmahRoot = string.Empty;
 	    public string ElmahRoot
 	    {
 		    get => Request.PathBase + _elmahRoot;

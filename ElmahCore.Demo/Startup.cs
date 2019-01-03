@@ -30,9 +30,9 @@ namespace ElmahCore.Demo
 
 	        services.AddElmah(options =>
 	        {
-		        options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
-	            options.Path = "elmah";
-                options.Notifiers.Add(new ErrorMailNotifier("test",new EmailOptions{MailSender = "a@mail.ru", MailRecipient = "test@email.com"}));
+		        //options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
+	            options.Path = @"el/mah";
+                //options.Notifiers.Add(new ErrorMailNotifier("test",new EmailOptions{MailSender = "a@mail.ru", MailRecipient = "test@email.com"}));
 	        });
 
 

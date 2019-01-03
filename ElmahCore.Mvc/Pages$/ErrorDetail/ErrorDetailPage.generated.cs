@@ -14,28 +14,28 @@ using System.Linq;
 
 namespace ElmahCore.Mvc.ErrorDetail
 {
-#line 2 "..\..\ErrorDetailPage.cshtml"
-#line default
-    #line hidden
+//#line 2 "..\..\ErrorDetailPage.cshtml"
+//#line default
+    //#line hidden
     
-    #line 3 "..\..\ErrorDetailPage.cshtml"
-#line default
-    #line hidden
-#line 4 "..\..\ErrorDetailPage.cshtml"
+    //#line 3 "..\..\ErrorDetailPage.cshtml"
+//#line default
+    //#line hidden
+//#line 4 "..\..\ErrorDetailPage.cshtml"
 
-#line default
-    #line hidden
+//#line default
+    //#line hidden
     
-    #line 5 "..\..\ErrorDetailPage.cshtml"
+    //#line 5 "..\..\ErrorDetailPage.cshtml"
     
     
-    #line default
-    #line hidden
+    //#line default
+    //#line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.3.2.0")]
     internal partial class ErrorDetailPage : WebTemplateBase
     {
-#line hidden
+//#line hidden
 
         public override void Execute()
         {
@@ -50,7 +50,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 7 "..\..\ErrorDetailPage.cshtml"
+            //#line 7 "..\..\ErrorDetailPage.cshtml"
   
     var basePageName = ElmahRoot;
     
@@ -79,13 +79,13 @@ WriteLiteral("\r\n");
         Response.StatusCode = 404;
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("        <p>Error not found in log.</p>\r\n");
 
 
             
-            #line 34 "..\..\ErrorDetailPage.cshtml"
+            //#line 34 "..\..\ErrorDetailPage.cshtml"
         return;
     }
 
@@ -96,7 +96,7 @@ WriteLiteral("        <p>Error not found in log.</p>\r\n");
         Context  = Context, /* TODO Consider not requiring this */
         Title    = title,
         Footnote = string.Format("This log is provided by the {0}.", log.Name),
-        ElmahRoot = ElmahRoot,
+        ElmahRoot = _elmahRoot,
         ErrorLog = ErrorLog,
         SpeedBarItems = new[] 
         {
@@ -110,8 +110,8 @@ WriteLiteral("        <p>Error not found in log.</p>\r\n");
 
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n");
 
 
@@ -120,12 +120,12 @@ WriteLiteral("\r\n\r\n<h1 id=\"PageTitle\">");
 
 
             
-            #line 59 "..\..\ErrorDetailPage.cshtml"
+            //#line 59 "..\..\ErrorDetailPage.cshtml"
               Write(error.Message);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</h1>\r\n\r\n<p id=\"ErrorTitle\">");
 
 
@@ -134,12 +134,12 @@ WriteLiteral("<span id=\"ErrorType\">");
 
 
             
-            #line 62 "..\..\ErrorDetailPage.cshtml"
+            //#line 62 "..\..\ErrorDetailPage.cshtml"
                       Write(error.Type);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</span>");
 
 
@@ -152,12 +152,12 @@ WriteLiteral("<span id=\"ErrorMessage\">");
 
 
             
-            #line 64 "..\..\ErrorDetailPage.cshtml"
+            //#line 64 "..\..\ErrorDetailPage.cshtml"
                          Write(error.Message);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</span></p>\r\n\r\n");
 
 
@@ -166,13 +166,13 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 74 "..\..\ErrorDetailPage.cshtml"
+            //#line 74 "..\..\ErrorDetailPage.cshtml"
  if (error.Detail.Length != 0)
 {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
     var stack = MarkupStackTrace(error.Detail);
     if (!string.IsNullOrWhiteSpace(stack.ToString()))
     {
@@ -181,44 +181,44 @@ WriteLiteral("\r\n\r\n");
 
 
 
-#line 76 "..\..\ErrorDetailPage.cshtml"
+//#line 76 "..\..\ErrorDetailPage.cshtml"
         Write(stack);
 
 
-#line default
-#line hidden
+//#line default
+//#line hidden
         WriteLiteral("</pre>\r\n");
     }
 
 
-#line 77 "..\..\ErrorDetailPage.cshtml"
+//#line 77 "..\..\ErrorDetailPage.cshtml"
 }
 
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
             
-            #line 83 "..\..\ErrorDetailPage.cshtml"
+            //#line 83 "..\..\ErrorDetailPage.cshtml"
   
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n<p id=\"ErrorLogTime\">");
 
 
             
-            #line 85 "..\..\ErrorDetailPage.cshtml"
+            //#line 85 "..\..\ErrorDetailPage.cshtml"
                 Write(string.Format(
     @"Logged on {0} at {1}",
     error.Time.ToLongDateString(),
     error.Time.ToLongTimeString()));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</p>\r\n\r\n");
 
 
@@ -231,93 +231,93 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 105 "..\..\ErrorDetailPage.cshtml"
+            //#line 105 "..\..\ErrorDetailPage.cshtml"
      if (error.WebHostHtmlMessage.Length != 0)
     {
         var htmlUrl = basePageName + "/html?id=" + Uri.EscapeDataString(errorEntry.Id);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("        <li><a href=\"");
 
 
             
-            #line 108 "..\..\ErrorDetailPage.cshtml"
+            //#line 108 "..\..\ErrorDetailPage.cshtml"
                 Write(basePageName);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("/html?id=");
 
 
             
-            #line 108 "..\..\ErrorDetailPage.cshtml"
+            //#line 108 "..\..\ErrorDetailPage.cshtml"
                                       Write(Uri.EscapeDataString(errorEntry.Id));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">Original ASP.NET error page</a></li>\r\n");
 
 
             
-            #line 109 "..\..\ErrorDetailPage.cshtml"
+            //#line 109 "..\..\ErrorDetailPage.cshtml"
     }
 
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
             
-            #line 113 "..\..\ErrorDetailPage.cshtml"
+            //#line 113 "..\..\ErrorDetailPage.cshtml"
   
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n    <li>Raw/Source data in \r\n        <a rel=\"");
 
 
             
-            #line 116 "..\..\ErrorDetailPage.cshtml"
+            //#line 116 "..\..\ErrorDetailPage.cshtml"
            Write(HtmlLinkType.Alternate);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\" \r\n           type=\"application/xml\" \r\n           href=\"xml");
 
 
             
-            #line 118 "..\..\ErrorDetailPage.cshtml"
+            //#line 118 "..\..\ErrorDetailPage.cshtml"
                 Write(Request.QueryString);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">XML</a>\r\n        or in\r\n        <a rel=\"");
 
 
             
-            #line 120 "..\..\ErrorDetailPage.cshtml"
+            //#line 120 "..\..\ErrorDetailPage.cshtml"
            Write(HtmlLinkType.Alternate);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\" \r\n           type=\"application/json\" \r\n           href=\"json");
 
 
             
-            #line 122 "..\..\ErrorDetailPage.cshtml"
+            //#line 122 "..\..\ErrorDetailPage.cshtml"
                  Write(Request.QueryString);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">JSON</a>\r\n    </li>\r\n</ul>\r\n\r\n");
 
 
@@ -326,7 +326,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 140 "..\..\ErrorDetailPage.cshtml"
+            //#line 140 "..\..\ErrorDetailPage.cshtml"
   
     var collection = new
     {
@@ -354,28 +354,28 @@ WriteLiteral("\r\n\r\n");
         
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("        <div id=\"");
 
 
             
-            #line 165 "..\..\ErrorDetailPage.cshtml"
+            //#line 165 "..\..\ErrorDetailPage.cshtml"
             Write(collection.Id);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">\r\n\r\n            <h2>");
 
 
             
-            #line 167 "..\..\ErrorDetailPage.cshtml"
+            //#line 167 "..\..\ErrorDetailPage.cshtml"
            Write(collection.Title);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</h2>\r\n            ");
 
 
@@ -394,64 +394,64 @@ WriteLiteral(@"
 
 
             
-            #line 183 "..\..\ErrorDetailPage.cshtml"
+            //#line 183 "..\..\ErrorDetailPage.cshtml"
                      foreach (var item in items)
                     {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                        <tr class=\"");
 
 
             
-            #line 185 "..\..\ErrorDetailPage.cshtml"
+            //#line 185 "..\..\ErrorDetailPage.cshtml"
                                Write(item.Index % 2 == 0 ? "even" : "odd");
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">\r\n                            <td class=\"key-col\">");
 
 
             
-            #line 186 "..\..\ErrorDetailPage.cshtml"
+            //#line 186 "..\..\ErrorDetailPage.cshtml"
                                            Write(item.Key);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</td>\r\n                            <td class=\"value-col\">");
 
 
             
-            #line 187 "..\..\ErrorDetailPage.cshtml"
+            //#line 187 "..\..\ErrorDetailPage.cshtml"
                                              Write(item.Value);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</td>\r\n                        </tr>\r\n");
 
 
             
-            #line 189 "..\..\ErrorDetailPage.cshtml"
+            //#line 189 "..\..\ErrorDetailPage.cshtml"
                     }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n                </table>\r\n            </div>\r\n        </div>\r\n");
 
 
             
-            #line 194 "..\..\ErrorDetailPage.cshtml"
+            //#line 194 "..\..\ErrorDetailPage.cshtml"
     }
 
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n");
 
 

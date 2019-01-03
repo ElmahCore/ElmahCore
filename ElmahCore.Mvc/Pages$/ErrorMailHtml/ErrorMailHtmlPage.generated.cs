@@ -16,17 +16,17 @@ using System.Collections.Generic;
 namespace ElmahCore.Mvc.ErrorMailHtml
 {
 
-#line 2 "..\..\ErrorMailHtmlPage.cshtml"
+//#line 2 "..\..\ErrorMailHtmlPage.cshtml"
     
     
-    #line default
-    #line hidden
+    //#line default
+    //#line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     internal partial class ErrorMailHtmlPage : RazorTemplateBase
     {
 
-#line hidden
+//#line hidden
 
         public override void Execute()
         {
@@ -38,25 +38,25 @@ WriteLiteral("\r\n");
 
 
             
-            #line 4 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 4 "..\..\ErrorMailHtmlPage.cshtml"
   
     // NB cast is not really required, but aids with intellisense!
     var error = (Error) this.Error;
 
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("<html>\r\n    <head>\r\n        <title>Error: ");
 
 
             
-            #line 10 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 10 "..\..\ErrorMailHtmlPage.cshtml"
                  Write(error.Message);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(@"</title>
         <style type=""text/css"">
             body { font-family: verdana, arial, helvetic; font-size: x-small; }
@@ -75,87 +75,87 @@ WriteLiteral(@"</title>
 
 
             
-            #line 24 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 24 "..\..\ErrorMailHtmlPage.cshtml"
                         Write(error.Type);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(": ");
 
 
             
-            #line 24 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 24 "..\..\ErrorMailHtmlPage.cshtml"
                                      Write(error.Message);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</p>\r\n");
 
 
             
-            #line 25 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 25 "..\..\ErrorMailHtmlPage.cshtml"
          if (error.Time != DateTime.MinValue)
         {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("            <p>Generated: ");
 
 
             
-            #line 27 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 27 "..\..\ErrorMailHtmlPage.cshtml"
                      Write(error.Time.ToUniversalTime().ToString("r"));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</p>\r\n");
 
 
             
-            #line 28 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 28 "..\..\ErrorMailHtmlPage.cshtml"
         }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
             
-            #line 29 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 29 "..\..\ErrorMailHtmlPage.cshtml"
          if (error.Detail.Length != 0)
         {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
 
 WriteLiteral("<pre id=\"errorDetail\">");
 
 
             
-            #line 34 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 34 "..\..\ErrorMailHtmlPage.cshtml"
                                Write(error.Detail);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</pre>\r\n");
 
 
             
-            #line 35 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 35 "..\..\ErrorMailHtmlPage.cshtml"
         }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
             
-            #line 36 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 36 "..\..\ErrorMailHtmlPage.cshtml"
          foreach (var collection in 
             from collection in new[] 
             {
@@ -180,90 +180,90 @@ WriteLiteral("</pre>\r\n");
         {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("            <div id=\"");
 
 
             
-            #line 58 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 58 "..\..\ErrorMailHtmlPage.cshtml"
                 Write(collection.Id);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">\r\n                <h1>");
 
 
             
-            #line 59 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 59 "..\..\ErrorMailHtmlPage.cshtml"
                Write(collection.Title);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</h1>\r\n                <table class=\"collection\">\r\n                    <tr><th>Na" +
 "me</th>            \r\n                        <th>Value</th></tr>\r\n");
 
 
             
-            #line 63 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 63 "..\..\ErrorMailHtmlPage.cshtml"
                      foreach (var item in collection.Items)
                     {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                        <tr><td>");
 
 
             
-            #line 65 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 65 "..\..\ErrorMailHtmlPage.cshtml"
                            Write(item.Key);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</td>\r\n                            <td>");
 
 
             
-            #line 66 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 66 "..\..\ErrorMailHtmlPage.cshtml"
                            Write(item.Value);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</td></tr>\r\n");
 
 
             
-            #line 67 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 67 "..\..\ErrorMailHtmlPage.cshtml"
                     }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                </table>\r\n            </div>\r\n");
 
 
             
-            #line 70 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 70 "..\..\ErrorMailHtmlPage.cshtml"
         }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("        <p>");
 
 
             
-            #line 71 "..\..\ErrorMailHtmlPage.cshtml"
+            //#line 71 "..\..\ErrorMailHtmlPage.cshtml"
        Write(RenderPartial<PoweredBy.PoweredBy>());
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</p>\r\n    </body>\r\n</html>\r\n");
 
 

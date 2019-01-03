@@ -17,34 +17,34 @@ using ElmahCore.Mvc.MoreLinq;
 
 namespace ElmahCore.Mvc
 {
-#line 2 "..\..\ErrorLogPage.cshtml"
-#line default
-    #line hidden
+//#line 2 "..\..\ErrorLogPage.cshtml"
+//#line default
+    //#line hidden
     
-    #line 3 "..\..\ErrorLogPage.cshtml"
-#line default
-    #line hidden
-#line 4 "..\..\ErrorLogPage.cshtml"
-#line default
-    #line hidden
+    //#line 3 "..\..\ErrorLogPage.cshtml"
+//#line default
+    //#line hidden
+//#line 4 "..\..\ErrorLogPage.cshtml"
+//#line default
+    //#line hidden
     
-    #line 5 "..\..\ErrorLogPage.cshtml"
+    //#line 5 "..\..\ErrorLogPage.cshtml"
     
     
-    #line default
-    #line hidden
+    //#line default
+    //#line hidden
     
-    #line 6 "..\..\ErrorLogPage.cshtml"
+    //#line 6 "..\..\ErrorLogPage.cshtml"
 
-#line default
-    #line hidden
+//#line default
+    //#line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     internal partial class ErrorLogPage : WebTemplateBase
     {
-#line hidden
+//#line hidden
 
-        #line 218 "..\..\ErrorLogPage.cshtml"
+        //#line 218 "..\..\ErrorLogPage.cshtml"
 
     IHtmlString LinkHere(string basePageName, string type, string text, int pageIndex, int pageSize)
     {
@@ -64,8 +64,8 @@ namespace ElmahCore.Mvc
         );
     } 
 
-        #line default
-        #line hidden
+        //#line default
+        //#line hidden
 
         public override void Execute()
         {
@@ -81,7 +81,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 8 "..\..\ErrorLogPage.cshtml"
+            //#line 8 "..\..\ErrorLogPage.cshtml"
   
     const int defaultPageSize = 15;
     const int maximumPageSize = 100;
@@ -125,7 +125,7 @@ WriteLiteral("\r\n");
         Context  = Context, /* TODO Consider not requiring this */
         Title    = title,
         Footnote = string.Format("This log is provided by the {0}.", log.Name),
-        ElmahRoot = ElmahRoot,
+        ElmahRoot = _elmahRoot,
         ErrorLog = ErrorLog,
         SpeedBarItems = new[] 
         {
@@ -157,44 +157,44 @@ WriteLiteral("\r\n");
         
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("        <h1 id=\"PageTitle\">\r\n            Error Log for <span id=\"ApplicationName\"" +
 " title=\"");
 
 
             
-            #line 80 "..\..\ErrorLogPage.cshtml"
+            //#line 80 "..\..\ErrorLogPage.cshtml"
                                                        Write(log.ApplicationName);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">");
 
 
             
-            #line 80 "..\..\ErrorLogPage.cshtml"
+            //#line 80 "..\..\ErrorLogPage.cshtml"
                                                                              Write(simpleName);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(" on ");
 
 
             
-            #line 80 "..\..\ErrorLogPage.cshtml"
+            //#line 80 "..\..\ErrorLogPage.cshtml"
                                                                                             Write(hostName);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</span>\r\n        </h1>\r\n        \r\n");
 
 
             
-            #line 83 "..\..\ErrorLogPage.cshtml"
+            //#line 83 "..\..\ErrorLogPage.cshtml"
          if (errorEntryList.Count > 0)
         {
             // Write error number range displayed on this page and the
@@ -226,80 +226,80 @@ WriteLiteral("</span>\r\n        </h1>\r\n        \r\n");
             
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("            <p>Errors ");
 
 
             
-            #line 112 "..\..\ErrorLogPage.cshtml"
+            //#line 112 "..\..\ErrorLogPage.cshtml"
                  Write(firstErrorNumber.ToString("N0"));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(" to ");
 
 
             
-            #line 112 "..\..\ErrorLogPage.cshtml"
+            //#line 112 "..\..\ErrorLogPage.cshtml"
                                                      Write(lastErrorNumber.ToString("N0"));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(" \r\n                of total ");
 
 
             
-            #line 113 "..\..\ErrorLogPage.cshtml"
+            //#line 113 "..\..\ErrorLogPage.cshtml"
                     Write(totalCount.ToString("N0"));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(" \r\n                (page ");
 
 
             
-            #line 114 "..\..\ErrorLogPage.cshtml"
+            //#line 114 "..\..\ErrorLogPage.cshtml"
                   Write((pageIndex + 1).ToString("N0"));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(" of ");
 
 
             
-            #line 114 "..\..\ErrorLogPage.cshtml"
+            //#line 114 "..\..\ErrorLogPage.cshtml"
                                                       Write(totalPages.ToString("N0"));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("). \r\n                Start with ");
 
 
             
-            #line 115 "..\..\ErrorLogPage.cshtml"
+            //#line 115 "..\..\ErrorLogPage.cshtml"
                       Write(Html(stockSizes.ToDelimitedString(string.Empty)));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(" errors per page.</p>\r\n");
 
 
             
-            #line 116 "..\..\ErrorLogPage.cshtml"
+            //#line 116 "..\..\ErrorLogPage.cshtml"
 
             // Write out the main table to display the errors.
 
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(@"            <table id=""ErrorLog"" cellspacing=""0"" style=""border-collapse:collapse;"" class=""table table-condensed table-striped"">
                 <tr>
                     <th class=""host-col"" style=""white-space:nowrap;"">Host</th>
@@ -314,7 +314,7 @@ WriteLiteral(@"            <table id=""ErrorLog"" cellspacing=""0"" style=""bord
 
 
             
-            #line 129 "..\..\ErrorLogPage.cshtml"
+            //#line 129 "..\..\ErrorLogPage.cshtml"
              foreach (var error in from item in errorEntryList.Index()
                                    let e = item.Value.Error
                                    select new
@@ -337,186 +337,186 @@ WriteLiteral(@"            <table id=""ErrorLog"" cellspacing=""0"" style=""bord
             {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                <tr class=\"");
 
 
             
-            #line 149 "..\..\ErrorLogPage.cshtml"
+            //#line 149 "..\..\ErrorLogPage.cshtml"
                        Write(error.Index % 2 == 0 ? "even" : "odd");
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">\r\n                    \r\n                    <td class=\"host-col\" style=\"white-s" +
 "pace:nowrap;\">");
 
 
             
-            #line 151 "..\..\ErrorLogPage.cshtml"
+            //#line 151 "..\..\ErrorLogPage.cshtml"
                                                                 Write(error.HostName);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</td>\r\n                    <td class=\"code-col\" style=\"white-space:nowrap;\">\r\n");
 
 
             
-            #line 153 "..\..\ErrorLogPage.cshtml"
+            //#line 153 "..\..\ErrorLogPage.cshtml"
                          if (!string.IsNullOrEmpty(error.StatusDescription))
                         {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                            <span title=\"");
 
 
             
-            #line 155 "..\..\ErrorLogPage.cshtml"
+            //#line 155 "..\..\ErrorLogPage.cshtml"
                                     Write(error.StatusDescription);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">");
 
 
             
-            #line 155 "..\..\ErrorLogPage.cshtml"
+            //#line 155 "..\..\ErrorLogPage.cshtml"
                                                               Write(error.StatusCode);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</span>\r\n");
 
 
             
-            #line 156 "..\..\ErrorLogPage.cshtml"
+            //#line 156 "..\..\ErrorLogPage.cshtml"
                         }
                         else if (error.StatusCode != 0)
                         {
                             
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
             
-            #line 159 "..\..\ErrorLogPage.cshtml"
+            //#line 159 "..\..\ErrorLogPage.cshtml"
                        Write(error.StatusCode);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
             
-            #line 159 "..\..\ErrorLogPage.cshtml"
+            //#line 159 "..\..\ErrorLogPage.cshtml"
                                              
                         }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                    </td>\r\n                    <td class=\"type-col\" style=\"white-" +
 "space:nowrap;\"><span title=\"");
 
 
             
-            #line 162 "..\..\ErrorLogPage.cshtml"
+            //#line 162 "..\..\ErrorLogPage.cshtml"
                                                                              Write(error.Type);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">");
 
 
             
-            #line 162 "..\..\ErrorLogPage.cshtml"
+            //#line 162 "..\..\ErrorLogPage.cshtml"
                                                                                           Write(error.HumaneType);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</span></td>\r\n                    \r\n                    <td class=\"error-col\"><sp" +
 "an>");
 
 
             
-            #line 164 "..\..\ErrorLogPage.cshtml"
+            //#line 164 "..\..\ErrorLogPage.cshtml"
                                            Write(error.Message);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</span> \r\n                        <a href=\"");
 
 
             
-            #line 165 "..\..\ErrorLogPage.cshtml"
+            //#line 165 "..\..\ErrorLogPage.cshtml"
                             Write(basePageName);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("/detail?id=");
 
 
             
-            #line 165 "..\..\ErrorLogPage.cshtml"
+            //#line 165 "..\..\ErrorLogPage.cshtml"
                                                     Write(error.Id);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">Details&hellip;</a></td>\r\n                    \r\n                    <td class=\"" +
 "user-col\" style=\"white-space:nowrap;\">");
 
 
             
-            #line 167 "..\..\ErrorLogPage.cshtml"
+            //#line 167 "..\..\ErrorLogPage.cshtml"
                                                                 Write(error.User);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</td>\r\n                    <td class=\"time-col\" style=\"white-space:nowrap;\"><abbr" +
 " title=\"");
 
 
             
-            #line 168 "..\..\ErrorLogPage.cshtml"
+            //#line 168 "..\..\ErrorLogPage.cshtml"
                                                                              Write(error.Iso8601Time);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\">");
 
 
             
-            #line 168 "..\..\ErrorLogPage.cshtml"
+            //#line 168 "..\..\ErrorLogPage.cshtml"
                                                                                                  Write(error.When);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</abbr></td>\r\n                </tr>\r\n");
 
 
             
-            #line 170 "..\..\ErrorLogPage.cshtml"
+            //#line 170 "..\..\ErrorLogPage.cshtml"
             }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("            </table>\r\n");
 
 
             
-            #line 172 "..\..\ErrorLogPage.cshtml"
+            //#line 172 "..\..\ErrorLogPage.cshtml"
 
             // Write out page navigation links.
 
@@ -529,37 +529,37 @@ WriteLiteral("            </table>\r\n");
             
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("            <p>\r\n\r\n");
 
 
             
-            #line 184 "..\..\ErrorLogPage.cshtml"
+            //#line 184 "..\..\ErrorLogPage.cshtml"
                  if (moreErrors)
                 {
                     
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
             
-            #line 186 "..\..\ErrorLogPage.cshtml"
+            //#line 186 "..\..\ErrorLogPage.cshtml"
                Write(LinkHere(basePageName, HtmlLinkType.Next, "Next errors", nextPageIndex, pageSize));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
             
-            #line 186 "..\..\ErrorLogPage.cshtml"
+            //#line 186 "..\..\ErrorLogPage.cshtml"
                                                                                                       
                 }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
             
-            #line 188 "..\..\ErrorLogPage.cshtml"
+            //#line 188 "..\..\ErrorLogPage.cshtml"
                  if (pageIndex > 0 && totalCount > 0)
                 {
                     if (moreErrors) {
@@ -567,28 +567,28 @@ WriteLiteral("            <p>\r\n\r\n");
                     }
                     
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
             
-            #line 193 "..\..\ErrorLogPage.cshtml"
+            //#line 193 "..\..\ErrorLogPage.cshtml"
                Write(LinkHere(basePageName, HtmlLinkType.Start, "Back to first page", 0, pageSize));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
             
-            #line 193 "..\..\ErrorLogPage.cshtml"
+            //#line 193 "..\..\ErrorLogPage.cshtml"
                                                                                                   
                 }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n            </p>\r\n");
 
 
             
-            #line 197 "..\..\ErrorLogPage.cshtml"
+            //#line 197 "..\..\ErrorLogPage.cshtml"
         }
         else
         {
@@ -603,41 +603,41 @@ WriteLiteral("\r\n            </p>\r\n");
             {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                <p>");
 
 
             
-            #line 209 "..\..\ErrorLogPage.cshtml"
+            //#line 209 "..\..\ErrorLogPage.cshtml"
               Write(LinkHere(basePageName, HtmlLinkType.Start, "Go to first page", 0, pageSize));
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(".</p>\r\n");
 
 
             
-            #line 210 "..\..\ErrorLogPage.cshtml"
+            //#line 210 "..\..\ErrorLogPage.cshtml"
             }
             else
             {
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("                <p>No errors found.</p>\r\n");
 
 
             
-            #line 214 "..\..\ErrorLogPage.cshtml"
+            //#line 214 "..\..\ErrorLogPage.cshtml"
             }
         }
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n");
 
 

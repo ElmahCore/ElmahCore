@@ -14,7 +14,7 @@ namespace ElmahCore.Mvc.PoweredBy
 	[System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     internal partial class PoweredBy : RazorTemplateBase
     {
-#line hidden
+//#line hidden
 
         public override void Execute()
         {
@@ -25,7 +25,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 3 "..\..\PoweredBy.cshtml"
+            //#line 3 "..\..\PoweredBy.cshtml"
   
     var about = GetAbout((version, fileVersion, product, copyright) => new
     {
@@ -39,67 +39,67 @@ WriteLiteral("\r\n");
     });
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("<span>\r\n    Based on <a href=\"https://elmah.github.io/\">Elmah</a>, Powered by <a href=\"https://github.com/ElmahCore/www\">");
 
 
             
-            #line 15 "..\..\PoweredBy.cshtml"
+            //#line 15 "..\..\PoweredBy.cshtml"
                                              Write(about.Product);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("</a>,\r\n    version ");
 
 
             
-            #line 16 "..\..\PoweredBy.cshtml"
+            //#line 16 "..\..\PoweredBy.cshtml"
        Write(about.Version);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 
             
-            #line 16 "..\..\PoweredBy.cshtml"
+            //#line 16 "..\..\PoweredBy.cshtml"
                             
 #if DEBUG
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(" (");
 
 
             
-            #line 18 "..\..\PoweredBy.cshtml"
+            //#line 18 "..\..\PoweredBy.cshtml"
    Write("Build.Configuration");
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(")");
 
 
             
-            #line 18 "..\..\PoweredBy.cshtml"
+            //#line 18 "..\..\PoweredBy.cshtml"
                                     #endif
     
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral(".\r\n    ");
 
 
             
-            #line 20 "..\..\PoweredBy.cshtml"
+            //#line 20 "..\..\PoweredBy.cshtml"
 Write(about.Copyright);
 
             
-            #line default
-            #line hidden
+            //#line default
+            //#line hidden
 WriteLiteral("\r\n    Licensed under <a href=\"http://www.apache.org/licenses/LICENSE-2.0\">Apache " +
 "License, Version 2.0</a>.\r\n</span>\r\n");
 
