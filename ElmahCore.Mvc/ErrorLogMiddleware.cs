@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace ElmahCore.Mvc
 {
@@ -71,6 +72,15 @@ namespace ElmahCore.Mvc
             }
             if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
             if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0,_elmahRoot.Length-1);
+
+            if (elmahOptions?.Value?.ApplicationName != null)
+            {
+                _errorLog.ApplicationName = elmahOptions.Value.ApplicationName;
+            }
+            else
+            {
+                _errorLog.ApplicationName = $"{PlatformServices.Default.Application.ApplicationName}({PlatformServices.Default.Application.ApplicationVersion})";
+            }
         }
 
         private void ConfigureFilters(string config)

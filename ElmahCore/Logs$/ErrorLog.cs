@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace ElmahCore
 {
@@ -24,8 +23,6 @@ namespace ElmahCore
 
         protected ErrorLog()
         {
-            ApplicationName = $"{PlatformServices.Default.Application.ApplicationName}({PlatformServices.Default.Application.ApplicationVersion})";
-
         }
 
         /// <summary>
