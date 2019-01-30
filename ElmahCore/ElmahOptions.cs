@@ -15,6 +15,7 @@ namespace ElmahCore
         public ErrorLog EventLog { get; set; }
         public string ConnectionString { get; set; }
 	    public Func<HttpContext,bool> CheckPermissionAction { get; set; }
+        public string ApplicationName { get; set; }
     }
 
 }
