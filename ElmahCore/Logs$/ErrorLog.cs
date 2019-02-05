@@ -21,10 +21,6 @@ namespace ElmahCore
         
         public abstract string Log(Error error);
 
-        protected ErrorLog()
-        {
-        }
-
         /// <summary>
         /// When overridden in a subclass, starts a task that asynchronously
         /// does the same as <see cref="Log"/>.

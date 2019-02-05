@@ -1,5 +1,4 @@
 ﻿using ElmahCore.Mvc;
-using ElmahCore.Mvc.Notifiers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;

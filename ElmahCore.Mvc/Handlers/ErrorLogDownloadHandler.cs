@@ -76,7 +76,7 @@ namespace ElmahCore.Mvc.Handlers
             // Determine the desired output format.
             //
 
-            var format = GetFormat(context, (query["format"].ToString() ?? "csv").ToLowerInvariant());
+            var format = GetFormat(context, query["format"].ToString().ToLowerInvariant());
             Debug.Assert(format != null);
 
             //

@@ -60,7 +60,7 @@ namespace ElmahCore.Mvc
                 {
                     ConfigureFilters(elmahOptions.Value.FiltersConfig);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     _logger.LogError("Error in filters XML file");
                 }
@@ -88,31 +88,32 @@ namespace ElmahCore.Mvc
             var doc = new XmlDocument();
             doc.Load(config);
             var filterNodes = doc.SelectNodes("//errorFilter");
-            foreach (XmlNode filterNode in filterNodes)
-            {
-                var notList = new List<string>();
-                var notifiers = filterNode.SelectNodes("//notifier");
+            if (filterNodes != null)
+                foreach (XmlNode filterNode in filterNodes)
                 {
-                    foreach (XmlElement notifier in notifiers)
+                    var notList = new List<string>();
+                    var notifiers = filterNode.SelectNodes("//notifier");
                     {
-                        var name = notifier.Attributes["name"]?.Value;
-                        if (name != null)
-                        {
-                            notList.Add(name);
-                        }
+                        if (notifiers != null)
+                            foreach (XmlElement notifier in notifiers)
+                            {
+                                var name = notifier.Attributes["name"]?.Value;
+                                if (name != null)
+                                {
+                                    notList.Add(name);
+                                }
+                            }
+                    }
+                    var assertionNode = (XmlElement) filterNode.SelectSingleNode("test/*");
+
+                    if (assertionNode != null)
+                    {
+                        var a = AssertionFactory.Create(assertionNode);
+                        var filter = new ErrorFilter(a, notList);
+                        Filtering += filter.OnErrorModuleFiltering;
+                        _filters.Add(filter);
                     }
                 }
-                var assertionNode = (XmlElement)filterNode.SelectSingleNode("test/*");
-
-                if (assertionNode != null)
-                {
-                    var a = AssertionFactory.Create(assertionNode);
-                    var filter = new ErrorFilter(a, notList);
-                    Filtering += filter.OnErrorModuleFiltering;
-                    _filters.Add(filter);
-                }
-            }
-
         }
 
         public async Task Invoke(HttpContext context, Func<Task> next)
@@ -202,7 +203,7 @@ namespace ElmahCore.Mvc
             {
                 throw;
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 _logger.LogError("Elmah request processing error");
             }
@@ -258,7 +259,7 @@ namespace ElmahCore.Mvc
                 }
 
             }
-            catch (Exception localException)
+            catch (Exception)
             {
                 //
                 // IMPORTANT! We swallow any exception raised during the 
