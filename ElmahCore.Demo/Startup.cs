@@ -29,7 +29,7 @@ namespace ElmahCore.Demo
 
 	        services.AddElmah(options =>
 	        {
-		        options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
+		        //options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
 	            options.Path = @"elmah";
 	        });
 

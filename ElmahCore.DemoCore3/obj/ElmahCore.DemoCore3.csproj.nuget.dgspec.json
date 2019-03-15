@@ -89,7 +89,7 @@
       }
     },
     "C:\\Sources\\ElmahCore\\ElmahCore.Mvc\\ElmahCore.Mvc.csproj": {
-      "version": "1.2.4",
+      "version": "1.2.5",
       "restore": {
         "projectUniqueName": "C:\\Sources\\ElmahCore\\ElmahCore.Mvc\\ElmahCore.Mvc.csproj",
         "projectName": "ElmahCore",
@@ -157,7 +157,7 @@
       }
     },
     "C:\\Sources\\ElmahCore\\ElmahCore\\ElmahCore.csproj": {
-      "version": "1.2.4",
+      "version": "1.2.5",
       "restore": {
         "projectUniqueName": "C:\\Sources\\ElmahCore\\ElmahCore\\ElmahCore.csproj",
         "projectName": "ElmahCore.Common",

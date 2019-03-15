@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v3.0",
-    "signature": "0d8e8d1526be262b58d9f2194daf274484044428"
+    "signature": "f2903d1b281df4f55168ea96d76be55a61cced50"
   },
   "compilationOptions": {
     "defines": [
@@ -24,7 +24,7 @@
     ".NETCoreApp,Version=v3.0": {
       "ElmahCore.DemoCore3/1.0.0": {
         "dependencies": {
-          "ElmahCore": "1.2.4",
+          "ElmahCore": "1.2.5",
           "Microsoft.AspNetCore.App": "3.0.0-preview-19075-0444",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "3.0.0-preview-19075-0444",
           "Microsoft.NETCore.App": "3.0.0-preview-27324-5",
@@ -196,7 +196,7 @@
           "System.IO.Compression": "4.2.1.0",
           "System.IO.Compression.FileSystem": "4.0.0.0",
           "System.IO.Compression.ZipFile": "4.0.4.0",
-          "System.IO.Reference": "4.2.1.0",
+          "System.IO": "4.2.1.0",
           "System.IO.FileSystem": "4.1.1.0",
           "System.IO.FileSystem.DriveInfo": "4.1.1.0",
           "System.IO.FileSystem.Primitives": "4.1.1.0",
@@ -232,20 +232,20 @@
           "System.Numerics.Vectors": "4.1.3.0",
           "System.ObjectModel": "4.1.1.0",
           "System.Reflection.DispatchProxy": "4.0.5.0",
-          "System.Reflection.Reference": "4.2.1.0",
+          "System.Reflection": "4.2.1.0",
           "System.Reflection.Emit": "4.1.1.0",
           "System.Reflection.Emit.ILGeneration": "4.0.3.0",
           "System.Reflection.Emit.Lightweight": "4.0.3.0",
           "System.Reflection.Extensions": "4.1.1.0",
           "System.Reflection.Metadata": "1.4.4.0",
-          "System.Reflection.Primitives.Reference": "4.1.1.0",
-          "System.Reflection.TypeExtensions.Reference": "4.1.2.0",
+          "System.Reflection.Primitives": "4.1.1.0",
+          "System.Reflection.TypeExtensions": "4.1.2.0",
           "System.Resources.Reader": "4.1.1.0",
           "System.Resources.ResourceManager": "4.1.1.0",
           "System.Resources.Writer": "4.1.1.0",
           "System.Runtime.CompilerServices.Unsafe.Reference": "4.0.5.0",
           "System.Runtime.CompilerServices.VisualC": "4.1.1.0",
-          "System.Runtime.Reference": "4.2.1.0",
+          "System.Runtime": "4.2.1.0",
           "System.Runtime.Extensions": "4.2.1.0",
           "System.Runtime.Handles": "4.1.1.0",
           "System.Runtime.InteropServices": "4.2.1.0",
@@ -276,7 +276,7 @@
           "System.Security.SecureString": "4.1.1.0",
           "System.ServiceModel.Web": "4.0.0.0",
           "System.ServiceProcess": "4.0.0.0",
-          "System.Text.Encoding.Reference": "4.1.1.0",
+          "System.Text.Encoding": "4.1.1.0",
           "System.Text.Encoding.Extensions": "4.1.1.0",
           "System.Text.Encodings.Web.Reference": "4.0.4.0",
           "System.Text.Json": "4.0.0.0",
@@ -285,7 +285,7 @@
           "System.Threading": "4.1.1.0",
           "System.Threading.Overlapped": "4.1.1.0",
           "System.Threading.Tasks.Dataflow": "4.6.4.0",
-          "System.Threading.Tasks.Reference": "4.1.1.0",
+          "System.Threading.Tasks": "4.1.1.0",
           "System.Threading.Tasks.Extensions": "4.3.0.0",
           "System.Threading.Tasks.Parallel": "4.0.3.0",
           "System.Threading.Thread": "4.1.1.0",
@@ -421,21 +421,6 @@
           "Microsoft.Extensions.Primitives": "2.1.1"
         }
       },
-      "Microsoft.Extensions.PlatformAbstractions/1.1.0": {
-        "dependencies": {
-          "NETStandard.Library": "2.0.3",
-          "System.Reflection.TypeExtensions": "4.3.0"
-        },
-        "runtime": {
-          "lib/netstandard1.3/Microsoft.Extensions.PlatformAbstractions.dll": {
-            "assemblyVersion": "1.1.0.0",
-            "fileVersion": "1.1.0.21115"
-          }
-        },
-        "compile": {
-          "lib/netstandard1.3/Microsoft.Extensions.PlatformAbstractions.dll": {}
-        }
-      },
       "Microsoft.Extensions.Primitives/2.1.1": {
         "dependencies": {
           "System.Memory": "4.5.1",
@@ -469,66 +454,14 @@
       },
       "runtime.win-x64.Microsoft.NETCore.DotNetAppHost/3.0.0-preview-27324-5": {},
       "System.Buffers/4.5.0": {},
-      "System.IO/4.3.0": {
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.0.0-preview.19073.11",
-          "Microsoft.NETCore.Targets": "2.0.0",
-          "System.Runtime": "4.3.0",
-          "System.Text.Encoding": "4.3.0",
-          "System.Threading.Tasks": "4.3.0"
-        }
-      },
       "System.Memory/4.5.1": {},
-      "System.Reflection/4.3.0": {
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.0.0-preview.19073.11",
-          "Microsoft.NETCore.Targets": "2.0.0",
-          "System.IO": "4.3.0",
-          "System.Reflection.Primitives": "4.3.0",
-          "System.Runtime": "4.3.0"
-        }
-      },
-      "System.Reflection.Primitives/4.3.0": {
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.0.0-preview.19073.11",
-          "Microsoft.NETCore.Targets": "2.0.0",
-          "System.Runtime": "4.3.0"
-        }
-      },
-      "System.Reflection.TypeExtensions/4.3.0": {
-        "dependencies": {
-          "System.Reflection": "4.3.0",
-          "System.Runtime": "4.3.0"
-        }
-      },
-      "System.Runtime/4.3.0": {
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.0.0-preview.19073.11",
-          "Microsoft.NETCore.Targets": "2.0.0"
-        }
-      },
       "System.Runtime.CompilerServices.Unsafe/4.5.1": {},
-      "System.Text.Encoding/4.3.0": {
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.0.0-preview.19073.11",
-          "Microsoft.NETCore.Targets": "2.0.0",
-          "System.Runtime": "4.3.0"
-        }
-      },
       "System.Text.Encodings.Web/4.5.0": {},
-      "System.Threading.Tasks/4.3.0": {
+      "ElmahCore/1.2.5": {
         "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.0.0-preview.19073.11",
-          "Microsoft.NETCore.Targets": "2.0.0",
-          "System.Runtime": "4.3.0"
-        }
-      },
-      "ElmahCore/1.2.4": {
-        "dependencies": {
-          "ElmahCore.Common": "1.2.4",
+          "ElmahCore.Common": "1.2.5",
           "Microsoft.AspNetCore.Authentication.Abstractions": "2.1.1",
-          "Microsoft.AspNetCore.Http": "2.1.1",
-          "Microsoft.Extensions.PlatformAbstractions": "1.1.0"
+          "Microsoft.AspNetCore.Http": "2.1.1"
         },
         "runtime": {
           "ElmahCore.Mvc.dll": {}
@@ -537,13 +470,12 @@
           "ElmahCore.Mvc.dll": {}
         }
       },
-      "ElmahCore.Common/1.2.4": {
+      "ElmahCore.Common/1.2.5": {
         "dependencies": {
           "Microsoft.AspNetCore.Hosting.Abstractions": "2.1.1",
           "Microsoft.AspNetCore.Http.Abstractions": "2.1.1",
           "Microsoft.AspNetCore.WebUtilities": "2.1.1",
-          "Microsoft.Extensions.Options": "2.1.1",
-          "Microsoft.Extensions.PlatformAbstractions": "1.1.0"
+          "Microsoft.Extensions.Options": "2.1.1"
         },
         "runtime": {
           "ElmahCore.dll": {}
@@ -1548,7 +1480,7 @@
         },
         "compileOnly": true
       },
-      "System.IO.Reference/4.2.1.0": {
+      "System.IO/4.2.1.0": {
         "compile": {
           "System.IO.dll": {}
         },
@@ -1764,7 +1696,7 @@
         },
         "compileOnly": true
       },
-      "System.Reflection.Reference/4.2.1.0": {
+      "System.Reflection/4.2.1.0": {
         "compile": {
           "System.Reflection.dll": {}
         },
@@ -1800,13 +1732,13 @@
         },
         "compileOnly": true
       },
-      "System.Reflection.Primitives.Reference/4.1.1.0": {
+      "System.Reflection.Primitives/4.1.1.0": {
         "compile": {
           "System.Reflection.Primitives.dll": {}
         },
         "compileOnly": true
       },
-      "System.Reflection.TypeExtensions.Reference/4.1.2.0": {
+      "System.Reflection.TypeExtensions/4.1.2.0": {
         "compile": {
           "System.Reflection.TypeExtensions.dll": {}
         },
@@ -1842,7 +1774,7 @@
         },
         "compileOnly": true
       },
-      "System.Runtime.Reference/4.2.1.0": {
+      "System.Runtime/4.2.1.0": {
         "compile": {
           "System.Runtime.dll": {}
         },
@@ -2028,7 +1960,7 @@
         },
         "compileOnly": true
       },
-      "System.Text.Encoding.Reference/4.1.1.0": {
+      "System.Text.Encoding/4.1.1.0": {
         "compile": {
           "System.Text.Encoding.dll": {}
         },
@@ -2082,7 +2014,7 @@
         },
         "compileOnly": true
       },
-      "System.Threading.Tasks.Reference/4.1.1.0": {
+      "System.Threading.Tasks/4.1.1.0": {
         "compile": {
           "System.Threading.Tasks.dll": {}
         },
@@ -2384,13 +2316,6 @@
       "path": "microsoft.extensions.options/2.1.1",
       "hashPath": "microsoft.extensions.options.2.1.1.nupkg.sha512"
     },
-    "Microsoft.Extensions.PlatformAbstractions/1.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-H6ZsQzxYw/6k2DfEQRXdC+vQ6obd6Uba3uGJrnJ2vG4PRXjQZ7seB13JdCfE72abp8E6Fk3gGgDzfJiLZi5ZpQ==",
-      "path": "microsoft.extensions.platformabstractions/1.1.0",
-      "hashPath": "microsoft.extensions.platformabstractions.1.1.0.nupkg.sha512"
-    },
     "Microsoft.Extensions.Primitives/2.1.1": {
       "type": "package",
       "serviceable": true,
@@ -2433,47 +2358,12 @@
       "path": "system.buffers/4.5.0",
       "hashPath": "system.buffers.4.5.0.nupkg.sha512"
     },
-    "System.IO/4.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-3qjaHvxQPDpSOYICjUoTsmoq5u6QJAFRUITgeT/4gqkF1bajbSmb1kwSxEA8AHlofqgcKJcM8udgieRNhaJ5Cg==",
-      "path": "system.io/4.3.0",
-      "hashPath": "system.io.4.3.0.nupkg.sha512"
-    },
     "System.Memory/4.5.1": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-sDJYJpGtTgx+23Ayu5euxG5mAXWdkDb4+b0rD0Cab0M1oQS9H0HXGPriKcqpXuiJDTV7fTp/d+fMDJmnr6sNvA==",
       "path": "system.memory/4.5.1",
       "hashPath": "system.memory.4.5.1.nupkg.sha512"
-    },
-    "System.Reflection/4.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-KMiAFoW7MfJGa9nDFNcfu+FpEdiHpWgTcS2HdMpDvt9saK3y/G4GwprPyzqjFH9NTaGPQeWNHU+iDlDILj96aQ==",
-      "path": "system.reflection/4.3.0",
-      "hashPath": "system.reflection.4.3.0.nupkg.sha512"
-    },
-    "System.Reflection.Primitives/4.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-5RXItQz5As4xN2/YUDxdpsEkMhvw3e6aNveFXUn4Hl/udNTCNhnKp8lT9fnc3MhvGKh1baak5CovpuQUXHAlIA==",
-      "path": "system.reflection.primitives/4.3.0",
-      "hashPath": "system.reflection.primitives.4.3.0.nupkg.sha512"
-    },
-    "System.Reflection.TypeExtensions/4.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-7u6ulLcZbyxB5Gq0nMkQttcdBTx57ibzw+4IOXEfR+sXYQoHvjW5LTLyNr8O22UIMrqYbchJQJnos4eooYzYJA==",
-      "path": "system.reflection.typeextensions/4.3.0",
-      "hashPath": "system.reflection.typeextensions.4.3.0.nupkg.sha512"
-    },
-    "System.Runtime/4.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-JufQi0vPQ0xGnAczR13AUFglDyVYt4Kqnz1AZaiKZ5+GICq0/1MH/mO/eAJHt/mHW1zjKBJd7kV26SrxddAhiw==",
-      "path": "system.runtime/4.3.0",
-      "hashPath": "system.runtime.4.3.0.nupkg.sha512"
     },
     "System.Runtime.CompilerServices.Unsafe/4.5.1": {
       "type": "package",
@@ -2482,13 +2372,6 @@
       "path": "system.runtime.compilerservices.unsafe/4.5.1",
       "hashPath": "system.runtime.compilerservices.unsafe.4.5.1.nupkg.sha512"
     },
-    "System.Text.Encoding/4.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-BiIg+KWaSDOITze6jGQynxg64naAPtqGHBwDrLaCtixsa5bKiR8dpPOHA7ge3C0JJQizJE+sfkz1wV+BAKAYZw==",
-      "path": "system.text.encoding/4.3.0",
-      "hashPath": "system.text.encoding.4.3.0.nupkg.sha512"
-    },
     "System.Text.Encodings.Web/4.5.0": {
       "type": "package",
       "serviceable": true,
@@ -2496,19 +2379,12 @@
       "path": "system.text.encodings.web/4.5.0",
       "hashPath": "system.text.encodings.web.4.5.0.nupkg.sha512"
     },
-    "System.Threading.Tasks/4.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-LbSxKEdOUhVe8BezB/9uOGGppt+nZf6e1VFyw6v3DN6lqitm0OSn2uXMOdtP0M3W4iMcqcivm2J6UgqiwwnXiA==",
-      "path": "system.threading.tasks/4.3.0",
-      "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
-    },
-    "ElmahCore/1.2.4": {
+    "ElmahCore/1.2.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "ElmahCore.Common/1.2.4": {
+    "ElmahCore.Common/1.2.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -3343,7 +3219,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.IO.Reference/4.2.1.0": {
+    "System.IO/4.2.1.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
@@ -3523,7 +3399,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.Reflection.Reference/4.2.1.0": {
+    "System.Reflection/4.2.1.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
@@ -3553,12 +3429,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.Reflection.Primitives.Reference/4.1.1.0": {
+    "System.Reflection.Primitives/4.1.1.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
     },
-    "System.Reflection.TypeExtensions.Reference/4.1.2.0": {
+    "System.Reflection.TypeExtensions/4.1.2.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
@@ -3588,7 +3464,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.Runtime.Reference/4.2.1.0": {
+    "System.Runtime/4.2.1.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
@@ -3743,7 +3619,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.Text.Encoding.Reference/4.1.1.0": {
+    "System.Text.Encoding/4.1.1.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
@@ -3788,7 +3664,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.Threading.Tasks.Reference/4.1.1.0": {
+    "System.Threading.Tasks/4.1.1.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""

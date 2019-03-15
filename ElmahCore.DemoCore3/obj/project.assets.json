@@ -379,11 +379,11 @@
           "lib/netstandard2.0/System.Text.Encodings.Web.dll": {}
         }
       },
-      "ElmahCore/1.2.4": {
+      "ElmahCore/1.2.5": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
-          "ElmahCore.Common": "1.2.4",
+          "ElmahCore.Common": "1.2.5",
           "Microsoft.AspNetCore.Authentication.Abstractions": "2.1.1",
           "Microsoft.AspNetCore.Http": "2.1.1"
         },
@@ -394,7 +394,7 @@
           "bin/placeholder/ElmahCore.dll": {}
         }
       },
-      "ElmahCore.Common/1.2.4": {
+      "ElmahCore.Common/1.2.5": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
@@ -1508,12 +1508,12 @@
         "version.txt"
       ]
     },
-    "ElmahCore/1.2.4": {
+    "ElmahCore/1.2.5": {
       "type": "project",
       "path": "../ElmahCore.Mvc/ElmahCore.Mvc.csproj",
       "msbuildProject": "../ElmahCore.Mvc/ElmahCore.Mvc.csproj"
     },
-    "ElmahCore.Common/1.2.4": {
+    "ElmahCore.Common/1.2.5": {
       "type": "project",
       "path": "../ElmahCore/ElmahCore.csproj",
       "msbuildProject": "../ElmahCore/ElmahCore.csproj"
@@ -1521,7 +1521,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.0": [
-      "ElmahCore >= 1.2.4",
+      "ElmahCore >= 1.2.5",
       "Microsoft.AspNetCore.App >= 3.0.0-preview-19075-0444",
       "Microsoft.AspNetCore.Mvc.NewtonsoftJson >= 3.0.0-preview-19075-0444",
       "Microsoft.NETCore.App >= 3.0.0-preview-27324-5",

@@ -286,6 +286,10 @@ C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.Dem
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\Microsoft.AspNetCore.JsonPatch.dll
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\Newtonsoft.Json.Bson.dll
+C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.dll
+C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.Mvc.dll
+C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.Mvc.pdb
+C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.pdb
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\obj\Release\netcoreapp3.0\ElmahCore.DemoCore3.csprojAssemblyReference.cache
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\obj\Release\netcoreapp3.0\ElmahCore.DemoCore3.csproj.CoreCompileInputs.cache
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\obj\Release\netcoreapp3.0\ElmahCore.DemoCore3.RazorAssemblyInfo.cache
@@ -309,8 +313,3 @@ C:\Sources\ElmahCore\ElmahCore.DemoCore3\obj\Release\netcoreapp3.0\ElmahCore.Dem
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\obj\Release\netcoreapp3.0\ElmahCore.DemoCore3.csproj.CopyComplete
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\obj\Release\netcoreapp3.0\ElmahCore.DemoCore3.dll
 C:\Sources\ElmahCore\ElmahCore.DemoCore3\obj\Release\netcoreapp3.0\ElmahCore.DemoCore3.pdb
-C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\Microsoft.Extensions.PlatformAbstractions.dll
-C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.dll
-C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.Mvc.dll
-C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.Mvc.pdb
-C:\Sources\ElmahCore\ElmahCore.DemoCore3\bin\Release\netcoreapp3.0\ElmahCore.pdb
