@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.PlatformAbstractions;
+
 
 namespace ElmahCore.Mvc
 {
@@ -79,7 +80,8 @@ namespace ElmahCore.Mvc
             }
             else
             {
-                _errorLog.ApplicationName = $"{PlatformServices.Default.Application.ApplicationName}({PlatformServices.Default.Application.ApplicationVersion})";
+                _errorLog.ApplicationName = Assembly.GetEntryAssembly().GetName().Name;
+                //_errorLog.ApplicationName = $"{PlatformServices.Default.Application.ApplicationName}({PlatformServices.Default.Application.ApplicationVersion})";
             }
         }
 

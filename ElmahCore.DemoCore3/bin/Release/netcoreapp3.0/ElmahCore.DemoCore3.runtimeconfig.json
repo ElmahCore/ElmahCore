@@ -1,0 +1,12 @@
+{
+  "runtimeOptions": {
+    "tfm": "netcoreapp3.0",
+    "framework": {
+      "name": "Microsoft.AspNetCore.App",
+      "version": "3.0.0-preview-19075-0444"
+    },
+    "configProperties": {
+      "System.GC.Server": true
+    }
+  }
+}

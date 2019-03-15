@@ -176,7 +176,7 @@ namespace ElmahCore
                 var last = ch;
 
                 Debug.Assert(s != null);
-                ch = s[index];
+                if (s != null) ch = s[index];
 
                 switch (ch)
                 {

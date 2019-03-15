@@ -14,3 +14,4 @@ ElmahCore.Mvc/bin/**/*
 ElmahCore.Mvc/obj/**/*
 ElmahCore.MsSql/bin/**/*
 ElmahCore.MsSql/obj/**/*
+/.vs/ElmahCore

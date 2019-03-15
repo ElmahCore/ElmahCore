@@ -25,7 +25,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
   </ItemGroup>
 
 </Project>

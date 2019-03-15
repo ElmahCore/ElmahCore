@@ -103,7 +103,7 @@ namespace ElmahCore.Mvc.Handlers
                         RenderEnd(writer);
                         Debug.Assert(title != null);
                         Debug.Assert(pubDate != null);
-                        yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
+                        if (pubDate != null) yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
                     }
 
                     runningDay = day;
@@ -123,7 +123,7 @@ namespace ElmahCore.Mvc.Handlers
                 RenderEnd(writer);
                 Debug.Assert(title != null);
                 Debug.Assert(pubDate != null);
-                yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
+                if (pubDate != null) yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
             }
         }
 
