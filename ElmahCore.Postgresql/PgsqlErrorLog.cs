@@ -11,7 +11,7 @@ namespace ElmahCore.Postgresql
     /// An <see cref="ErrorLog"/> implementation that uses PostgreSQL
     /// as its backing store.
     /// </summary>
-    /// 
+    ///
     public class PgsqlErrorLog : ErrorLog
     {
         private readonly string _connectionString;
@@ -64,7 +64,7 @@ namespace ElmahCore.Postgresql
             var id = Guid.NewGuid();
 
             using (var connection = new NpgsqlConnection(ConnectionString))
-            using (var command = Commands.LogError(id, this.ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
+            using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
             {
                 command.Connection = connection;
                 connection.Open();
@@ -115,7 +115,7 @@ namespace ElmahCore.Postgresql
             {
                 connection.Open();
 
-                using (var command = Commands.GetErrorsXml(this.ApplicationName, pageIndex, pageSize))
+                using (var command = Commands.GetErrorsXml(ApplicationName, pageIndex, pageSize))
                 {
                     command.Connection = connection;
 
@@ -131,7 +131,7 @@ namespace ElmahCore.Postgresql
                     }
                 }
 
-                using (var command = Commands.GetErrorsXmlTotal(this.ApplicationName))
+                using (var command = Commands.GetErrorsXmlTotal(ApplicationName))
                 {
                     command.Connection = connection;
                     return Convert.ToInt32(command.ExecuteScalar());
@@ -151,6 +151,7 @@ namespace ElmahCore.Postgresql
                 using (var cmdCheck = Commands.CheckTable())
                 {
                     cmdCheck.Connection = connection;
+                    // ReSharper disable once PossibleNullReferenceException
                     var exists = (bool)cmdCheck.ExecuteScalar();
 
                     if (!exists)
