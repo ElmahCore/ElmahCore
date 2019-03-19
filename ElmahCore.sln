@@ -18,7 +18,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore", "ElmahCore\Elma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Mvc", "ElmahCore.Mvc\ElmahCore.Mvc.csproj", "{BF039A92-379C-41E5-A8D2-6C26DAEFDC60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElmahCore.DemoCore3", "ElmahCore.DemoCore3\ElmahCore.DemoCore3.csproj", "{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.DemoCore3", "ElmahCore.DemoCore3\ElmahCore.DemoCore3.csproj", "{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Postgresql", "ElmahCore.Postgresql\ElmahCore.Postgresql.csproj", "{75B6FE36-D765-4685-9AA6-5878002A5290}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75B6FE36-D765-4685-9AA6-5878002A5290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75B6FE36-D765-4685-9AA6-5878002A5290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75B6FE36-D765-4685-9AA6-5878002A5290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75B6FE36-D765-4685-9AA6-5878002A5290}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>ElmahCore.Postgresql</id>
+    <version>1.2.5</version>
+    <authors>ElmahCore</authors>
+    <owners>ElmahCore</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectUrl>https://github.com/ElmahCore/ElmahCore</projectUrl>
+    <description>ELMAH for ASP.NET Core</description>
+    <copyright>ElmahCore</copyright>
+    <tags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</tags>
+    <repository url="https://www.nuget.org/packages/ElmahCore" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="ElmahCore.Common" version="1.2.5" exclude="Build,Analyzers" />
+        <dependency id="Npgsql" version="4.0.5" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Sources\ElmahCore\ElmahCore.Postgresql\bin\Release\netstandard2.0\ElmahCore.Postgresql.dll" target="lib\netstandard2.0\ElmahCore.Postgresql.dll" />
+  </files>
+</package>

@@ -1,0 +1,144 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Sources\\ElmahCore\\ElmahCore.Postgresql\\ElmahCore.Postgresql.csproj": {}
+  },
+  "projects": {
+    "C:\\Sources\\ElmahCore\\ElmahCore.Postgresql\\ElmahCore.Postgresql.csproj": {
+      "version": "1.2.5",
+      "restore": {
+        "projectUniqueName": "C:\\Sources\\ElmahCore\\ElmahCore.Postgresql\\ElmahCore.Postgresql.csproj",
+        "projectName": "ElmahCore.Postgresql",
+        "projectPath": "C:\\Sources\\ElmahCore\\ElmahCore.Postgresql\\ElmahCore.Postgresql.csproj",
+        "packagesPath": "C:\\Users\\naych\\.nuget\\packages\\",
+        "outputPath": "C:\\Sources\\ElmahCore\\ElmahCore.Postgresql\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\naych\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "http://rr-tfs:8080/tfs/RR/_packaging/R3.Core/nuget/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {
+              "C:\\Sources\\ElmahCore\\ElmahCore\\ElmahCore.csproj": {
+                "projectPath": "C:\\Sources\\ElmahCore\\ElmahCore\\ElmahCore.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "Npgsql": {
+              "target": "Package",
+              "version": "[4.0.5, )"
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    },
+    "C:\\Sources\\ElmahCore\\ElmahCore\\ElmahCore.csproj": {
+      "version": "1.2.5",
+      "restore": {
+        "projectUniqueName": "C:\\Sources\\ElmahCore\\ElmahCore\\ElmahCore.csproj",
+        "projectName": "ElmahCore.Common",
+        "projectPath": "C:\\Sources\\ElmahCore\\ElmahCore\\ElmahCore.csproj",
+        "packagesPath": "C:\\Users\\naych\\.nuget\\packages\\",
+        "outputPath": "C:\\Sources\\ElmahCore\\ElmahCore\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\naych\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "http://rr-tfs:8080/tfs/RR/_packaging/R3.Core/nuget/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "Microsoft.AspNetCore.Hosting.Abstractions": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "Microsoft.AspNetCore.WebUtilities": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "Microsoft.Extensions.Options": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}
