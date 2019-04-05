@@ -17,7 +17,7 @@ Default elmah path `~/elmah`.
 
 ## Change URL path
 ```sh
-services.AddElmah(options => option.Path = "you_path_here")
+services.AddElmah(options => options.Path = "you_path_here")
 ```
 ## Restrict access to the Elmah url
 ```sh
