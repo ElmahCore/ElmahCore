@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using ElmahCore.Mvc.MoreLinq;
 using Microsoft.AspNetCore.Http;
 
@@ -42,17 +43,17 @@ namespace ElmahCore.Mvc
         static string _styleSheetHash;
         static readonly ReadOnlyCollection<string> AllStyleSheetResourceNames = Array.AsReadOnly(new[] {"Bootstrap.css", "ErrorLog.css"});
 
-        public static void LoadStyleSheets(HttpContext context, IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding, bool cacheResponse)
+        public static async Task LoadStyleSheets(HttpContext context, IEnumerable<string> resourceNames, string mediaType, Encoding responseEncoding, bool cacheResponse)
         {
             var response = context.Response;
             response.ContentType = mediaType;
 
             foreach (var resourceName in resourceNames)
-                ManifestResourceHelper.WriteResourceToStream(response.Body, typeof(StyleSheetHelper), resourceName);
+                await ManifestResourceHelper.WriteResourceToStream(response.Body, typeof(StyleSheetHelper), resourceName);
         }
         public static string StyleSheetHash
         {
-            get { return _styleSheetHash ?? (_styleSheetHash = CalculateHash()); }
+            get { return _styleSheetHash ?? (_styleSheetHash = CalculateHash().Result); }
         }
 
         public static IEnumerable<string> StyleSheetResourceNames
@@ -60,11 +61,11 @@ namespace ElmahCore.Mvc
             get { return AllStyleSheetResourceNames; }
         }
 
-        private static string CalculateHash()
+        private static async Task<string> CalculateHash()
         {
             var memoryStream = new MemoryStream();
             foreach (var resourceName in AllStyleSheetResourceNames)
-                ManifestResourceHelper.WriteResourceToStream(memoryStream, typeof(StyleSheetHelper), resourceName);
+                await ManifestResourceHelper.WriteResourceToStream(memoryStream, typeof(StyleSheetHelper), resourceName);
 
             return MD5.Create()
                       .ComputeHash(memoryStream)

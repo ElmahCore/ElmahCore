@@ -187,7 +187,7 @@ namespace ElmahCore.Mvc
                         await ErrorLogDownloadHandler.ProcessRequestAsync(_errorLog, context);
                         return;
                     case "stylesheet":
-                        StyleSheetHelper.LoadStyleSheets(context, StyleSheetHelper.StyleSheetResourceNames, "text/css",
+                        await StyleSheetHelper.LoadStyleSheets(context, StyleSheetHelper.StyleSheetResourceNames, "text/css",
                             Encoding.UTF8,
                             true);
                         break;
