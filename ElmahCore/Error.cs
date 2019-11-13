@@ -168,12 +168,10 @@ namespace ElmahCore
 	            bool isProcessed = false;
                 if (value is IEnumerable en && !(en is string))
                 {
-	                if (en.GetType().FullName.StartsWith("Microsoft.AspNetCore.Http.ItemsDictionary")) {
-						try { en.GetEnumerator(); } catch
-						{
-							continue;
-						}
-	                }
+	                if (value is IDictionary<object, object> dic)
+                    {
+                        if(dic.Keys.Count == 0) { continue; }
+                    }
 	                foreach (var item in en)
                     {
                         try
