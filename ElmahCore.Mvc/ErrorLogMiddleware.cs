@@ -167,7 +167,7 @@ namespace ElmahCore.Mvc
                 switch (resource)
                 {
                     case "detail":
-                        await ProcessTemplate<ErrorDetailPage>(context, _errorLog);
+                        await ProcessTemplate<ErrorDetailPage>(context, _errorLog, "text/html");
                         break;
                     case "html":
                         break;
@@ -194,10 +194,10 @@ namespace ElmahCore.Mvc
                     case "test":
                         throw new TestException();
                     case "about":
-                        await ProcessTemplate<AboutPage>(context, _errorLog);
+                        await ProcessTemplate<AboutPage>(context, _errorLog, "text/html");
                         break;
                     default:
-                        await ProcessTemplate<ErrorLogPage>(context, _errorLog);
+                        await ProcessTemplate<ErrorLogPage>(context, _errorLog, "text/html");
                         break;
                 }
             }
@@ -212,9 +212,11 @@ namespace ElmahCore.Mvc
         }
 
         
-        async Task ProcessTemplate<T>(HttpContext context, ErrorLog error) where T : WebTemplateBase, new()
+        async Task ProcessTemplate<T>(HttpContext context, ErrorLog error, string contentType) where T : WebTemplateBase, new()
         {
             var template = new T { Context = context, ErrorLog = error, ElmahRoot = _elmahRoot};
+
+            context.Response.ContentType = contentType;
 
             await context.Response.WriteAsync(template.TransformText());
         }
