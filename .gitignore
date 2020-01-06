@@ -10,8 +10,12 @@ ElmahCore/obj/**/*
 ElmahCore/bin/**/*
 ElmahCore.Demo/bin/**/*
 ElmahCore.Demo/obj/**/*
+ElmahCore.DemoCore3/bin/**/*
+ElmahCore.DemoCore3/obj/**/*
 ElmahCore.Mvc/bin/**/*
 ElmahCore.Mvc/obj/**/*
 ElmahCore.MsSql/bin/**/*
 ElmahCore.MsSql/obj/**/*
+ElmahCore.Postgresql/bin/**/*
+ElmahCore.Postgresql/obj/**/*
 /.vs/ElmahCore
