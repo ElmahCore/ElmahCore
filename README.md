@@ -26,6 +26,13 @@ services.AddElmah(options =>
         options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
 });
 ```
+**Note:** `app.UseElmah();` needs to be after 
+```
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseElmah();
+```
+or the user will be redirected to the sign in screen even if he is authenticated.
 ## Change Error Log type
 You can create your own error log, which will store errors anywhere.
 ```sh
