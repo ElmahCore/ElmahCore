@@ -261,7 +261,7 @@ namespace ElmahCore.Mvc
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //
                 // IMPORTANT! We swallow any exception raised during the 
@@ -272,7 +272,7 @@ namespace ElmahCore.Mvc
                 // even system ones and potentially let them slip by.
                 //
 
-                _logger.LogError("Elmah local exception");
+                _logger.LogError(ex, "Elmah local exception");
             }
             if (entry != null)
                 OnLogged(new ErrorLoggedEventArgs(entry));
