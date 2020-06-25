@@ -17,7 +17,15 @@
     <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
     <Description>ELMAH for ASP.NET Core</Description>
     <Copyright>ElmahCore</Copyright>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <EmbeddedResource Include="Bootstrap.css" />
