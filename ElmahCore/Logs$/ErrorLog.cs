@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -175,9 +176,9 @@ namespace ElmahCore
         
         public string ApplicationName
         {
-            get => _appName ?? string.Empty;
+            get => _appName ?? Assembly.GetEntryAssembly().GetName().Name;
 
-		    set
+            set
             {
                 if (_appNameInitialized)
                     throw new InvalidOperationException("The application name cannot be reset once initialized.");

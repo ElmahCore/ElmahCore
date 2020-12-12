@@ -89,7 +89,7 @@ namespace ElmahCore
 
             _source = baseException?.Source;
             _detail = e?.ToString();
-            _user = Thread.CurrentPrincipal?.Identity?.Name ?? string.Empty;
+            _user = context.User?.Identity?.Name ?? string.Empty;
             Time = DateTime.Now;
 
 
@@ -168,12 +168,10 @@ namespace ElmahCore
 	            bool isProcessed = false;
                 if (value is IEnumerable en && !(en is string))
                 {
-	                if (en.GetType().FullName.StartsWith("Microsoft.AspNetCore.Http.ItemsDictionary")) {
-						try { en.GetEnumerator(); } catch
-						{
-							continue;
-						}
-	                }
+	                if (value is IDictionary<object, object> dic)
+                    {
+                        if(dic.Keys.Count == 0) { continue; }
+                    }
 	                foreach (var item in en)
                     {
                         try

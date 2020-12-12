@@ -2,20 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>ELMAH for ASP.NET Core</Description>
-    <Copyright>ElmahCore</Copyright>
+    <Version>1.2.5</Version>
     <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
-    <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
-    <NeutralLanguage>en-001</NeutralLanguage>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>1.2.5.0</AssemblyVersion>
     <FileVersion>1.2.5.0</FileVersion>
-    <Version>1.2.5</Version>
+    <AssemblyName>ElmahCore.Postgresql</AssemblyName>
+    <PackageId>ElmahCore.Postgresql</PackageId>
     <Authors>ElmahCore</Authors>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Company>ElmahCore</Company>
+    <Product>ElmahCore.Postgresql</Product>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
+    <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
+    <Description>ELMAH for ASP.NET Core</Description>
+    <Copyright>ElmahCore</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
