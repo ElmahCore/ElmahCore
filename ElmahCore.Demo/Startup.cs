@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ElmahCore.Demo
 {
@@ -31,6 +35,17 @@ namespace ElmahCore.Demo
 	        {
 		        //options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
 	            options.Path = @"elmah";
+                options.OnError = async (context, error) =>
+                {
+                    if (!context.Request.HasFormContentType)
+                        return;
+                    var sensitiveFields = error.Form.AllKeys
+                        .Where(key => key.Equals("password", StringComparison.CurrentCultureIgnoreCase))
+                        .ToList();
+                    if (sensitiveFields.Count() == 0)
+                        return;
+                    sensitiveFields.ForEach(t => error.Form.Set(t, "*** Redacted ***"));
+                };
 	        });
 
 

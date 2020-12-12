@@ -25,12 +25,13 @@ namespace ElmahCore.Mvc
         public event ErrorLoggedEventHandler Logged;
         private readonly string _elmahRoot = @"/elmah";
         private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
-        private ILogger _logger;
-	    private Func<HttpContext, bool> _сheckPermissionAction;
+        private readonly ILogger _logger;
+        private readonly Func<HttpContext, bool> _сheckPermissionAction = context => true;
+        private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
 
-        public ErrorLogMiddleware(ErrorLog errorLog,ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
+        public ErrorLogMiddleware(ErrorLog errorLog, ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
         {
             ElmahExtensions.LogMiddleware = this;
             _errorLog = errorLog ?? throw new ArgumentNullException(nameof(errorLog));
@@ -38,28 +39,31 @@ namespace ElmahCore.Mvc
 
             _logger = lf.CreateLogger<ErrorLogMiddleware>();
 
-	        _сheckPermissionAction = elmahOptions?.Value?.CheckPermissionAction;
+            //return here if the elmah options is not provided
+            if (elmahOptions?.Value == null)
+                return;
+            var options = elmahOptions.Value;
+
+	        _сheckPermissionAction = options.PermissionCheck;
+            _onError = options.Error;
 
             //Notifiers
-            if (elmahOptions?.Value?.Notifiers != null)
+            if (options.Notifiers != null)
                 _notifiers = elmahOptions.Value.Notifiers.ToList();
 
             //Filters
-            if (elmahOptions?.Value?.Filters != null)
+            foreach (var errorFilter in options.Filters)
             {
-                _filters = elmahOptions.Value.Filters.ToList();
-                foreach (var errorFilter in _filters)
-                {
-                    Filtering += errorFilter.OnErrorModuleFiltering;
-                }
+                Filtering += errorFilter.OnErrorModuleFiltering;
             }
+            
 
 
-            if (!string.IsNullOrEmpty(elmahOptions?.Value?.FiltersConfig))
+            if (!string.IsNullOrEmpty(options.FiltersConfig))
             {
                 try
                 {
-                    ConfigureFilters(elmahOptions.Value.FiltersConfig);
+                    ConfigureFilters(options.FiltersConfig);
                 }
                 catch (Exception)
                 {
@@ -67,21 +71,16 @@ namespace ElmahCore.Mvc
                 }
             }
 
-            if (!string.IsNullOrEmpty(elmahOptions?.Value?.Path))
+            if (!string.IsNullOrEmpty(options.Path))
             {
                 _elmahRoot = elmahOptions.Value.Path.ToLower();
+                if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
+                if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0, _elmahRoot.Length - 1);
             }
-            if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
-            if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0,_elmahRoot.Length-1);
-
-            if (elmahOptions?.Value?.ApplicationName != null)
+          
+            if (!string.IsNullOrWhiteSpace(options.ApplicationName))
             {
                 _errorLog.ApplicationName = elmahOptions.Value.ApplicationName;
-            }
-            else
-            {
-                _errorLog.ApplicationName = Assembly.GetEntryAssembly().GetName().Name;
-                //_errorLog.ApplicationName = $"{PlatformServices.Default.Application.ApplicationName}({PlatformServices.Default.Application.ApplicationVersion})";
             }
         }
 
@@ -123,17 +122,15 @@ namespace ElmahCore.Mvc
             try
             {
 
-                if (context.Request.Path.Value.Equals(_elmahRoot,StringComparison.InvariantCultureIgnoreCase) || context.Request.Path.Value.StartsWith(_elmahRoot+"/", StringComparison.InvariantCultureIgnoreCase))
+                if (context.Request.Path.Value.Equals(_elmahRoot,StringComparison.InvariantCultureIgnoreCase) 
+                    || context.Request.Path.Value.StartsWith(_elmahRoot+"/", StringComparison.InvariantCultureIgnoreCase))
                 {
-	                if (_сheckPermissionAction != null)
-	                {
-		                if (!_сheckPermissionAction(context))
-		                {
-			                await context.ChallengeAsync();
-			                return;
-		                }
-	                }
 
+		            if (!_сheckPermissionAction(context))
+		            {
+			            await context.ChallengeAsync();
+			            return;
+		            }
                     await ProcessElamhRequest(context);
                     return;
                 }
@@ -148,11 +145,11 @@ namespace ElmahCore.Mvc
                 {
                    return;
                 }
-                LogException(new HttpException(context.Response.StatusCode), context);
+                await LogException(new HttpException(context.Response.StatusCode), context, _onError);
             }
             catch (Exception exception)
             {
-                LogException(exception, context);
+                await LogException(exception, context, _onError);
 
                 //To next middleware
                 throw;
@@ -222,7 +219,7 @@ namespace ElmahCore.Mvc
         }
 
 
-        internal void LogException(Exception e, HttpContext context)
+        internal async Task LogException(Exception e, HttpContext context, Func<HttpContext, Error, Task> onError)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));
@@ -250,6 +247,7 @@ namespace ElmahCore.Mvc
             //
 
                 var error = new Error(e, context);
+                await onError(context, error);
                 var log = GetErrorLog(context);
                 error.ApplicationName = log.ApplicationName;
                 var id = log.Log(error);
