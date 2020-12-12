@@ -89,7 +89,7 @@ namespace ElmahCore
 
             _source = baseException?.Source;
             _detail = e?.ToString();
-            _user = Thread.CurrentPrincipal?.Identity?.Name ?? string.Empty;
+            _user = context.User?.Identity?.Name ?? string.Empty;
             Time = DateTime.Now;
 
 
