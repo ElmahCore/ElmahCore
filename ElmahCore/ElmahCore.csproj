@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	  <Version>1.2.6</Version>
+	  <Version>1.2.7</Version>
 	  <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-	  <AssemblyVersion>1.2.6.0</AssemblyVersion>
-	  <FileVersion>1.2.6.0</FileVersion>
+	  <AssemblyVersion>1.2.77.0</AssemblyVersion>
+	  <FileVersion>1.2.7.0</FileVersion>
 	  <AssemblyName>ElmahCore</AssemblyName>
 	  <PackageId>ElmahCore.Common</PackageId>
 	  <Authors>ElmahCore</Authors>
@@ -21,6 +21,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <UserSecretsId>c3a38668-74c2-494f-b54d-1a06c261f315</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,10 +30,10 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

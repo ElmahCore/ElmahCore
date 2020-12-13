@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.2.6</Version>
+    <Version>1.2.7</Version>
     <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-    <AssemblyVersion>1.2.6.0</AssemblyVersion>
-    <FileVersion>1.2.6.0</FileVersion>
+    <AssemblyVersion>1.2.7.0</AssemblyVersion>
+    <FileVersion>1.2.7.0</FileVersion>
     <AssemblyName>ElmahCore.Postgresql</AssemblyName>
     <PackageId>ElmahCore.Postgresql</PackageId>
     <Authors>ElmahCore</Authors>
@@ -28,7 +28,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="4.0.5" />
+    <PackageReference Include="Npgsql" Version="5.0.1.1" />
   </ItemGroup>
 
   <ItemGroup>
