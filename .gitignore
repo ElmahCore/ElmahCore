@@ -19,3 +19,5 @@ ElmahCore.MsSql/obj/**/*
 ElmahCore.Postgresql/bin/**/*
 ElmahCore.Postgresql/obj/**/*
 /.vs/ElmahCore
+/.vs
+/ElmahCore.MySql/obj
