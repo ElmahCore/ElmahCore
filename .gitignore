@@ -21,3 +21,5 @@ ElmahCore.Postgresql/obj/**/*
 /.vs/ElmahCore
 /.vs
 /ElmahCore.MySql/obj
+/ElmahCore.DemoCore5/bin/Debug/net5.0
+/ElmahCore.DemoCore5/obj
