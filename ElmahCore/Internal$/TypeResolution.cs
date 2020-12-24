@@ -20,11 +20,12 @@ namespace ElmahCore
 
     internal static class TypeResolution
     {
-        static readonly Message<TypeResolutionArgs, Type> Message = new Message<TypeResolutionArgs, Type>(); 
+        static readonly Message<TypeResolutionArgs, Type> Message = new Message<TypeResolutionArgs, Type>();
 
-        public static IDisposable PushHandler(Func<Func<object, TypeResolutionArgs, Type>, Func<object, TypeResolutionArgs, Type>> binder)
+        private static void PushHandler(
+            Func<Func<object, TypeResolutionArgs, Type>, Func<object, TypeResolutionArgs, Type>> binder)
         {
-            return Message.PushHandler(binder);
+            Message.PushHandler(binder);
         }
         
         static TypeResolution()
@@ -37,7 +38,7 @@ namespace ElmahCore
             return GetType(typeName, false);
         }
 
-        public static Type GetType(string typeName, bool ignoreCase)
+        private static Type GetType(string typeName, bool ignoreCase)
         {
             return Send(new TypeResolutionArgs(typeName, true, ignoreCase));
         }

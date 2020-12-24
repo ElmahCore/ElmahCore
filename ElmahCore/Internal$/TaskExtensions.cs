@@ -21,7 +21,7 @@ namespace ElmahCore
 		/// <see cref="Task{T}"/>.
 		/// </summary>
 
-		public static bool TryConcludeFrom<T>(this TaskCompletionSource<T> source, Task<T> task)
+		public static void TryConcludeFrom<T>(this TaskCompletionSource<T> source, Task<T> task)
 		{
 			if (source == null) throw new ArgumentNullException(nameof(source));
 			if (task == null) throw new ArgumentNullException(nameof(task));
@@ -34,18 +34,13 @@ namespace ElmahCore
 			{
 				var aggregate = task.Exception;
 				Debug.Assert(aggregate != null);
-                if (aggregate != null) source.TrySetException(aggregate.InnerExceptions);
+                source.TrySetException(aggregate.InnerExceptions);
             }
 			else if (TaskStatus.RanToCompletion == task.Status)
 			{
 				source.TrySetResult(task.Result);
 			}
-			else
-			{
-				return false;
-			}
-			return true;
-		}
+        }
 	}
 
 
@@ -56,7 +51,7 @@ namespace ElmahCore
 
 	static class TaskExtensions
 	{
-		/// <summary>
+        /// <summary>
 		/// Returns a <see cref="Task{T}"/> that can be used as the
 		/// <see cref="IAsyncResult"/> return value from the method
 		/// that begin the operation of an API following the 
@@ -66,22 +61,7 @@ namespace ElmahCore
 		/// successfully).
 		/// </summary>
 
-		public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object state)
-		{
-			return Apmize(task, callback, state, null);
-		}
-
-		/// <summary>
-		/// Returns a <see cref="Task{T}"/> that can be used as the
-		/// <see cref="IAsyncResult"/> return value from the method
-		/// that begin the operation of an API following the 
-		/// <a href="http://msdn.microsoft.com/en-us/library/ms228963.aspx">Asynchronous Programming Model</a>.
-		/// If an <see cref="AsyncCallback"/> is supplied, it is invoked
-		/// when the supplied task concludes (fails, cancels or completes
-		/// successfully).
-		/// </summary>
-
-		public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object state, TaskScheduler scheduler)
+		public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object state, TaskScheduler scheduler = null)
 		{
 			var result = task;
 

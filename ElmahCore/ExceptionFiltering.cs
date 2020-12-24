@@ -11,21 +11,21 @@ namespace ElmahCore
     [ Serializable ]
     public sealed class ExceptionFilterEventArgs : EventArgs
     {
-		[NonSerialized ] private readonly object _context;
-		private readonly List<string> _notifiers = new List<string>();
+        private readonly List<string> _notifiers = new List<string>();
         internal IEnumerable<string> DismissedNotifiers => _notifiers;
 
         public ExceptionFilterEventArgs(Exception e, object context)
         {
 	        Exception = e ?? throw new ArgumentNullException(nameof(e));
-            _context = context;
+            Context = context;
         }
 
 		public Exception Exception { get; }
 
-		public object Context => _context;
+		[field: NonSerialized]
+        public object Context { get; }
 
-		public bool Dismissed { get; private set; }
+        public bool Dismissed { get; private set; }
 
 		public void Dismiss()
         {

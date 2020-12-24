@@ -88,16 +88,16 @@ namespace ElmahCore.Sql
         /// of logged time.
         /// </summary>
 
-        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            if (pageIndex < 0)
-                throw new ArgumentOutOfRangeException(nameof(pageIndex), pageIndex, null);
+            if (errorIndex < 0)
+                throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
 
             if (pageSize < 0)
                 throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
 
             using (var connection = new SqlConnection(ConnectionString))
-            using (var command = CommandExtension.GetErrorsXml(ApplicationName, pageIndex, pageSize))
+            using (var command = CommandExtension.GetErrorsXml(ApplicationName, errorIndex, pageSize))
             {
                 command.Connection = connection;
                 connection.Open();

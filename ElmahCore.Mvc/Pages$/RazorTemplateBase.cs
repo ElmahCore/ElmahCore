@@ -71,14 +71,5 @@ namespace ElmahCore.Mvc
 
             return _generatingEnvironment.ToString();
         }
-
-        public static HelperResult RenderPartial<T>() where T : RazorTemplateBase, new()
-        {
-            return new HelperResult(writer =>
-            {
-                var t = new T();
-                writer.Write(t.TransformText());
-            });
-        }
     }
 }

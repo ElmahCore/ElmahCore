@@ -1,28 +1,3 @@
-#region License, Terms and Author(s)
-//
-// ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-#endregion
-
-//[assembly: Elmah.Scc("$Id: CompositeAssertion.cs 618 2009-05-30 00:18:30Z azizatif $")]
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,10 +5,6 @@ using System.Linq;
 
 namespace ElmahCore.Assertions
 {
-    #region Imports
-
-	#endregion
-
     /// <summary>
     /// Read-only collection of <see cref="Assertions.IAssertion"/> instances.
     /// </summary>
@@ -49,7 +20,7 @@ namespace ElmahCore.Assertions
 
         private static IEnumerable<IAssertion> Validate(IEnumerable<IAssertion> assertions)
         {
-            if (assertions == null) throw new ArgumentNullException("assertions");
+            if (assertions == null) throw new ArgumentNullException(nameof(assertions));
             return ValidateImpl(assertions);
         }
 
@@ -58,7 +29,7 @@ namespace ElmahCore.Assertions
             foreach (var assertion in assertions)
             {
                 if (assertion == null)
-                    throw new ArgumentException(null, "assertions");
+                    throw new ArgumentException(null, nameof(assertions));
                 yield return assertion;
             }
         }

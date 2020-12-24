@@ -1,9 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Threading;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace ElmahCore
 {
@@ -28,7 +27,7 @@ namespace ElmahCore
 
         //
         // IMPORTANT! The size must be the same for all instances
-        // for the entires collection to be initialized correctly.
+        // for the entries collection to be initialized correctly.
         //
 
         private readonly int _size;
@@ -37,21 +36,20 @@ namespace ElmahCore
         /// The maximum number of errors that will ever be allowed to be stored
         /// in memory.
         /// </summary>
-        
-        public static readonly int MaximumSize = 500;
+        private static readonly int MaximumSize = 500;
         
         /// <summary>
         /// The maximum number of errors that will be held in memory by default 
         /// if no size is specified.
         /// </summary>
-        
-        public static readonly int DefaultSize = 15;
+        private static readonly int DefaultSize = 15;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryErrorLog"/> class
         /// with a default size for maximum recordable entries.
         /// </summary>
 
+        // ReSharper disable once UnusedMember.Global
         public MemoryErrorLog() : this(DefaultSize) {}
 
         /// <summary>
@@ -59,6 +57,7 @@ namespace ElmahCore
         /// with a specific size for maximum recordable entries.
         /// </summary>
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public MemoryErrorLog(int size)
         {
             if (size < 0 || size > MaximumSize)   
@@ -66,47 +65,6 @@ namespace ElmahCore
 
             _size = size;
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryErrorLog"/> class
-        /// using a dictionary of configured settings.
-        /// </summary>
-        
-        public MemoryErrorLog(IDictionary config)
-        {
-            if (config == null)
-            {
-                _size = DefaultSize;
-            }
-            else
-            {
-                var sizeString = Find(config,"size", string.Empty);
-
-                if (sizeString.Length == 0)
-                {
-                    _size = DefaultSize;
-                }
-                else
-                {
-                    _size = Convert.ToInt32(sizeString, CultureInfo.InvariantCulture);
-                    _size = Math.Max(0, Math.Min(MaximumSize, _size));
-                }
-
-                //
-                // Set the application name. This implementation does not
-                // and cannot provide per-app isolation.
-                // Fixes: https://code.google.com/p/elmah/issues/detail?id=291
-                //
-
-
-            }
-        }
-
-	    public static T Find<T>(IDictionary dict, object key, T @default)
-	    {
-		    if (dict == null) throw new ArgumentNullException(nameof(dict));
-		    return (T) (dict[key] ?? @default);
-	    }
 
         /// <summary>
         /// Gets the name of this error log implementation.
@@ -140,7 +98,7 @@ namespace ElmahCore
 
             try
             {
-                var entries = _entries ?? (_entries = new EntryCollection(_size));
+                var entries = _entries ??= new EntryCollection(_size);
                 entries.Add(entry);
             }
             finally
@@ -190,9 +148,9 @@ namespace ElmahCore
         /// descending order of logged time.
         /// </summary>
 
-        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            if (pageIndex < 0) throw new ArgumentOutOfRangeException(nameof(pageIndex), pageIndex, null);
+            if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
 
             //
@@ -215,7 +173,7 @@ namespace ElmahCore
 
                 totalCount = _entries.Count;
 
-                var startIndex = totalCount - ((pageIndex + 1) * Math.Min(pageSize, totalCount));
+                var startIndex = errorIndex;
                 var endIndex = Math.Min(startIndex + pageSize, totalCount);
                 var count = Math.Max(0, endIndex - startIndex);
                 
@@ -250,25 +208,6 @@ namespace ElmahCore
             }
 
             return totalCount;
-        }
-
-        /// <summary>
-        /// Used to clear the content of the collection used by this logger. This method is men
-        /// for testing and debugging purposes only.
-        /// </summary>
-
-        internal void Reset()
-        {
-            Lock.EnterWriteLock();
-
-            try
-            {
-                _entries = null;
-            }
-            finally
-            {
-                Lock.ExitWriteLock();
-            }
         }
 
         sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>

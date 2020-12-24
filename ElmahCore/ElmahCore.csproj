@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>8.0</LangVersion>
 	  <Version>1.2.7</Version>
 	  <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
 	  <AssemblyVersion>1.2.77.0</AssemblyVersion>
@@ -25,6 +26,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Error2.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
@@ -34,6 +39,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="4.6.0" />
   </ItemGroup>
 
 </Project>

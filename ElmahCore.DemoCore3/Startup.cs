@@ -27,11 +27,18 @@ namespace ElmahCore.DemoCore3
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddElmah(options =>
+            services.AddElmah<XmlFileErrorLog>(options =>
             {
                 //options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
                 options.Path = @"elmah";
+                options.LogPath = "~/errors.xml";
             });
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }));
 
             services.AddMvc()
                 .AddNewtonsoftJson();
@@ -40,6 +47,8 @@ namespace ElmahCore.DemoCore3
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors("MyPolicy");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -54,11 +63,11 @@ namespace ElmahCore.DemoCore3
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-            app.UseAuthorization();
 
             app.UseElmah();
 
             app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(routes =>
             {
                 //routes.MapApplication();

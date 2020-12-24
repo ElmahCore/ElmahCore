@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable UnusedMember.Global
 
 namespace ElmahCore.Assertions
 {
     internal sealed class AssertionHelperContext
     {
-        private readonly object _source;
-        private readonly Exception _exception;
-        private readonly object _context;
         private Exception _baseException;
         private int _httpStatusCode;
         private bool _statusCodeInitialized;
@@ -21,68 +21,38 @@ namespace ElmahCore.Assertions
         {
             Debug.Assert(e != null);
 
-            _source = source == null ? this : source;
-            _exception = e;
-            _context = context;
+            FilterSource = source ?? this;
+            Exception = e;
+            Context = context;
         }
 
-        public object FilterSource
-        {
-            get { return _source; }
-        }
+        public object FilterSource { get; }
 
-        public Type FilterSourceType
-        {
-            get { return _source.GetType(); }
-        }
+        public Type FilterSourceType => FilterSource.GetType();
 
-        public AssemblyName FilterSourceAssemblyName
-        {
-            get { return FilterSourceType.Assembly.GetName(); }
-        }
+        public AssemblyName FilterSourceAssemblyName => FilterSourceType.Assembly.GetName();
 
-        public Exception Exception
-        {
-            get { return _exception; }
-        }
+        public Exception Exception { get; }
 
-        public Exception BaseException
-        {
-            get
-            {
-                if (_baseException == null)
-                    _baseException = Exception.GetBaseException();
+        public Exception BaseException => _baseException ??= Exception.GetBaseException();
 
-                return _baseException;
-            }
-        }
-
-        public bool HasHttpStatusCode
-        {
-            get { return HttpStatusCode != 0; }
-        }
+        public bool HasHttpStatusCode => HttpStatusCode != 0;
 
         public int HttpStatusCode
         {
             get
             {
-                if (!_statusCodeInitialized)
-                {
-                    _statusCodeInitialized = true;
+                if (_statusCodeInitialized) return _httpStatusCode;
 
-                    var exception = Exception as HttpException;
+                _statusCodeInitialized = true;
 
-                    if (exception != null)
-                        _httpStatusCode = exception.StatusCode;
-                }
+                if (Exception is HttpException exception)
+                    _httpStatusCode = exception.StatusCode;
 
                 return _httpStatusCode;
             }
         }
 
-        public object Context
-        {
-            get { return _context; }
-        }
+        public object Context { get; }
     }
 }

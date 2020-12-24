@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ElmahCore.DemoCore5.Controllers
 {
@@ -20,13 +17,13 @@ namespace ElmahCore.DemoCore5.Controllers
 
         public IActionResult Index()
         {
+            ElmahExtensions.RiseError(new Exception("test2"));
             return View();
         }
 
         public IActionResult Privacy()
         {
             throw new Exception("Test");
-            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

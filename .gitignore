@@ -23,3 +23,4 @@ ElmahCore.Postgresql/obj/**/*
 /ElmahCore.MySql/obj
 /ElmahCore.DemoCore5/bin/Debug/net5.0
 /ElmahCore.DemoCore5/obj
+/ElmahCore.DemoCore3/wwwroot/errors.xml/**/*

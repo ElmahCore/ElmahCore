@@ -50,14 +50,14 @@ namespace ElmahCore.Sql
 			return command;
 		}
 
-		public static SqlCommand GetErrorsXml(string appName, int pageIndex, int pageSize)
+		public static SqlCommand GetErrorsXml(string appName, int errorIndex, int pageSize)
 		{
 			var command = new SqlCommand("ELMAH_GetErrorsXml") {CommandType = CommandType.StoredProcedure};
 
 			var parameters = command.Parameters;
 
 			parameters.Add("@Application", SqlDbType.NVarChar, MaxAppNameLength).Value = appName;
-			parameters.Add("@PageIndex", SqlDbType.Int).Value = pageIndex;
+			parameters.Add("@PageIndex", SqlDbType.Int).Value = errorIndex;
 			parameters.Add("@PageSize", SqlDbType.Int).Value = pageSize;
 			parameters.Add("@TotalCount", SqlDbType.Int).Direction = ParameterDirection.Output;
 

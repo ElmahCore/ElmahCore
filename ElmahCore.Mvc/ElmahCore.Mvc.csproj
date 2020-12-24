@@ -23,18 +23,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="wwwroot\index.html" />
+    <None Remove="wwwroot\js\*.js" />
+    <None Remove="wwwroot\img\*.svg" />
+    <None Remove="wwwroot\css\*.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.29" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <EmbeddedResource Include="Bootstrap.css" />
-    <EmbeddedResource Include="ErrorLog.css" />
+    <EmbeddedResource Include="wwwroot\index.html" />
+    <EmbeddedResource Include="wwwroot\js\*.js" />
+    <EmbeddedResource Include="wwwroot\img\*.svg" />
+    <EmbeddedResource Include="wwwroot\css\*.css" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="System.Text.Json" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>

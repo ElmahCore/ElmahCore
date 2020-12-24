@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,7 @@ namespace ElmahCore
     /// disk as its backing store.
     /// </summary>
 
+    // ReSharper disable once UnusedType.Global
     public class XmlFileErrorLog : ErrorLog
     {
         private readonly string _logPath;
@@ -37,8 +39,8 @@ namespace ElmahCore
         /// <summary>
         /// Gets the path to where the log is stored.
         /// </summary>
-        
-        public virtual string LogPath => _logPath;
+
+        protected virtual string LogPath => _logPath;
 
 	    /// <summary>
         /// Gets the name of this error log implementation.
@@ -74,15 +76,12 @@ namespace ElmahCore
 
             try
             {
-                using (var writer = new XmlTextWriter(path, Encoding.UTF8))
-                {
-                    writer.Formatting = Formatting.Indented;
-                    writer.WriteStartElement("error");
-                    writer.WriteAttributeString("errorId", errorId);
-                    ErrorXml.Encode(error, writer);
-                    writer.WriteEndElement();
-                    writer.Flush();
-                }
+                using var writer = new XmlTextWriter(path, Encoding.UTF8) {Formatting = Formatting.Indented};
+                writer.WriteStartElement("error");
+                writer.WriteAttributeString("errorId", errorId);
+                ErrorXml.Encode(error, writer);
+                writer.WriteEndElement();
+                writer.Flush();
             }
             catch (IOException)
             {
@@ -100,12 +99,12 @@ namespace ElmahCore
 
         /// <summary>
         /// Returns a page of errors from the folder in descending order 
-        /// of logged time as defined by the sortable filenames.
+        /// of logged time as defined by the sortable file names.
         /// </summary>
 
-        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            if (pageIndex < 0) throw new ArgumentOutOfRangeException(nameof(pageIndex), pageIndex, null);
+            if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
 
             var logPath = LogPath;
@@ -123,30 +122,39 @@ namespace ElmahCore
                              .Reverse()
                              .ToArray();
 
-            if (errorEntryList != null)
-            {
-                var entries = files.Skip(pageIndex * pageSize)
-                                   .Take(pageSize)
-                                   .Select(LoadErrorLogEntry);
+            if (errorEntryList == null) return files.Length; // Return total
 
-                foreach (var entry in entries)
-                    errorEntryList.Add(entry);
-            }
+            var entries = files.Skip(errorIndex)
+                .Take(pageSize)
+                .Select(LoadErrorLogEntry);
+
+            foreach (var entry in entries)
+                errorEntryList.Add(entry);
 
             return files.Length; // Return total
         }
 
         private ErrorLogEntry LoadErrorLogEntry(string path)
         {
-            using (var reader = XmlReader.Create(path))
+            for (var i = 0; i < 5; i++)
             {
-                if (!reader.IsStartElement("error"))
-                    return null;
+                try
+                {
+                    using var reader = XmlReader.Create(path);
+                    if (!reader.IsStartElement("error"))
+                        return null;
                                            
-                var id = reader.GetAttribute("errorId");
-                var error = ErrorXml.Decode(reader);
-                return new ErrorLogEntry(this, id, error);
+                    var id = reader.GetAttribute("errorId");
+                    var error = ErrorXml.Decode(reader);
+                    return new ErrorLogEntry(this, id, error);
+                }
+                catch (IOException)
+                {
+                    //ignored
+                    Task.Delay(500).GetAwaiter().GetResult();
+                }
             }
+            throw new IOException("");
         }
 
         /// <summary>
@@ -173,15 +181,13 @@ namespace ElmahCore
             if (!IsUserFile(file.Attributes))
                 return null;
 
-            using (var reader = XmlReader.Create(file.FullName))
-                return new ErrorLogEntry(this, id, ErrorXml.Decode(reader));
+            using var reader = XmlReader.Create(file.FullName);
+            return new ErrorLogEntry(this, id, ErrorXml.Decode(reader));
         }
 
-        private static bool IsUserFile(FileAttributes attributes)
-        {
-            return 0 == (attributes & (FileAttributes.Directory | 
-                                       FileAttributes.Hidden | 
-                                       FileAttributes.System));
-        }
+        private static bool IsUserFile(FileAttributes attributes) =>
+            0 == (attributes & (FileAttributes.Directory | 
+                                FileAttributes.Hidden | 
+                                FileAttributes.System));
     }
 }

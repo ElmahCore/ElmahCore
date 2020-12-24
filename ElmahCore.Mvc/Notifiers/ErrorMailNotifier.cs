@@ -46,18 +46,18 @@ namespace ElmahCore.Mvc.Notifiers
 
     public class ErrorMailNotifier : IErrorNotifier
     {
-        private string _mailSender;
-        private string _mailRecipient;
-        private string _mailCopyRecipient;
-        private string _mailSubjectFormat;
-        private MailPriority _mailPriority;
-        private bool _reportAsynchronously;
-        private string _smtpServer;
-        private int _smtpPort;
-        private string _authUserName;
-        private string _authPassword;
-        private bool _noYsod;
-        private bool _useSsl;
+        private readonly string _mailSender;
+        private readonly string _mailRecipient;
+        private readonly string _mailCopyRecipient;
+        private readonly string _mailSubjectFormat;
+        private readonly MailPriority _mailPriority;
+        private readonly bool _reportAsynchronously;
+        private readonly string _smtpServer;
+        private readonly int _smtpPort;
+        private readonly string _authUserName;
+        private readonly string _authPassword;
+        private readonly bool _noYsod;
+        private readonly bool _useSsl;
 
         /// <summary>
         /// Initializes the module and prepares it to handle requests.
@@ -91,10 +91,7 @@ namespace ElmahCore.Mvc.Notifiers
         /// Gets the e-mail address of the sender.
         /// </summary>
         
-        protected virtual string MailSender
-        {
-            get { return _mailSender; }
-        }
+        protected virtual string MailSender => _mailSender;
 
         /// <summary>
         /// Gets the e-mail address of the recipient, or a 
@@ -108,10 +105,7 @@ namespace ElmahCore.Mvc.Notifiers
         /// or later, multiple recipients must be comma-delimited.
         /// </remarks>
 
-        protected virtual string MailRecipient
-        {
-            get { return _mailRecipient; }
-        }
+        protected virtual string MailRecipient => _mailRecipient;
 
         /// <summary>
         /// Gets the e-mail address of the recipient for mail carbon 
@@ -125,10 +119,7 @@ namespace ElmahCore.Mvc.Notifiers
         /// or later, multiple recipients must be comma-delimited.
         /// </remarks>
 
-        protected virtual string MailCopyRecipient
-        {
-            get { return _mailCopyRecipient; }
-        }
+        protected virtual string MailCopyRecipient => _mailCopyRecipient;
 
         /// <summary>
         /// Gets the text used to format the e-mail subject.
@@ -140,56 +131,38 @@ namespace ElmahCore.Mvc.Notifiers
         /// be insert.
         /// </remarks>
 
-        protected virtual string MailSubjectFormat
-        {
-            get { return _mailSubjectFormat; }
-        }
+        protected virtual string MailSubjectFormat => _mailSubjectFormat;
 
         /// <summary>
         /// Gets the priority of the e-mail. 
         /// </summary>
         
-        protected virtual MailPriority MailPriority
-        {
-            get { return _mailPriority; }
-        }
+        protected virtual MailPriority MailPriority => _mailPriority;
 
         /// <summary>
         /// Gets the SMTP server host name used when sending the mail.
         /// </summary>
 
-        protected string SmtpServer
-        {
-            get { return _smtpServer; }
-        }
+        protected string SmtpServer => _smtpServer;
 
         /// <summary>
         /// Gets the SMTP port used when sending the mail.
         /// </summary>
 
-        protected int SmtpPort
-        {
-            get { return _smtpPort; }
-        }
+        protected int SmtpPort => _smtpPort;
 
         /// <summary>
         /// Gets the user name to use if the SMTP server requires authentication.
         /// </summary>
 
-        protected string AuthUserName
-        {
-            get { return _authUserName; }
-        }
+        protected string AuthUserName => _authUserName;
 
         /// <summary>
         /// Gets the clear-text password to use if the SMTP server requires 
         /// authentication.
         /// </summary>
 
-        protected string AuthPassword
-        {
-            get { return _authPassword; }
-        }
+        protected string AuthPassword => _authPassword;
 
         /// <summary>
         /// Indicates whether <a href="http://en.wikipedia.org/wiki/Screens_of_death#ASP.NET">YSOD</a> 
@@ -197,22 +170,14 @@ namespace ElmahCore.Mvc.Notifiers
         /// not attached.
         /// </summary>
         
-        protected bool NoYsod
-        {
-            get { return _noYsod; }
-        }
+        protected bool NoYsod => _noYsod;
 
         /// <summary>
         /// Determines if SSL will be used to encrypt communication with the 
         /// mail server.
         /// </summary>
 
-        protected bool UseSsl
-        {
-            get { return _useSsl; }
-        }
-
-
+        protected bool UseSsl => _useSsl;
 
 
         /// <summary>
@@ -226,7 +191,7 @@ namespace ElmahCore.Mvc.Notifiers
         protected virtual void ReportErrorAsync(Error error)
         {
             if (error == null)
-                throw new ArgumentNullException("error");
+                throw new ArgumentNullException(nameof(error));
 
             //
             // Schedule the reporting at a later time using a worker from 
@@ -271,7 +236,7 @@ namespace ElmahCore.Mvc.Notifiers
         protected virtual void ReportError(Error error)
         {
             if (error == null)
-                throw new ArgumentNullException("error");
+                throw new ArgumentNullException(nameof(error));
 
             //
             // Start by checking if we have a sender and a recipient.
@@ -394,7 +359,7 @@ namespace ElmahCore.Mvc.Notifiers
         protected virtual void SendMail(MailMessage mail)
         {
             if (mail == null)
-                throw new ArgumentNullException("mail");
+                throw new ArgumentNullException(nameof(mail));
 
             //
             // Under .NET Framework 2.0, the authentication settings

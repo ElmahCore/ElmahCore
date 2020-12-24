@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ElmahCore.DemoCore3.Models;
 
@@ -8,6 +9,12 @@ namespace ElmahCore.DemoCore3.Controllers
     {
         public IActionResult Index()
         {
+            //for (int i= 0;i<=100; i++)
+                ElmahExtensions.RiseError(new InvalidOperationException("test"));
+            var r = 0;
+            // ReSharper disable once UnusedVariable
+            // ReSharper disable once IntDivisionByZero
+            var d = 100 / r;
             return View();
         }
 
