@@ -16,7 +16,7 @@ namespace ElmahCore.Postgresql
     {
         private readonly string _connectionString;
 
-        private const int _maxAppNameLength = 60;
+        private const int MaxAppNameLength = 60;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PgsqlErrorLog"/> class
@@ -106,16 +106,16 @@ namespace ElmahCore.Postgresql
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
+            if (errorIndex < 0) throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
             using (var connection = new NpgsqlConnection(ConnectionString))
             {
                 connection.Open();
 
-                using (var command = Commands.GetErrorsXml(ApplicationName, pageIndex, pageSize))
+                using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize))
                 {
                     command.Connection = connection;
 
@@ -270,7 +270,7 @@ WHERE
                 return command;
             }
 
-            public static NpgsqlCommand GetErrorsXml(string appName, int pageIndex, int pageSize)
+            public static NpgsqlCommand GetErrorsXml(string appName, int errorIndex, int pageSize)
             {
                 var command = new NpgsqlCommand();
 
@@ -284,8 +284,8 @@ OFFSET @offset
 LIMIT @limit
 ";
 
-                command.Parameters.Add("@Application", NpgsqlDbType.Text, _maxAppNameLength).Value = appName;
-                command.Parameters.Add("@offset", NpgsqlDbType.Integer).Value = (pageIndex) * pageSize;
+                command.Parameters.Add("@Application", NpgsqlDbType.Text, MaxAppNameLength).Value = appName;
+                command.Parameters.Add("@offset", NpgsqlDbType.Integer).Value = errorIndex;
                 command.Parameters.Add("@limit", NpgsqlDbType.Integer).Value = pageSize;
 
                 return command;
@@ -295,7 +295,7 @@ LIMIT @limit
             {
                 var command = new NpgsqlCommand();
                 command.CommandText = "SELECT COUNT(*) FROM Elmah_Error WHERE Application = @Application";
-                command.Parameters.Add("@Application", NpgsqlDbType.Text, _maxAppNameLength).Value = appName;
+                command.Parameters.Add("@Application", NpgsqlDbType.Text, MaxAppNameLength).Value = appName;
                 return command;
             }
         }

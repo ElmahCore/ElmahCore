@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+// ReSharper disable MemberCanBeProtected.Global
+// ReSharper disable UnusedMember.Global
+// ReSharper disable VirtualMemberNeverOverridden.Global
+// ReSharper disable UnusedParameter.Global
 
 namespace ElmahCore
 {
@@ -27,10 +31,7 @@ namespace ElmahCore
         /// does the same as <see cref="Log"/>.
         /// </summary>
 
-        public Task<string> LogAsync(Error error)
-        {
-            return LogAsync(error, CancellationToken.None);
-        }
+        public Task<string> LogAsync(Error error) => LogAsync(error, CancellationToken.None);
 
         /// <summary>
         /// When overridden in a subclass, starts a task that asynchronously
@@ -38,31 +39,23 @@ namespace ElmahCore
         /// specifies a <see cref="CancellationToken"/> to use.
         /// </summary>
 
-        public virtual Task<string> LogAsync(Error error, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Log(error));
-        }
-        
+        public virtual Task<string> LogAsync(Error error, CancellationToken cancellationToken) => Task.FromResult(Log(error));
+
 
         /// <summary>
         /// When overridden in a subclass, begins an asynchronous version 
         /// of <see cref="Log"/>.
         /// </summary>
 
-        public virtual IAsyncResult BeginLog(Error error, AsyncCallback asyncCallback, object asyncState)
-        {
-            return LogAsync(error, CancellationToken.None).Apmize(asyncCallback, asyncState);
-        }
+        public virtual IAsyncResult BeginLog(Error error, AsyncCallback asyncCallback, object asyncState) 
+            => LogAsync(error, CancellationToken.None).Apmize(asyncCallback, asyncState);
 
         /// <summary>
         /// When overridden in a subclass, ends an asynchronous version 
         /// of <see cref="Log"/>.
         /// </summary>
 
-        public virtual string EndLog(IAsyncResult asyncResult)
-        {
-            return EndApmizedTask<string>(asyncResult);
-        }
+        public virtual string EndLog(IAsyncResult asyncResult) => EndApmizedTask<string>(asyncResult);
 
         /// <summary>
         /// Retrieves a single application error from log given its 
@@ -77,10 +70,7 @@ namespace ElmahCore
         /// does the same as <see cref="GetError"/>.
         /// </summary>
 
-        public Task<ErrorLogEntry> GetErrorAsync(string id)
-        {
-            return GetErrorAsync(id, CancellationToken.None);
-        }
+        public Task<ErrorLogEntry> GetErrorAsync(string id) => GetErrorAsync(id, CancellationToken.None);
 
         /// <summary>
         /// When overridden in a subclass, starts a task that asynchronously
@@ -88,10 +78,8 @@ namespace ElmahCore
         /// specifies a <see cref="CancellationToken"/> to use.
         /// </summary>
 
-        public virtual Task<ErrorLogEntry> GetErrorAsync(string id, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(GetError(id));
-        }
+        // ReSharper disable once UnusedParameter.Global
+        public virtual Task<ErrorLogEntry> GetErrorAsync(string id, CancellationToken cancellationToken) => Task.FromResult(GetError(id));
 
 
         /// <summary>
@@ -99,27 +87,23 @@ namespace ElmahCore
         /// of <see cref="GetError"/>.
         /// </summary>
 
-        public virtual IAsyncResult BeginGetError(string id, AsyncCallback asyncCallback, object asyncState)
-        {
-            return GetErrorAsync(id, CancellationToken.None).Apmize(asyncCallback, asyncState);
-        }
+        public virtual IAsyncResult BeginGetError(string id, AsyncCallback asyncCallback, object asyncState) 
+            => GetErrorAsync(id, CancellationToken.None).Apmize(asyncCallback, asyncState);
 
         /// <summary>
         /// When overridden in a subclass, ends an asynchronous version 
         /// of <see cref="GetError"/>.
         /// </summary>
 
-        public virtual ErrorLogEntry EndGetError(IAsyncResult asyncResult)
-        {
-            return EndApmizedTask<ErrorLogEntry>(asyncResult);
-        }
+        public virtual ErrorLogEntry EndGetError(IAsyncResult asyncResult) 
+            => EndApmizedTask<ErrorLogEntry>(asyncResult);
 
         /// <summary>
         /// Retrieves a page of application errors from the log in 
         /// descending order of logged time.
         /// </summary>
 
-        public abstract int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList);
+        public abstract int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList);
 
 
         /// <summary>
@@ -128,20 +112,16 @@ namespace ElmahCore
         /// parameter specifies a <see cref="CancellationToken"/> to use.
         /// </summary>
 
-        public Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
-        {
-            return GetErrorsAsync(pageIndex, pageSize, errorEntryList, CancellationToken.None);
-        }
+        public Task<int> GetErrorsAsync(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList) 
+            => GetErrorsAsync(errorIndex, pageSize, errorEntryList, CancellationToken.None);
 
         /// <summary>
         /// When overridden in a subclass, starts a task that asynchronously
         /// does the same as <see cref="GetErrors"/>.
         /// </summary>
 
-        public virtual Task<int> GetErrorsAsync(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(GetErrors(pageIndex, pageSize, errorEntryList));
-        }
+        public virtual Task<int> GetErrorsAsync(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken) 
+            => Task.FromResult(GetErrors(errorIndex, pageSize, errorEntryList));
 
 
         /// <summary>
@@ -149,20 +129,15 @@ namespace ElmahCore
         /// of <see cref="GetErrors"/>.
         /// </summary>
 
-        public virtual IAsyncResult BeginGetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState)
-        {
-            return GetErrorsAsync(pageIndex, pageSize, errorEntryList, CancellationToken.None).Apmize(asyncCallback, asyncState);
-        }
+        public virtual IAsyncResult BeginGetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState) 
+            => GetErrorsAsync(pageIndex, pageSize, errorEntryList, CancellationToken.None).Apmize(asyncCallback, asyncState);
 
         /// <summary>
         /// When overridden in a subclass, ends an asynchronous version 
         /// of <see cref="GetErrors"/>.
         /// </summary>
         
-        public virtual int EndGetErrors(IAsyncResult asyncResult)
-        {
-            return EndApmizedTask<int>(asyncResult);
-        }
+        public virtual int EndGetErrors(IAsyncResult asyncResult) => EndApmizedTask<int>(asyncResult);
 
         /// <summary>
         /// Get the name of this log.
@@ -176,7 +151,7 @@ namespace ElmahCore
         
         public string ApplicationName
         {
-            get => _appName ?? Assembly.GetEntryAssembly().GetName().Name;
+            get => _appName ?? Assembly.GetEntryAssembly()?.GetName().Name;
 
             set
             {
@@ -205,5 +180,23 @@ namespace ElmahCore
             }
         }
 
+        public async Task<int> GetNewErrorsAsync(string id, List<ErrorLogEntry> entries)
+        {
+            const int page = 0;
+            int cnt, count;
+            do
+            {
+                var errors = new List<ErrorLogEntry>();
+                count = await GetErrorsAsync(page, 10, errors);
+                cnt = errors.Count;
+                foreach (var el in errors)
+                {
+                    if (el.Id == id) return count;
+                    entries.Add(el);
+                }
+
+            } while (cnt > 0);
+            return count;
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace ElmahCore.Mvc
 {
 	struct AsyncResultOr<T>
     {
-        public bool HasValue { get { return AsyncResult == null; } }
+        public bool HasValue => AsyncResult == null;
         public T Value { get; set; }
         public IAsyncResult AsyncResult { get; private set; }
 
@@ -36,7 +36,7 @@ namespace ElmahCore.Mvc
 
         public static AsyncResultOr<T> Async(IAsyncResult ar)
         {
-            if (ar == null) throw new ArgumentNullException("ar");
+            if (ar == null) throw new ArgumentNullException(nameof(ar));
             return new AsyncResultOr<T>(ar);
         }
 

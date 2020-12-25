@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security;
-using System.Threading;
 using System.Xml;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
@@ -36,6 +36,7 @@ namespace ElmahCore
         private NameValueCollection _queryString;
         private NameValueCollection _form;
         private NameValueCollection _cookies;
+        private List<ElmahLogMessageEntry> _messageLog = new List<ElmahLogMessageEntry>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Error"/> class.
@@ -69,7 +70,12 @@ namespace ElmahCore
                     _typeName = "HTTP";
                 }
             }
-
+            else
+            {
+                if (context?.Connection?.LocalIpAddress != null && StatusCode == 0)
+                    StatusCode = 500;
+            }
+            
             Exception = baseException;
 
             //
@@ -89,11 +95,8 @@ namespace ElmahCore
 
             _source = baseException?.Source;
             _detail = e?.ToString();
-            _user = context.User?.Identity?.Name ?? string.Empty;
+            _user = context?.User?.Identity?.Name ?? string.Empty;
             Time = DateTime.Now;
-
-
-
 
             //
             // If the HTTP context is available, then capture the
@@ -113,11 +116,12 @@ namespace ElmahCore
                 var request = context.Request;
 
                 //Load Server Variables
-                _serverVariables = GetServerValiables(context);
+                _serverVariables = GetServerVariables(context);
                 _serverVariables.Add("HttpStatusCode", StatusCode.ToString());
                 _queryString = CopyCollection(QueryHelpers.ParseQuery(request.QueryString.Value));
                 _form = CopyCollection(request.HasFormContentType ? request.Form : null);
                 _cookies = CopyCollection(request.Cookies);
+                _messageLog = context.Features.Get<ElmahLogFeature>()?.Log ?? new List<ElmahLogMessageEntry>();
             }
 
             var callerInfo = e?.TryGetCallerInfo() ?? CallerInfo.Empty;
@@ -129,7 +133,7 @@ namespace ElmahCore
             }
         }
 
-        private NameValueCollection GetServerValiables(HttpContext context)
+        private NameValueCollection GetServerVariables(HttpContext context)
         {
             var serverVariables = new NameValueCollection();
             LoadVariables(serverVariables, () => context.Features, "");
@@ -165,7 +169,7 @@ namespace ElmahCore
 		            // ignored
 	            }
 
-	            bool isProcessed = false;
+	            var isProcessed = false;
                 if (value is IEnumerable en && !(en is string))
                 {
 	                if (value is IDictionary<object, object> dic)
@@ -183,10 +187,10 @@ namespace ElmahCore
                             {
                                 isProcessed = true;
                                 var val = valueProp.GetValue(item);
-                                if (val.GetType().ToString() != val.ToString())
+                                if (val != null && val.GetType().ToString() != val.ToString() && !val.GetType().IsSubclassOf(typeof(Stream)))
                                 {
-                                    var prfix2 = prop.Name.StartsWith("RequestHeaders",StringComparison.InvariantCultureIgnoreCase) ? "Header_" : prop.Name + "_";
-                                    serverVariables.Add(prefix + prfix2 + keyProp.GetValue(item), val.ToString());
+                                    var propName = prop.Name.StartsWith("RequestHeaders",StringComparison.InvariantCultureIgnoreCase) ? "Header_" : prop.Name + "_";
+                                    serverVariables.Add(prefix + propName + keyProp.GetValue(item), val.ToString());
                                 }
                             }
                         }
@@ -196,19 +200,22 @@ namespace ElmahCore
 	                    }
                     }
                 }
-                if (!isProcessed)
+
+                if (isProcessed) continue;
+
+                try
                 {
-                    try
-                    {
-                        if (value == null || value.GetType().ToString() != value.ToString()) serverVariables.Add(prefix + prop.Name, value?.ToString());
-                    }
-	                catch
-	                {
-		                // ignored
-	                }
+                    if (value != null && value.GetType().ToString() != value.ToString() && !value.GetType().IsSubclassOf(typeof(Stream))) 
+                        serverVariables.Add(prefix + prop.Name, value?.ToString());
+                }
+                catch
+                {
+                    // ignored
                 }
             }
         }
+
+        public List<ElmahLogMessageEntry> MessageLog => _messageLog;
 
 
 		/// <summary>
@@ -437,9 +444,6 @@ namespace ElmahCore
             return copy;
         }
 
-        private static NameValueCollection FaultIn(ref NameValueCollection collection)
-        {
-	        return collection ?? (collection = new NameValueCollection());
-        }
+        private static NameValueCollection FaultIn(ref NameValueCollection collection) => collection ??= new NameValueCollection();
     }
 }

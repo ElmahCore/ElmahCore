@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.2.7</Version>
+    <Version>2.0.0</Version>
     <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-    <AssemblyVersion>1.2.7.0</AssemblyVersion>
-    <FileVersion>1.2.7.0</FileVersion>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
     <AssemblyName>ElmahCore.Mvc</AssemblyName>
     <PackageId>ElmahCore</PackageId>
     <Authors>ElmahCore</Authors>
@@ -23,18 +23,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="wwwroot\index.html" />
+    <None Remove="wwwroot\js\*.js" />
+    <None Remove="wwwroot\img\*.svg" />
+    <None Remove="wwwroot\css\*.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.29" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <EmbeddedResource Include="Bootstrap.css" />
-    <EmbeddedResource Include="ErrorLog.css" />
+    <EmbeddedResource Include="wwwroot\index.html" />
+    <EmbeddedResource Include="wwwroot\js\*.js" />
+    <EmbeddedResource Include="wwwroot\img\*.svg" />
+    <EmbeddedResource Include="wwwroot\css\*.css" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="System.Text.Json" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>

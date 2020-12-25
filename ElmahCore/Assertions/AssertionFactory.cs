@@ -1,40 +1,14 @@
-#region License, Terms and Author(s)
-//
-// ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-#endregion
-
-//[assembly: Elmah.Scc("$Id: AssertionFactory.cs 640 2009-06-01 17:22:02Z azizatif $")]
-
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace ElmahCore.Assertions
 {
-    #region Imports
-
-	#endregion
 
     /// <summary>
     /// Represents the method that will be responsible for creating an 
@@ -50,70 +24,38 @@ namespace ElmahCore.Assertions
 
     internal static class AssertionFactory
     {
-        public static IAssertion assert_is_null(IContextExpression binding)
-        {
-            return new IsNullAssertion(binding);
-        }
+        public static IAssertion assert_is_null(IContextExpression binding) 
+            => new IsNullAssertion(binding);
 
-        public static IAssertion assert_is_not_null(IContextExpression binding)
-        {
-            return new UnaryNotAssertion(assert_is_null(binding));
-        }
+        public static IAssertion assert_is_not_null(IContextExpression binding) 
+            => new UnaryNotAssertion(assert_is_null(binding));
 
-        public static IAssertion assert_equal(IContextExpression binding, TypeCode type, string value)
-        {
-            return new ComparisonAssertion(ComparisonResults.Equal, binding, type, value);
-        }
+        public static IAssertion assert_equal(IContextExpression binding, TypeCode type, string value) 
+            => new ComparisonAssertion(ComparisonResults.Equal, binding, type, value);
 
-        public static IAssertion assert_not_equal(IContextExpression binding, TypeCode type, string value)
-        {
-            return new UnaryNotAssertion(assert_equal(binding, type, value));
-        }
+        public static IAssertion assert_not_equal(IContextExpression binding, TypeCode type, string value) 
+            => new UnaryNotAssertion(assert_equal(binding, type, value));
 
-        public static IAssertion assert_lesser(IContextExpression binding, TypeCode type, string value)
-        {
-            return new ComparisonAssertion(ComparisonResults.Lesser, binding, type, value);
-        }
+        public static IAssertion assert_lesser(IContextExpression binding, TypeCode type, string value) 
+            => new ComparisonAssertion(ComparisonResults.Lesser, binding, type, value);
 
-        public static IAssertion assert_lesser_or_equal(IContextExpression binding, TypeCode type, string value)
-        {
-            return new ComparisonAssertion(ComparisonResults.LesserOrEqual, binding, type, value);
-        }
+        public static IAssertion assert_lesser_or_equal(IContextExpression binding, TypeCode type, string value) 
+            => new ComparisonAssertion(ComparisonResults.LesserOrEqual, binding, type, value);
 
-        public static IAssertion assert_greater(IContextExpression binding, TypeCode type, string value)
-        {
-            return new ComparisonAssertion(ComparisonResults.Greater, binding, type, value);
-        }
+        public static IAssertion assert_greater(IContextExpression binding, TypeCode type, string value) 
+            => new ComparisonAssertion(ComparisonResults.Greater, binding, type, value);
 
-        public static IAssertion assert_greater_or_equal(IContextExpression binding, TypeCode type, string value)
-        {
-            return new ComparisonAssertion(ComparisonResults.GreaterOrEqual, binding, type, value);
-        }
+        public static IAssertion assert_greater_or_equal(IContextExpression binding, TypeCode type, string value) => new ComparisonAssertion(ComparisonResults.GreaterOrEqual, binding, type, value);
 
-        public static IAssertion assert_and(XmlElement config)
-        {
-            return LogicalAssertion.LogicalAnd(Create(config.ChildNodes));
-        }
+        public static IAssertion assert_and(XmlElement config) => LogicalAssertion.LogicalAnd(Create(config.ChildNodes));
 
-        public static IAssertion assert_or(XmlElement config)
-        {
-            return LogicalAssertion.LogicalOr(Create(config.ChildNodes));
-        }
+        public static IAssertion assert_or(XmlElement config) => LogicalAssertion.LogicalOr(Create(config.ChildNodes));
 
-        public static IAssertion assert_not(XmlElement config)
-        {
-            return LogicalAssertion.LogicalNot(Create(config.ChildNodes));
-        }
+        public static IAssertion assert_not(XmlElement config) => LogicalAssertion.LogicalNot(Create(config.ChildNodes));
 
-        public static IAssertion assert_is_type(IContextExpression binding, Type type)
-        {
-            return new TypeAssertion(binding, type, /* byCompatibility */ false);
-        }
+        public static IAssertion assert_is_type(IContextExpression binding, Type type) => new TypeAssertion(binding, type, /* byCompatibility */ false);
 
-        public static IAssertion assert_is_type_compatible(IContextExpression binding, Type type)
-        {
-            return new TypeAssertion(binding, type, /* byCompatibility */ true);
-        }
+        public static IAssertion assert_is_type_compatible(IContextExpression binding, Type type) => new TypeAssertion(binding, type, /* byCompatibility */ true);
 
         public static IAssertion assert_regex(IContextExpression binding, string pattern, bool caseSensitive, bool dontCompile)
         {
@@ -144,7 +86,7 @@ namespace ElmahCore.Assertions
         public static IAssertion Create(XmlElement config)
         {
             if (config == null)
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
 
             try
             {
@@ -159,7 +101,7 @@ namespace ElmahCore.Assertions
         public static IAssertion[] Create(XmlNodeList nodes)
         {
             if (nodes == null) 
-                throw new ArgumentNullException("nodes");
+                throw new ArgumentNullException(nameof(nodes));
 
             //
             // First count the number of elements, which will be used to
@@ -186,7 +128,7 @@ namespace ElmahCore.Assertions
                 if (nodeType != XmlNodeType.Element)
                 {
                     throw new Exception(
-                        string.Format("Unexpected type of node ({0}).", nodeType.ToString()));
+                        $"Unexpected type of node ({nodeType.ToString()}).");
                 }
 
                 elementCount++;
@@ -224,13 +166,11 @@ namespace ElmahCore.Assertions
 
             if (xmlns.Length > 0)
             {
-                string assemblyName, ns;
-
-                if (!DecodeClrTypeNamespaceFromXmlNamespace(xmlns, out ns, out assemblyName) 
+                if (!DecodeClrTypeNamespaceFromXmlNamespace(xmlns, out var ns, out var assemblyName) 
                     || ns.Length == 0 || assemblyName.Length == 0)
                 {
-                    throw new Exception(string.Format(
-                        "Error decoding CLR type namespace and assembly from the XML namespace '{0}'.", xmlns));
+                    throw new Exception(
+                        $"Error decoding CLR type namespace and assembly from the XML namespace '{xmlns}'.");
                 }
                 
                 var assembly = Assembly.Load(assemblyName);
@@ -244,10 +184,8 @@ namespace ElmahCore.Assertions
             var method = factoryType.GetMethod(name, BindingFlags.Public | BindingFlags.Static);
             if (method == null)
             {
-                throw new MissingMemberException(string.Format(
-                    "{0} does not have a method named {1}. " +
-                    "Ensure that the method is named correctly and that it is public and static.",
-                    factoryType, name));
+                throw new MissingMemberException($"{factoryType} does not have a method named {name}. " +
+                                                 "Ensure that the method is named correctly and that it is public and static.");
             }
 
             var parameters = method.GetParameters();
@@ -277,7 +215,7 @@ namespace ElmahCore.Assertions
             return args;
         }
 
-        private static readonly string[] Truths = new[] { "true", "yes", "on", "1" }; // TODO Remove duplication with SecurityConfiguration
+        private static readonly string[] Truths = { "true", "yes", "on", "1" }; // TODO Remove duplication with SecurityConfiguration
         
         private static object ParseArgument(ParameterInfo parameter, XmlElement config) 
         {

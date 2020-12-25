@@ -97,16 +97,16 @@ namespace ElmahCore.MySql
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override int GetErrors(int pageIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex", pageIndex, null);
+            if (errorIndex < 0) throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
 
             using (var connection = new MySqlConnection(ConnectionString))
             {
                 connection.Open();
 
-                using (var command = CommandExtension.GetErrorsXml(ApplicationName, pageIndex, pageSize))
+                using (var command = CommandExtension.GetErrorsXml(ApplicationName, errorIndex, pageSize))
                 {
                     command.Connection = connection;
 

@@ -1,18 +1,14 @@
 using ElmahCore.DemoCore5.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ElmahCore.Mvc;
+using ElmahCore.Sql;
+using Microsoft.Extensions.Logging;
 
 namespace ElmahCore.DemoCore5
 {
@@ -36,11 +32,14 @@ namespace ElmahCore.DemoCore5
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddElmah(options =>
+            services.AddElmah<SqlErrorLog>(options =>
+            //services.AddElmah(options =>
             {
-                //options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
+                //options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
                 options.Path = @"elmah";
-            });
+                options.ConnectionString = "Server=.;Database=elmahtest;Trusted_Connection=True;";
+            })
+            /*.SetElmahLogLevel(LogLevel.Trace)*/;
 
             services.AddControllersWithViews();
         }

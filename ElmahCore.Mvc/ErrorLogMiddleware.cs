@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using ElmahCore.Assertions;
-using ElmahCore.Mvc.About;
-using ElmahCore.Mvc.ErrorDetail;
 using ElmahCore.Mvc.Handlers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -17,16 +13,17 @@ using Microsoft.Extensions.Options;
 
 namespace ElmahCore.Mvc
 {
-    internal class ErrorLogMiddleware
+    internal sealed class ErrorLogMiddleware
     {
         private readonly ErrorLog _errorLog;
         private readonly IEnumerable<IErrorNotifier> _notifiers;
         public event ExceptionFilterEventHandler Filtering;
+        // ReSharper disable once EventNeverSubscribedTo.Global
         public event ErrorLoggedEventHandler Logged;
         private readonly string _elmahRoot = @"/elmah";
         private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
         private readonly ILogger _logger;
-        private readonly Func<HttpContext, bool> _сheckPermissionAction = context => true;
+        private readonly Func<HttpContext, bool> _checkPermissionAction = context => true;
         private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
@@ -44,7 +41,7 @@ namespace ElmahCore.Mvc
                 return;
             var options = elmahOptions.Value;
 
-	        _сheckPermissionAction = options.PermissionCheck;
+	        _checkPermissionAction = options.PermissionCheck;
             _onError = options.Error;
 
             //Notifiers
@@ -121,17 +118,23 @@ namespace ElmahCore.Mvc
         {
             try
             {
+                context.Features.Set(new ElmahLogFeature());
 
-                if (context.Request.Path.Value.Equals(_elmahRoot,StringComparison.InvariantCultureIgnoreCase) 
-                    || context.Request.Path.Value.StartsWith(_elmahRoot+"/", StringComparison.InvariantCultureIgnoreCase))
+                var sourcePath = context.Request.Path.Value;
+                if (sourcePath.Equals(_elmahRoot,StringComparison.InvariantCultureIgnoreCase) 
+                    || sourcePath.StartsWith(_elmahRoot+"/", StringComparison.InvariantCultureIgnoreCase))
                 {
 
-		            if (!_сheckPermissionAction(context))
+		            if (!_checkPermissionAction(context))
 		            {
 			            await context.ChallengeAsync();
 			            return;
 		            }
-                    await ProcessElamhRequest(context);
+
+                    var path = sourcePath.Substring(_elmahRoot.Length, sourcePath.Length - _elmahRoot.Length);
+                    if (path.StartsWith("/"))  path = path.Substring(1);
+                    if (path.Contains('?'))  path = path.Substring(0, path.IndexOf('?'));
+                    await ProcessElmahRequest(context, path);
                     return;
                 }
 
@@ -156,23 +159,22 @@ namespace ElmahCore.Mvc
             }
         }
 
-        private async Task ProcessElamhRequest(HttpContext context)
+        private async Task ProcessElmahRequest(HttpContext context, string resource)
         {
             try
             {
-                var resource = context.Request.Path.Value.Split('/').LastOrDefault();
+                if (resource.StartsWith("api"))
+                {
+                    await ErrorApiHandler.ProcessRequest(context, _errorLog, resource);
+                    return;
+                }
                 switch (resource)
                 {
-                    case "detail":
-                        await ProcessTemplate<ErrorDetailPage>(context, _errorLog, "text/html");
-                        break;
-                    case "html":
-                        break;
                     case "xml":
-                        ErrorXmlHandler.ProcessRequest(context, _errorLog);
+                        await ErrorXmlHandler.ProcessRequest(context, _errorLog);
                         break;
                     case "json":
-                        ErrorJsonHandler.ProcessRequest(context, _errorLog);
+                        await ErrorJsonHandler.ProcessRequest(context, _errorLog);
                         break;
                     case "rss":
                         await ErrorRssHandler.ProcessRequest(context, _errorLog, _elmahRoot);
@@ -183,18 +185,10 @@ namespace ElmahCore.Mvc
                     case "download":
                         await ErrorLogDownloadHandler.ProcessRequestAsync(_errorLog, context);
                         return;
-                    case "stylesheet":
-                        await StyleSheetHelper.LoadStyleSheets(context, StyleSheetHelper.StyleSheetResourceNames, "text/css",
-                            Encoding.UTF8,
-                            true);
-                        break;
                     case "test":
                         throw new TestException();
-                    case "about":
-                        await ProcessTemplate<AboutPage>(context, _errorLog, "text/html");
-                        break;
                     default:
-                        await ProcessTemplate<ErrorLogPage>(context, _errorLog, "text/html");
+                        await ErrorResourceHandler.ProcessRequest(context, resource, _elmahRoot);
                         break;
                 }
             }
@@ -209,16 +203,6 @@ namespace ElmahCore.Mvc
         }
 
         
-        async Task ProcessTemplate<T>(HttpContext context, ErrorLog error, string contentType) where T : WebTemplateBase, new()
-        {
-            var template = new T { Context = context, ErrorLog = error, ElmahRoot = _elmahRoot};
-
-            context.Response.ContentType = contentType;
-
-            await context.Response.WriteAsync(template.TransformText());
-        }
-
-
         internal async Task LogException(Exception e, HttpContext context, Func<HttpContext, Error, Task> onError)
         {
             if (e == null)
@@ -242,15 +226,15 @@ namespace ElmahCore.Mvc
                         return;
                 }
 
-            //
-            // Log away...
-            //
+                //
+                // AddMessage away...
+                //
 
                 var error = new Error(e, context);
                 await onError(context, error);
-                var log = GetErrorLog(context);
+                var log = _errorLog;
                 error.ApplicationName = log.ApplicationName;
-                var id = log.Log(error);
+                var id = await log.LogAsync(error);
                 entry = new ErrorLogEntry(log, id, error);
 
                 //Send notification
@@ -279,20 +263,9 @@ namespace ElmahCore.Mvc
         }
 
         /// <summary>
-        /// Gets the <see cref="ErrorLog"/> instance to which the module
-        /// will log exceptions.
-        /// </summary>
-
-        protected virtual ErrorLog GetErrorLog(HttpContext context)
-        {
-            return _errorLog;
-        }
-
-        /// <summary>
         /// Raises the <see cref="Logged"/> event.
         /// </summary>
-
-        protected virtual void OnLogged(ErrorLoggedEventArgs args)
+        private void OnLogged(ErrorLoggedEventArgs args)
         {
             Logged?.Invoke(this, args);
         }
@@ -300,8 +273,7 @@ namespace ElmahCore.Mvc
         /// <summary>
         /// Raises the <see cref="Filtering"/> event.
         /// </summary>
-
-        protected virtual void OnFiltering(ExceptionFilterEventArgs args)
+        private void OnFiltering(ExceptionFilterEventArgs args)
         {
             Filtering?.Invoke(this, args);
         }

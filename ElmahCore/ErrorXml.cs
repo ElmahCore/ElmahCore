@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Xml;
+using Microsoft.Extensions.Logging;
 
 namespace ElmahCore
 {
@@ -116,19 +119,39 @@ namespace ElmahCore
 
                 NameValueCollection collection;
 
-                switch (reader.Name)
+                if (reader.Name == "messageLog")
                 {
-                    case "serverVariables" : collection = error.ServerVariables; break;
-                    case "queryString"     : collection = error.QueryString; break;
-                    case "form"            : collection = error.Form; break;
-                    case "cookies"         : collection = error.Cookies; break;
-                    default                : reader.Skip(); continue;
+                    if (reader.IsEmptyElement)
+                        reader.Read();
+                    else
+                        UpcodeToLog(reader, error.MessageLog);
                 }
-
-                if (reader.IsEmptyElement)
-                    reader.Read();
                 else
-                    UpcodeTo(reader, collection);
+                {
+
+                    switch (reader.Name)
+                    {
+                        case "serverVariables":
+                            collection = error.ServerVariables;
+                            break;
+                        case "queryString":
+                            collection = error.QueryString;
+                            break;
+                        case "form":
+                            collection = error.Form;
+                            break;
+                        case "cookies":
+                            collection = error.Cookies;
+                            break;
+                        default:
+                            reader.Skip();
+                            continue;
+                    }
+                    if (reader.IsEmptyElement)
+                        reader.Read();
+                    else
+                        UpcodeTo(reader, collection);
+                }
             }
         }
 
@@ -141,19 +164,17 @@ namespace ElmahCore
         {
             var sw = new StringWriter();
 
-            using (var writer = XmlWriter.Create(sw, new XmlWriterSettings
+            using var writer = XmlWriter.Create(sw, new XmlWriterSettings
             {
                 Indent = true,
                 NewLineOnAttributes = true,
                 CheckCharacters = false,
                 OmitXmlDeclaration = true, // see issue #120: http://code.google.com/p/elmah/issues/detail?id=120
-            }))
-            {
-                writer.WriteStartElement("error");
-                Encode(error, writer);
-                writer.WriteEndElement();
-                writer.Flush();
-            }
+            });
+            writer.WriteStartElement("error");
+            Encode(error, writer);
+            writer.WriteEndElement();
+            writer.Flush();
 
             return sw.ToString();
         }
@@ -212,6 +233,27 @@ namespace ElmahCore
             WriteCollection(writer, "queryString", error.QueryString);
             WriteCollection(writer, "form", error.Form);
             WriteCollection(writer, "cookies", error.Cookies);
+            WriteMessageLog(writer, "messageLog", error.MessageLog);
+        }
+
+        private static void WriteMessageLog(XmlWriter writer, string name, IEnumerable<ElmahLogMessageEntry> log)
+        {
+            if (log == null ) return;
+            
+            var list = log.ToList();
+            if (list.Count == 0) return;
+            writer.WriteStartElement(name);
+            foreach (var entry in list)
+            {
+                writer.WriteStartElement("message");
+                WriteXmlAttribute(writer, "level", entry.Level.ToString());
+                WriteXmlAttribute(writer, "exception", entry.Exception);
+                WriteXmlAttribute(writer, "time-stamp", XmlConvert.ToString(entry.TimeStamp.ToUniversalTime(), @"yyyy-MM-dd\THH:mm:ss.fffffff\Z"));
+                WriteXmlAttribute(writer, "scope", entry.Scope);
+                WriteXmlAttribute(writer, "message", entry.Message);
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
         }
 
         private static void WriteCollection(XmlWriter writer, string name, NameValueCollection collection)
@@ -352,6 +394,57 @@ namespace ElmahCore
             }
 
             reader.ReadEndElement();
+        }
+        private static void UpcodeToLog(XmlReader reader, List<ElmahLogMessageEntry> log)
+        {
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (log == null) throw new ArgumentNullException(nameof(log));
+
+            Debug.Assert(!reader.IsEmptyElement);
+            reader.Read();
+
+            //
+            // Add entries into the collection as <item> elements
+            // with child <value> elements are found.
+            //
+            DateTime LoadTime(string text) =>
+                text.Length == 0
+                    ? new DateTime()
+                    : XmlConvert.ToDateTime(text, XmlDateTimeSerializationMode.Local);
+
+            while (reader.NodeType != XmlNodeType.EndElement)
+            {
+                if (reader.IsStartElement("message"))
+                {
+
+                    var entry = new ElmahLogMessageEntry
+                    {
+                        Level = GetLogLevel(reader.GetAttribute("level")),
+                        Exception = reader.GetAttribute("exception"),
+                        TimeStamp = LoadTime(reader.GetAttribute("time-stamp") ?? string.Empty),
+                        Scope = reader.GetAttribute("scope"),
+                        Message = reader.GetAttribute("message")
+                    };
+
+                    log.Add(entry);
+
+                    reader.Read(); // <item>
+                }
+                else
+                {
+                    reader.Skip();
+                }
+
+                reader.MoveToContent();
+            }
+
+            reader.ReadEndElement();
+        }
+
+        static LogLevel GetLogLevel(string level) 
+        {
+            Enum.TryParse(level, out LogLevel result);
+            return result;
         }
     }
 }

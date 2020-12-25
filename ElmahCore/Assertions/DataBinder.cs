@@ -1,28 +1,3 @@
-#region License, Terms and Author(s)
-//
-// ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-#endregion
-
-//[assembly: Elmah.Scc("$Id: DataBinder.cs 623 2009-05-30 00:46:46Z azizatif $")]
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,13 +8,11 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace ElmahCore.Assertions
 {
-    #region Imports
-
-	#endregion
-
     /// <summary>
     /// Provides data expression evaluation facilites similar to 
     /// <see cref="DataBinder"/> in ASP.NET.
@@ -47,35 +20,24 @@ namespace ElmahCore.Assertions
 
     internal static class DataBinder
     {
-        public static object Eval(object container, string expression)
-        {
-            return Eval(container, expression, false);
-        }
+        public static object Eval(object container, string expression) => Eval(container, expression, false);
 
-        public static object Eval(object container, string expression, bool strict)
-        {
-            return Compile(expression, strict)(container);
-        }
+        public static object Eval(object container, string expression, bool strict) => Compile(expression, strict)(container);
 
-        public static Func<object, object> Compile(string expression)
-        {
-            return Compile(expression, false);
-        }
+        public static Func<object, object> Compile(string expression) => Compile(expression, false);
 
-        public static Func<object, object> Compile(string expression, bool strict)
-        {
-            return obj => Parse(expression, strict).Aggregate(obj, (node, b) => b(node));
-        }
+        public static Func<object, object> Compile(string expression, bool strict) => obj => Parse(expression, strict).Aggregate(obj, (node, b) => b(node));
 
-        public static IEnumerable<Func<object, object>> Parse(string expression)
-        {
-            return Parse(expression, false);
-        }
+        public static IEnumerable<Func<object, object>> Parse(string expression) => Parse(expression, false);
 
         public static IEnumerable<Func<object, object>> Parse(string expression, bool strict)
         {
-            var mp = strict ? (obj, name)  => { throw new DataBindingException(string.Format(@"DataBinding: '{0}' does not contain a property with the name '{1}'.", obj.GetType(), name)); } : (Func<object, string, object>) null;
-            var mi = strict ? (obj, index) => { throw new DataBindingException(string.Format(@"DataBinding: '{0}' does not allow indexed access.", obj.GetType())); } : (Func<object, object, object>)null;
+            var mp = strict ? (obj, name)  => throw new DataBindingException(
+                    $@"DataBinding: '{obj.GetType()}' does not contain a property with the name '{name}'.")
+                : (Func<object, string, object>) null;
+            var mi = strict ? (obj, index) => throw new DataBindingException(
+                    $@"DataBinding: '{obj.GetType()}' does not allow indexed access.")
+                : (Func<object, object, object>)null;
 
             var binders = Parse(expression, p => PassThru((object obj) => GetProperty(obj, p, mp)),
                                             i => PassThru((object obj) => GetIndex(obj, i, mi)));
@@ -89,46 +51,37 @@ namespace ElmahCore.Assertions
 
         static Func<T, TResult> PassThru<T, TResult>(Func<T, TResult> f) { return f; }
 
-        static Func<object, object> Optionalize(Func<object, object> binder)
-        {
-            return obj => obj == null || Convert.IsDBNull(obj) ? null : binder(obj);
-        }
+        static Func<object, object> Optionalize(Func<object, object> binder) => obj => obj == null || Convert.IsDBNull(obj) ? null : binder(obj);
 
         static object GetProperty(object obj, string name, Func<object, string, object> missingSelector)
         {
-            if (obj == null) throw new ArgumentNullException("obj");
-            if (name == null) throw new ArgumentNullException("name");
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (name == null) throw new ArgumentNullException(nameof(name));
         
             var property = TypeDescriptor.GetProperties(obj).Find(name, true);
             return property != null 
                  ? property.GetValue(obj) 
-                 : missingSelector != null 
-                 ? missingSelector(obj, name) 
-                 : null;
+                 : missingSelector?.Invoke(obj, name);
         }
 
         static object GetIndex(object obj, object index, Func<object, object, object> missingSelector)
         {
-            if (obj == null) throw new ArgumentNullException("obj");
-            if (index == null) throw new ArgumentNullException("index");
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (index == null) throw new ArgumentNullException(nameof(index));
 
             var isIntegralIndex = index is int;
-        
-            var array = obj as Array;
-            if (array != null && isIntegralIndex)
+
+            if (obj is Array array && isIntegralIndex)
                 return array.GetValue((int) index);
-        
-            var list = obj as IList;
-            if (list != null && isIntegralIndex)
+
+            if (obj is IList list && isIntegralIndex)
                 return list[(int) index];
 
             var property = FindIndexerProperty(obj.GetType(), index.GetType());
 
             return property != null 
                  ? property.GetValue(obj, new[] { index })
-                 : missingSelector != null 
-                 ? missingSelector(obj, index)
-                 : null;
+                 : missingSelector?.Invoke(obj, index);
         }
 
         // TODO Consider as Type extension method
@@ -157,8 +110,8 @@ namespace ElmahCore.Assertions
             Func<string, T> propertySelector, 
             Func<object, T> indexSelector)
         {
-            if (propertySelector == null) throw new ArgumentNullException("propertySelector");
-            if (indexSelector == null) throw new ArgumentNullException("indexSelector");
+            if (propertySelector == null) throw new ArgumentNullException(nameof(propertySelector));
+            if (indexSelector == null) throw new ArgumentNullException(nameof(indexSelector));
 
             expression = (expression ?? string.Empty).Trim();
             if (expression.Length == 0)
@@ -180,8 +133,8 @@ namespace ElmahCore.Assertions
                 select text[0] == '\'' || text[0] == '\"'
                      ? (object) text.Substring(1, text.Length - 2)
                      : int.Parse(text, NumberStyles.Integer, CultureInfo.InvariantCulture);
-            
-            using (var i = indexes.GetEnumerator())
+
+            using var i = indexes.GetEnumerator();
             foreach (var a in accessors)
             {
                 if (a.IsIndexer)
@@ -209,6 +162,7 @@ namespace ElmahCore.Assertions
     {
         public DataBindingException() {}
         public DataBindingException(string message) :
+            // ReSharper disable once IntroduceOptionalParameters.Global
             this(message, null) {}
         public DataBindingException(string message, Exception inner) :
             base(message, inner) {}

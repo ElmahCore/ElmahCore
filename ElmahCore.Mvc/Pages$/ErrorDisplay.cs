@@ -92,7 +92,7 @@ namespace ElmahCore.Mvc
         public static string HumaneExceptionErrorType(Error error)
         {
             if (error == null)
-                throw new System.ArgumentNullException("error");
+                throw new System.ArgumentNullException(nameof(error));
 
             return HumaneExceptionErrorType(error.Type);
         }

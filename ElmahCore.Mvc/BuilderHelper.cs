@@ -1,6 +1,9 @@
 using System;
+using ElmahCore.Mvc.Logger;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ElmahCore.Mvc
 {
@@ -25,7 +28,20 @@ namespace ElmahCore.Mvc
         public static IServiceCollection AddElmah<T>(this IServiceCollection services) where T : ErrorLog
         {
             services.AddSingleton<ErrorLogMiddleware>();
+            services.AddHttpContextAccessor();
+            services.AddSingleton<ILoggerProvider>(provider => 
+                new ElmahLoggerProvider(provider.GetService<IHttpContextAccessor>()));
+
             return services.AddSingleton<ErrorLog, T>();
+        }
+
+        public static IServiceCollection SetElmahLogLevel(this IServiceCollection services, LogLevel level)
+        {
+            services.AddLogging(builder =>
+            {
+                builder.AddFilter<ElmahLoggerProvider>(l =>  l >= level);
+            });
+            return services;
         }
 
         public static IServiceCollection AddElmah(this IServiceCollection services, Action<ElmahOptions> setupAction)

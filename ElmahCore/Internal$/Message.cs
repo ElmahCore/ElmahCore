@@ -5,11 +5,7 @@ using System.Threading;
 
 namespace ElmahCore
 {
-    #region Imports
-
-    #endregion
-
-    internal class Message<TInput, TOutput>
+    internal sealed class Message<TInput, TOutput>
     {
         sealed class State
         {
@@ -25,10 +21,8 @@ namespace ElmahCore
 
         private State _state = new State(null, null);
 
-        bool TryUpdateState(State replacement, State current)
-        {
-            return current == Interlocked.CompareExchange(ref _state, replacement, current);
-        }
+        bool TryUpdateState(State replacement, State current) 
+            => current == Interlocked.CompareExchange(ref _state, replacement, current);
 
         public IDisposable PushHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
         {
@@ -56,12 +50,9 @@ namespace ElmahCore
             }
         }
 
-        public TOutput Send(TInput input)
-        {
-            return Send(null, input);
-        }
+        public TOutput Send(TInput input) => Send(null, input);
 
-        public virtual TOutput Send(object sender, TInput input)
+        private TOutput Send(object sender, TInput input)
         {
             Func<object, TInput, TOutput> handler = null;
             for (var updated = false; !updated; )
@@ -72,13 +63,13 @@ namespace ElmahCore
                     break;
                 var binder = _state.Binder;
                 if (binder == null)
-                    return default(TOutput);
+                    return default;
                 var delegates = binder.GetInvocationList();
                 var binders =
                     from Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> d
                         in delegates
                     select d;
-                handler = binders.Aggregate((Func<object, TInput, TOutput>) delegate { return default(TOutput); }, (next, b) => b(next));
+                handler = binders.Aggregate((Func<object, TInput, TOutput>) delegate { return default; }, (next, b) => b(next));
                 updated = TryUpdateState(new State(state.Binder, handler), state);
             }
 

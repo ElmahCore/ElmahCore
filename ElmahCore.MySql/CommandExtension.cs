@@ -107,7 +107,7 @@ namespace ElmahCore.MySql
             return command;
         }
 
-        public static MySqlCommand GetErrorsXml(string appName, int pageIndex, int pageSize)
+        public static MySqlCommand GetErrorsXml(string appName, int errorIndex, int pageSize)
         {
             var command = new MySqlCommand();
             command.CommandText =
@@ -120,7 +120,7 @@ namespace ElmahCore.MySql
                 OFFSET @offset
             ";
 
-            var offset = pageIndex * pageSize;
+            var offset = errorIndex;
             command.Parameters.Add("@Application", MySqlDbType.String).Value= appName;
             command.Parameters.Add("@offset", MySqlDbType.Int32).Value = offset;
             command.Parameters.Add("@limit", MySqlDbType.Int32).Value = pageSize;

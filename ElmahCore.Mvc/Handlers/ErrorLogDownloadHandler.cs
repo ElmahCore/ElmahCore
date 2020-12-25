@@ -1,28 +1,3 @@
-#region License, Terms and Author(s)
-//
-// ELMAH - Error Logging Modules and Handlers for ASP.NET
-// Copyright (c) 2004-9 Atif Aziz. All rights reserved.
-//
-//  Author(s):
-//
-//      Atif Aziz, http://www.raboof.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-#endregion
-
-//[assembly: Elmah.Scc("$Id: ErrorLogDownloadHandler.cs 923 2011-12-23 22:02:10Z azizatif $")]
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,28 +10,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore.Mvc.Handlers
 {
-    #region Imports
-
-#if !NET_3_5 && !NET_4_0
-#endif
-
-	#endregion
 
     static class ErrorLogDownloadHandler
     {
-        private static readonly TimeSpan BeatPollInterval = TimeSpan.FromSeconds(3);
-
         private const int PageSize = 100;
-
-        public static IEnumerable<AsyncResultOr<string>> ProcessRequest(ErrorLog errorLog,
-            HttpContext context, 
-            Func<AsyncCallback> getAsyncCallback)
-        {
-            if (context == null) throw new ArgumentNullException("context");
-            if (getAsyncCallback == null) throw new ArgumentNullException("getAsyncCallback");
-
-            return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequest(errorLog, context, getAsyncCallback, format, maxDownloadCount));
-        }
 
         private static T ProcessRequestPrelude<T>(HttpContext context, Func<Format, int, T> resultor)
         {
@@ -86,11 +43,9 @@ namespace ElmahCore.Mvc.Handlers
             return resultor(format, maxDownloadCount);
         }
 
-        #if !NET_3_5 && !NET_4_0
-
         public static Task ProcessRequestAsync(ErrorLog errorLog, HttpContext context)
         {
-            if (context == null) throw new ArgumentNullException("context");
+            if (context == null) throw new ArgumentNullException(nameof(context));
             return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequestAsync(errorLog,context, format, maxDownloadCount));
         }
 
@@ -148,86 +103,15 @@ namespace ElmahCore.Mvc.Handlers
             }
         }
 
-        #endif // !NET_3_5 && !NET_4_0
-
-        private static IEnumerable<AsyncResultOr<string>> ProcessRequest(ErrorLog log, HttpContext context, Func<AsyncCallback> getAsyncCallback, Format format, int maxDownloadCount)
-        {
-            var response = context.Response;
-
-            foreach (var text in format.Header())
-                yield return AsyncResultOr.Value(text);
-
-            var lastBeatTime = DateTime.Now;
-            var errorEntryList = new List<ErrorLogEntry>(PageSize);
-            var downloadCount = 0;
-
-            for (var pageIndex = 0; ; pageIndex++)
-            {
-                var ar = log.BeginGetErrors(pageIndex, PageSize, errorEntryList,
-                                            getAsyncCallback(), null);
-                yield return AsyncResultOr.InsteadOf<string>(ar);
-
-                var total = log.EndGetErrors(ar);
-                var count = errorEntryList.Count;
-
-                if (maxDownloadCount > 0)
-                {
-                    var remaining = maxDownloadCount - (downloadCount + count);
-                    if (remaining < 0)
-                        count += remaining;
-                }
-
-                foreach (var entry in format.Entries(errorEntryList, 0, count, total))
-                    yield return AsyncResultOr.Value(entry);
-
-                downloadCount += count;
-
-                response.Body.Flush();
-
-                //
-                // Done if either the end of the list (no more errors found) or
-                // the requested limit has been reached.
-                //
-
-                if (count == 0 || downloadCount == maxDownloadCount)
-                {
-                    if (count > 0)
-                    {
-                        foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
-                            yield return AsyncResultOr.Value(entry);
-                    }
-                    break;
-                }
-
-                //
-                // Poll whether the client is still connected so data is not
-                // unnecessarily sent to an abandoned connection. This check is 
-                // only performed at certain intervals.
-                //
-
-                if (DateTime.Now - lastBeatTime > BeatPollInterval)
-                {
-                    lastBeatTime = DateTime.Now;
-                }
-
-                //
-                // Fetch next page of results.
-                //
-
-                errorEntryList.Clear();
-            }
-        }
-
         private static Format GetFormat(HttpContext context, string format)
         {
             Debug.Assert(context != null);
             switch (format)
             {
-                case "csv": return new CsvFormat(context);
                 case "jsonp": return new JsonPaddingFormat(context);
                 case "html-jsonp": return new JsonPaddingFormat(context, /* wrapped */ true);
                 default:
-                    throw new Exception("Request log format is not supported.");
+                    return new CsvFormat(context);
             }
         }
 
@@ -241,7 +125,7 @@ namespace ElmahCore.Mvc.Handlers
                 _context = context;
             }
 
-            protected HttpContext Context { get { return _context; } }
+            protected HttpContext Context => _context;
 
             public virtual IEnumerable<string> Header() { yield break; }
 
@@ -367,7 +251,7 @@ namespace ElmahCore.Mvc.Handlers
                     yield return @"
                     <html xmlns='http://www.w3.org/1999/xhtml'>
                     <head>
-                        <title>Error Log in HTML-Wrapped JSONP Format</title>
+                        <title>Error AddMessage in HTML-Wrapped JSONP Format</title>
                     </head>
                     <body>
                         <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>";
@@ -415,7 +299,7 @@ namespace ElmahCore.Mvc.Handlers
                                     .Member("type").String("text/html")
                                     .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
                                 .Object()
-                                    .Member("type").String("aplication/json")
+                                    .Member("type").String("application/json")
                                     .Member("href").String(string.Format(urlTemplate, "json")).Pop()
                                 .Object()
                                     .Member("type").String("application/xml")

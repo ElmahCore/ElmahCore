@@ -258,9 +258,6 @@ WriteLiteral("        <p>");
 
 
             
-            //#line 71 "..\..\ErrorMailHtmlPage.cshtml"
-       Write(RenderPartial<PoweredBy.PoweredBy>());
-
             
             //#line default
             //#line hidden

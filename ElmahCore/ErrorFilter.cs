@@ -12,8 +12,10 @@ namespace ElmahCore
     /// </summary>
 
     // ReSharper disable once UnusedMember.Global
+    // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     internal class ErrorFilter : IErrorFilter, INotifierProvider
     {
+        // ReSharper disable once MemberCanBeProtected.Global
         public virtual IAssertion Assertion { get; } = StaticAssertion.False;
 
         internal ErrorFilter(IAssertion assertion, List<string> notList)

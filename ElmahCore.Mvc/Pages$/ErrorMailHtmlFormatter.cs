@@ -46,10 +46,7 @@ namespace ElmahCore.Mvc
         /// by this <see cref="ErrorTextFormatter"/> implementation.
         /// </summary>
 
-        public override string MimeType
-        { 
-            get { return "text/html"; }
-        }
+        public override string MimeType => "text/html";
 
         /// <summary>
         /// Formats a complete HTML document describing the given 
@@ -57,8 +54,8 @@ namespace ElmahCore.Mvc
         /// </summary>
         public override void Format(TextWriter writer, Error error)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
-            if (error == null) throw new ArgumentNullException("error");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            if (error == null) throw new ArgumentNullException(nameof(error));
 
             var page = new ErrorMailHtmlPage(error);
             writer.Write(page.TransformText());

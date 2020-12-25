@@ -29,9 +29,6 @@ namespace ElmahCore
                                && 0 == FilePath.Length
                                && 0 == LineNumber;
 
-	    public override string ToString()
-        {
-            return $"{(MemberName ?? "<?member>")}@{(FilePath ?? "<?filename>")}:{LineNumber}";
-        }
+	    public override string ToString() => $"{(MemberName ?? "<?member>")}@{(FilePath ?? "<?filename>")}:{LineNumber}";
     }
 }
