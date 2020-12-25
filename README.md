@@ -3,6 +3,8 @@ This project is licensed under the terms of the Apache license 2.0.
 # Using ElmahCore
 ELMAH for Net.Standard and Net.Core 
 
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-new-ui.png)
+
 Add nuget package **elmahcore**
 
 ## Simple usage
@@ -74,7 +76,7 @@ Since version 2.0 ElmahCore support Microsoft.Extensions.Logging
         builder.AddFilter<EventLogLoggerProvider>(level => level == LogLevel.Debug);
     });
 ```
-
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-log.png)
 ## Using Notifiers
 You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
 ```sh
