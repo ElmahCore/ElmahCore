@@ -29,9 +29,19 @@ namespace ElmahCore.Mvc
         {
             services.AddSingleton<ErrorLogMiddleware>();
             services.AddHttpContextAccessor();
-            services.AddSingleton<ILoggerProvider>(provider => new ElmahLoggerProvider(provider.GetService<IHttpContextAccessor>()));
+            services.AddSingleton<ILoggerProvider>(provider => 
+                new ElmahLoggerProvider(provider.GetService<IHttpContextAccessor>()));
 
             return services.AddSingleton<ErrorLog, T>();
+        }
+
+        public static IServiceCollection SetElmahLogLevel(this IServiceCollection services, LogLevel level)
+        {
+            services.AddLogging(builder =>
+            {
+                builder.AddFilter<ElmahLoggerProvider>(l =>  l >= level);
+            });
+            return services;
         }
 
         public static IServiceCollection AddElmah(this IServiceCollection services, Action<ElmahOptions> setupAction)

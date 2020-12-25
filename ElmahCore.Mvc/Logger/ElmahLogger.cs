@@ -62,7 +62,7 @@ namespace ElmahCore.Mvc.Logger
             {
                 TimeStamp = DateTime.Now,
                 Message = message,
-                Scope = GetScopeInformation(),
+                //Scope = GetScopeInformation(),
                 Exception = exception?.ToString(),
                 Level = logLevel
             };
@@ -75,6 +75,7 @@ namespace ElmahCore.Mvc.Logger
 
         public IDisposable BeginScope<TState>(TState state) => ScopeProvider?.Push(state) ?? NullScope.Instance;
 
+        // ReSharper disable once UnusedMember.Local
         private string GetScopeInformation()
         {
             var stringBuilder = new StringBuilder();

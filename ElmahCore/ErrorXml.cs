@@ -164,19 +164,17 @@ namespace ElmahCore
         {
             var sw = new StringWriter();
 
-            using (var writer = XmlWriter.Create(sw, new XmlWriterSettings
+            using var writer = XmlWriter.Create(sw, new XmlWriterSettings
             {
                 Indent = true,
                 NewLineOnAttributes = true,
                 CheckCharacters = false,
                 OmitXmlDeclaration = true, // see issue #120: http://code.google.com/p/elmah/issues/detail?id=120
-            }))
-            {
-                writer.WriteStartElement("error");
-                Encode(error, writer);
-                writer.WriteEndElement();
-                writer.Flush();
-            }
+            });
+            writer.WriteStartElement("error");
+            Encode(error, writer);
+            writer.WriteEndElement();
+            writer.Flush();
 
             return sw.ToString();
         }
