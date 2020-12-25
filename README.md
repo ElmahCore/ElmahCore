@@ -69,13 +69,6 @@ public IActionResult Test()
 ```
 ## Microsoft.Extensions.Logging support
 Since version 2.0 ElmahCore support Microsoft.Extensions.Logging
-```sh
-    //Store all debug messages in ELMAH log
-    services.AddLogging(builder =>
-    {
-        builder.AddFilter<EventLogLoggerProvider>(level => level == LogLevel.Debug);
-    });
-```
 ![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-log.png)
 ## Using Notifiers
 You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
