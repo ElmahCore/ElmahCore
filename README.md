@@ -23,7 +23,7 @@ services.AddElmah(options => options.Path = "you_path_here")
 ```sh
 services.AddElmah(options =>
 {
-        options.CheckPermissionAction = context => context.User.Identity.IsAuthenticated;
+        options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
 });
 ```
 **Note:** `app.UseElmah();` needs to be after 
@@ -43,6 +43,8 @@ You can create your own error log, which will store errors anywhere.
  - MemoryErrorLog – store errors in memory (by default)
  - XmlFileErrorLog – store errors in XML files
  - SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
+ - MysqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
+ - PgsqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
 ```sh
 services.AddElmah<XmlFileErrorLog>(options =>
 {
@@ -52,7 +54,7 @@ services.AddElmah<XmlFileErrorLog>(options =>
 ```sh
 services.AddElmah<SqlErrorLog>(options =>
 {
-    options.ConnectionString = "connection_string"; // DB structure see here: https://bitbucket.org/project-elmah/main/downloads/ELMAH-1.2-db-SQLServer.sql
+    options.ConnectionString = "connection_string";
 });
 ```
 ## Rise exception
@@ -63,6 +65,16 @@ public IActionResult Test()
     ...
 }
 ```
+## Microsoft.Extensions.Logging support
+Since version 2.0 ElmahCore support Microsoft.Extensions.Logging
+```sh
+    //Store all debug messages in ELMAH log
+    services.AddLogging(builder =>
+    {
+        builder.AddFilter<EventLogLoggerProvider>(level => level == LogLevel.Debug);
+    });
+```
+
 ## Using Notifiers
 You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
 ```sh
