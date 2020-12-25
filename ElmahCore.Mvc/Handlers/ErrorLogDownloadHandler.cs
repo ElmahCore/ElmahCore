@@ -251,7 +251,7 @@ namespace ElmahCore.Mvc.Handlers
                     yield return @"
                     <html xmlns='http://www.w3.org/1999/xhtml'>
                     <head>
-                        <title>Error Log in HTML-Wrapped JSONP Format</title>
+                        <title>Error AddMessage in HTML-Wrapped JSONP Format</title>
                     </head>
                     <body>
                         <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>";

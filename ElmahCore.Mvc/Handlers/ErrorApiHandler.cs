@@ -16,6 +16,24 @@ namespace ElmahCore.Mvc.Handlers
 
             switch (path)
             {
+                case "api/error":
+                    var errorId = context.Request.Query["id"].ToString();
+                    if (string.IsNullOrEmpty(errorId))
+                    {
+                        await context.Response.WriteAsync("{}");
+                    }
+                    
+                    var error = await GetErrorAsync(errorLog, errorId);
+                    
+                    var jRes = JsonSerializer.Serialize(error, new JsonSerializerOptions
+                    {
+                        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        MaxDepth = 0
+                    });
+                    await context.Response.WriteAsync(jRes);
+                    break;
+
                 case "api/errors":
                     int.TryParse(context.Request.Query["i"].ToString(), out var errorIndex);
 
@@ -47,6 +65,13 @@ namespace ElmahCore.Mvc.Handlers
                     break;
             }
         }
+
+        private static async Task<ErrorLogEntryWrapper> GetErrorAsync(ErrorLog errorLog, string id)
+        {
+            var error = await errorLog.GetErrorAsync(id);
+            return error == null ? null : new ErrorLogEntryWrapper(error);
+        }
+
         private static async Task<ErrorsList> GetErrorsAsync(ErrorLog errorLog, int errorIndex, int pageSize)
         {
             if (errorIndex < 0) errorIndex = 0;

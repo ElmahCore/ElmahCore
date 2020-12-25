@@ -118,6 +118,8 @@ namespace ElmahCore.Mvc
         {
             try
             {
+                context.Features.Set(new ElmahLogFeature());
+
                 var sourcePath = context.Request.Path.Value;
                 if (sourcePath.Equals(_elmahRoot,StringComparison.InvariantCultureIgnoreCase) 
                     || sourcePath.StartsWith(_elmahRoot+"/", StringComparison.InvariantCultureIgnoreCase))
@@ -225,7 +227,7 @@ namespace ElmahCore.Mvc
                 }
 
                 //
-                // Log away...
+                // AddMessage away...
                 //
 
                 var error = new Error(e, context);

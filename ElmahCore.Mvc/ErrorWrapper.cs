@@ -99,7 +99,7 @@ namespace ElmahCore.Mvc
             // ReSharper disable once ValueParameterNotUsed
             set {}
         }
-
+        [XmlIgnore]
         public string HtmlMessage { get; set;}
 
         public bool IsMobile
@@ -186,6 +186,14 @@ namespace ElmahCore.Mvc
             set {}
         }
         public string Version => _error.ServerVariables["Version"];
+
+        [XmlIgnore]
+        public List<ElmahLogMessageEntry> MessageLog
+        {
+            get => _error.MessageLog;
+            // ReSharper disable once ValueParameterNotUsed
+            set {}
+        }
 
 
         public SerializableDictionary<string, string> Form

@@ -39,7 +39,7 @@ namespace ElmahCore.Mvc.Handlers
                     error.Time,
                     baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
             
-            var rss = RssXml.Rss(title, link, "Log of recent errors", items);
+            var rss = RssXml.Rss(title, link, "AddMessage of recent errors", items);
 
             await response.WriteAsync(XmlText.StripIllegalXmlCharacters(rss.ToString()));
         }

@@ -36,6 +36,7 @@ namespace ElmahCore
         private NameValueCollection _queryString;
         private NameValueCollection _form;
         private NameValueCollection _cookies;
+        private List<ElmahLogMessageEntry> _messageLog = new List<ElmahLogMessageEntry>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Error"/> class.
@@ -120,6 +121,7 @@ namespace ElmahCore
                 _queryString = CopyCollection(QueryHelpers.ParseQuery(request.QueryString.Value));
                 _form = CopyCollection(request.HasFormContentType ? request.Form : null);
                 _cookies = CopyCollection(request.Cookies);
+                _messageLog = context.Features.Get<ElmahLogFeature>()?.Log ?? new List<ElmahLogMessageEntry>();
             }
 
             var callerInfo = e?.TryGetCallerInfo() ?? CallerInfo.Empty;
@@ -212,6 +214,8 @@ namespace ElmahCore
                 }
             }
         }
+
+        public List<ElmahLogMessageEntry> MessageLog => _messageLog;
 
 
 		/// <summary>
