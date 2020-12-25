@@ -45,8 +45,8 @@ You can create your own error log, which will store errors anywhere.
  - MemoryErrorLog – store errors in memory (by default)
  - XmlFileErrorLog – store errors in XML files
  - SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
- - MysqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
- - PgsqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
+ - MysqlErrorLog - store errors in MySQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
+ - PgsqlErrorLog - store errors in PostgreSQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
 ```sh
 services.AddElmah<XmlFileErrorLog>(options =>
 {
