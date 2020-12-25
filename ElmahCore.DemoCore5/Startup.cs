@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using ElmahCore.Mvc;
 using ElmahCore.Sql;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.EventLog;
 
 namespace ElmahCore.DemoCore5
 {
@@ -33,13 +34,12 @@ namespace ElmahCore.DemoCore5
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddElmah<SqlErrorLog>(options =>
-            //services.AddElmah(options =>
+                //services.AddElmah(options =>
             {
                 //options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
                 options.Path = @"elmah";
                 options.ConnectionString = "Server=.;Database=elmahtest;Trusted_Connection=True;";
-            })
-            /*.SetElmahLogLevel(LogLevel.Trace)*/;
+            });
 
             services.AddControllersWithViews();
         }

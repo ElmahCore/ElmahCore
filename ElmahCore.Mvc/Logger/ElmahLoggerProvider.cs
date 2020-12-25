@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ElmahCore.Mvc.Logger
 {
-    class ElmahLoggerProvider: ILoggerProvider, ISupportExternalScope
+    public class ElmahLoggerProvider: ILoggerProvider, ISupportExternalScope
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private IExternalScopeProvider _scopeProvider;

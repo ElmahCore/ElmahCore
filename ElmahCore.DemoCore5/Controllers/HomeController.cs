@@ -17,11 +17,11 @@ namespace ElmahCore.DemoCore5.Controllers
 
         public IActionResult Index()
         {
-            _logger.LogTrace("Test");
+            /*_logger.LogTrace("Test");
             _logger.LogDebug("Test");
             _logger.LogError("Test");
             _logger.LogInformation("Test");
-            _logger.LogWarning("Test");
+            _logger.LogWarning("Test");*/
             _logger.LogCritical(new InvalidOperationException("Test"), "Test");
             ElmahExtensions.RiseError(new Exception("test2"));
             var r = 0;
