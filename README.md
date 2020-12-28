@@ -3,6 +3,8 @@ This project is licensed under the terms of the Apache license 2.0.
 # Using ElmahCore
 ELMAH for Net.Standard and Net.Core 
 
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-new-ui.png)
+
 Add nuget package **elmahcore**
 
 ## Simple usage
@@ -43,8 +45,8 @@ You can create your own error log, which will store errors anywhere.
  - MemoryErrorLog – store errors in memory (by default)
  - XmlFileErrorLog – store errors in XML files
  - SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
- - MysqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
- - PgsqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
+ - MysqlErrorLog - store errors in MySQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
+ - PgsqlErrorLog - store errors in PostgreSQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
 ```sh
 services.AddElmah<XmlFileErrorLog>(options =>
 {
@@ -67,14 +69,7 @@ public IActionResult Test()
 ```
 ## Microsoft.Extensions.Logging support
 Since version 2.0 ElmahCore support Microsoft.Extensions.Logging
-```sh
-    //Store all debug messages in ELMAH log
-    services.AddLogging(builder =>
-    {
-        builder.AddFilter<EventLogLoggerProvider>(level => level == LogLevel.Debug);
-    });
-```
-
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-log.png)
 ## Using Notifiers
 You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
 ```sh
