@@ -2,7 +2,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions.Internal;
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable MemberCanBeProtected.Global
@@ -98,6 +97,19 @@ namespace ElmahCore.Mvc.Logger
                 }
             }
             return stringBuilder.ToString();
+        }
+    }
+    public class NullScope : IDisposable
+    {
+        public static NullScope Instance { get; } = new NullScope();
+
+        private NullScope()
+        {
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
         }
     }
 }

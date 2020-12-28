@@ -29,7 +29,7 @@ namespace ElmahCore.Mvc
             if (entry == null) throw new ArgumentNullException(nameof(entry));
             Log = entry.Log;
             Id = entry.Id;
-            Error = new ErrorWrapper(entry.Error);
+            Error = new ErrorWrapper(entry.Error, entry.Log.SourcePaths);
         }
     }
 }

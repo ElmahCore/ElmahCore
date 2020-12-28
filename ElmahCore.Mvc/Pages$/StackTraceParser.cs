@@ -45,7 +45,7 @@ namespace ElmahCore.Mvc
             Func<TToken, TToken, TMethod> methodSelector,
             Func<TToken, TToken, TParameter> parameterSelector,
             Func<TToken, IEnumerable<TParameter>, TParameters> parametersSelector,
-            Func<TToken, TToken, TSourceLocation> sourceLocationSelector,
+            Func<TToken, TToken, TToken, TToken, TSourceLocation> sourceLocationSelector,
             Func<TToken, TMethod, TParameters, TSourceLocation, TFrame> selector)
         {
             return from Match m in Regex.Matches(text)
@@ -62,7 +62,9 @@ namespace ElmahCore.Mvc
                                        select parameterSelector(Token(pt[i], tokenSelector), 
                                                                 Token(pn[i], tokenSelector))),
                                    sourceLocationSelector(Token(groups["file"], tokenSelector), 
-                                                          Token(groups["line"], tokenSelector)));
+                                                          Token(groups["line"], tokenSelector),
+                                                          Token(groups["method"], tokenSelector),
+                                                          Token(groups["type"], tokenSelector)));
         }
 
         static T Token<T>(Capture capture, Func<int, int, string, T> tokenSelector)

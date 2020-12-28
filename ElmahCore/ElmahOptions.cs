@@ -52,6 +52,8 @@ namespace ElmahCore
         /// </summary>
         public string ApplicationName { get; set; }
 
+        public string[] SourcePaths { get; set; }
+
         public virtual bool PermissionCheck(HttpContext context) => OnPermissionCheck(context);
         public virtual Task Error(HttpContext context, Error error) => OnError(context, error);
     }

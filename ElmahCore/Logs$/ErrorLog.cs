@@ -163,6 +163,8 @@ namespace ElmahCore
             }
         }
 
+        public string[] SourcePaths { get; set; }
+
 
         static T EndApmizedTask<T>(IAsyncResult asyncResult)
         {

@@ -42,7 +42,7 @@ namespace ElmahCore.Mvc.Handlers
             // Stream out the error as formatted JSON.
             //
             var jsonSerializerOptions = new JsonSerializerOptions {IgnoreNullValues = true};
-            var err = new ErrorWrapper(entry?.Error) {HtmlMessage = null};
+            var err = new ErrorWrapper(entry?.Error, errorLog.SourcePaths) {HtmlMessage = null};
             var jsonString = JsonSerializer.Serialize(err,jsonSerializerOptions);
             await response.WriteAsync(jsonString);
         }

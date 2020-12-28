@@ -26,6 +26,7 @@ namespace ElmahCore.Mvc
         private readonly Func<HttpContext, bool> _checkPermissionAction = context => true;
         private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
+
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
 
         public ErrorLogMiddleware(ErrorLog errorLog, ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
@@ -78,6 +79,10 @@ namespace ElmahCore.Mvc
             if (!string.IsNullOrWhiteSpace(options.ApplicationName))
             {
                 _errorLog.ApplicationName = elmahOptions.Value.ApplicationName;
+            }
+            if (options.SourcePaths != null && options.SourcePaths.Any())
+            {
+                _errorLog.SourcePaths = elmahOptions.Value.SourcePaths;
             }
         }
 
@@ -163,11 +168,21 @@ namespace ElmahCore.Mvc
         {
             try
             {
-                if (resource.StartsWith("api"))
+                if (resource.StartsWith("api/"))
                 {
                     await ErrorApiHandler.ProcessRequest(context, _errorLog, resource);
                     return;
                 }
+                if (resource.StartsWith("exception/"))
+                {
+                    await MsdnHandler.ProcessRequestException(context, resource.Substring("exception/".Length));
+                    return;
+                }
+                if (resource.StartsWith("status/"))
+                {
+                    await MsdnHandler.ProcessRequestStatus(context, resource.Substring("status/".Length));
+                    return;
+                }                
                 switch (resource)
                 {
                     case "xml":
@@ -229,8 +244,8 @@ namespace ElmahCore.Mvc
                 //
                 // AddMessage away...
                 //
-
                 var error = new Error(e, context);
+
                 await onError(context, error);
                 var log = _errorLog;
                 error.ApplicationName = log.ApplicationName;

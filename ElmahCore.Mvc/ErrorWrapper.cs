@@ -25,11 +25,20 @@ namespace ElmahCore.Mvc
         };
 
         private readonly Error _error;
+        public List<StackFrameSourceCodeInfo> Sources { get; private set; }
+
         public ErrorWrapper(){}
-        public ErrorWrapper(Error error)
+        public ErrorWrapper(Error error, string[] sourcePath)
         {
             _error = error ?? throw new ArgumentNullException(nameof(error));
-            HtmlMessage = ErrorDetailHelper.MarkupStackTrace(_error.Detail);
+            HtmlMessage = ErrorDetailHelper.MarkupStackTrace(_error.Detail,out var srcList);
+            if (srcList?.Any() == true)
+            {
+                Sources = srcList.Select(i
+                    => ErrorDetailHelper.GetStackFrameSourceCodeInfo(sourcePath,i.Method, i.Type, i.Source, i.Line))
+                    .Where(i=> !string.IsNullOrEmpty(i.ContextCode))
+                    .ToList();
+            }
         }
 
         [XmlElement("ApplicationName")]
@@ -179,7 +188,7 @@ namespace ElmahCore.Mvc
             set {}
         }
         [XmlElement("Client")]
-        public string Client 
+        public string Client
         {
             get => _error.ServerVariables["Connection_RemoteIpAddress"];
             // ReSharper disable once ValueParameterNotUsed

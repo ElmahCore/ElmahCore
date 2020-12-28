@@ -29,13 +29,19 @@ namespace ElmahCore.DemoCore3
             });
 
             //services.AddElmah<XmlFileErrorLog>(options =>
-            services.AddElmah<SqlErrorLog>(options =>
-                //services.AddElmah(options =>
+            services.AddElmah<SqlErrorLog>(options => 
+            //services.AddElmah(options =>
             {
                 //options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
                 options.Path = @"elmah";
-                options.ConnectionString = "Server=.;Database=elmahtest;Trusted_Connection=True;"; 
+                options.ConnectionString = "Server=.;Database=elmahtest;Trusted_Connection=True;";
                 options.LogPath = "~/errors.xml";
+                //options.SourcePaths = new []
+                //{
+                //    @"D:\tmp\ElmahCore.DemoCore3",
+                //    @"D:\tmp\ElmahCore.Mvc",
+                //    @"D:\tmp\ElmahCore"
+                //};
             });
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {

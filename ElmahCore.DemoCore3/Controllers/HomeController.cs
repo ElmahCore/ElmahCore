@@ -16,13 +16,25 @@ namespace ElmahCore.DemoCore3.Controllers
         }
         public IActionResult Index()
         {
+            ElmahExtensions.RiseError(new InvalidOperationException("This is the Test Exception from code."));
+
             _logger.LogTrace("Test");
             _logger.LogDebug("Test");
             _logger.LogError("Test");
             _logger.LogInformation("Test");
             _logger.LogWarning("Test");
             _logger.LogCritical(new InvalidOperationException("Test"), "Test");
-            ElmahExtensions.RiseError(new Exception("test2"));
+
+            ElmahExtensions.RiseError(new NullReferenceException());
+
+            if (DateTime.Now.Millisecond < 500)
+            {
+                string str = null;
+                foreach (var cc in str)
+                {
+                }
+            }
+
             var r = 0;
             // ReSharper disable once UnusedVariable
             // ReSharper disable once IntDivisionByZero

@@ -45,7 +45,7 @@ namespace ElmahCore.Mvc.Handlers
             // Stream out the error as formatted XML.
             //
 
-            var wrappedError = new ErrorWrapper(entry?.Error);
+            var wrappedError = new ErrorWrapper(entry?.Error, errorLog.SourcePaths);
             var xmlSerializer = new XmlSerializer(wrappedError.GetType(), new XmlRootAttribute("Error"));
             using(var textWriter = new StringWriter())
             {
