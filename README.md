@@ -70,6 +70,22 @@ public IActionResult Test()
 ## Microsoft.Extensions.Logging support
 Since version 2.0 ElmahCore support Microsoft.Extensions.Logging
 ![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-log.png)
+
+## Source Preview
+Since version 2.0.1 ElmahCore support source preview.
+Just add paths to source files.
+```sh
+services.AddElmah(options =>
+{
+   options.SourcePaths = new []
+   {
+      @"D:\tmp\ElmahCore.DemoCore3",
+      @"D:\tmp\ElmahCore.Mvc",
+      @"D:\tmp\ElmahCore"
+   };
+});
+```
+
 ## Using Notifiers
 You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
 ```sh
