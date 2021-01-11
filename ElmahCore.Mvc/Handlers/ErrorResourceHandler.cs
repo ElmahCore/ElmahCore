@@ -24,7 +24,7 @@ namespace ElmahCore.Mvc.Handlers
                 using (var reader = new StreamReader(stream2 ?? throw new InvalidOperationException()))
                 {
                     var html = await reader.ReadToEndAsync();
-                    html = html.Replace("ELMAH_ROOT", elmahRoot);
+                    html = html.Replace("ELMAH_ROOT", context.Request.PathBase + elmahRoot);
                     context.Response.ContentType = "text/html";
                     await context.Response.WriteAsync(html);
                     return;
