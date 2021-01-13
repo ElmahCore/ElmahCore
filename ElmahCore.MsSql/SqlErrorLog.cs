@@ -190,9 +190,9 @@ namespace ElmahCore.Sql
 SELECT 1 
 WHERE EXISTS (
    SELECT 1
-   FROM   information_schema.tables 
-   WHERE  table_schema = 'dbo'
-   AND    table_name = 'elmah_error'
+   FROM   INFORMATION_SCHEMA.TABLES 
+   WHERE  TABLE_SCHEMA = 'dbo'
+   AND    TABLE_NAME = 'ELMAH_Error'
    )
 "
                 };
@@ -249,7 +249,7 @@ ON [PRIMARY]";
                 var command = new SqlCommand
                 {
                     CommandText = @"
-INSERT INTO Elmah_Error (ErrorId, Application, Host, Type, Source, Message, ""User"", StatusCode, TimeUtc, AllXml)
+INSERT INTO ELMAH_Error (ErrorId, Application, Host, Type, Source, Message, ""User"", StatusCode, TimeUtc, AllXml)
 VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusCode, @TimeUtc, @AllXml)
 "
                 };
@@ -272,7 +272,7 @@ VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusC
                 var command = new SqlCommand
                 {
                     CommandText = @"
-SELECT AllXml FROM Elmah_Error 
+SELECT AllXml FROM ELMAH_Error 
 WHERE 
     Application = @Application 
     AND ErrorId = @ErrorId
@@ -291,7 +291,7 @@ WHERE
                 var command = new SqlCommand
                 {
                     CommandText = @"
-SELECT ErrorId, AllXml FROM Elmah_Error
+SELECT ErrorId, AllXml FROM ELMAH_Error
 WHERE
     Application = @Application
 ORDER BY [Sequence] DESC
@@ -312,7 +312,7 @@ FETCH NEXT @limit ROWS ONLY;
             {
                 var command = new SqlCommand
                 {
-                    CommandText = "SELECT COUNT(*) FROM Elmah_Error WHERE Application = @Application"
+                    CommandText = "SELECT COUNT(*) FROM ELMAH_Error WHERE Application = @Application"
                 };
                 command.Parameters.Add("@Application", SqlDbType.NVarChar, MaxAppNameLength).Value = appName;
                 return command;
