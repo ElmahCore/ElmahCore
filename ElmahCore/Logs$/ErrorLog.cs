@@ -26,6 +26,8 @@ namespace ElmahCore
         
         public abstract string Log(Error error);
 
+        public abstract void Log(Guid id, Error error);
+
         /// <summary>
         /// When overridden in a subclass, starts a task that asynchronously
         /// does the same as <see cref="Log"/>.
