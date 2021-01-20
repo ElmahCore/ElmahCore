@@ -50,6 +50,7 @@ namespace ElmahCore.Mvc
                 _notifiers = elmahOptions.Value.Notifiers.ToList();
 
             //Filters
+            _filters = elmahOptions.Value?.Filters.ToList();
             foreach (var errorFilter in options.Filters)
             {
                 Filtering += errorFilter.OnErrorModuleFiltering;

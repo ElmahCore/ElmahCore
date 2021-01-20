@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using ElmahCore.DemoCore5.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ElmahCore.Mvc;
 using ElmahCore.Sql;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 
@@ -33,12 +36,12 @@ namespace ElmahCore.DemoCore5
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddElmah<SqlErrorLog>(options =>
-                //services.AddElmah(options =>
+            services.AddElmah<ElmahCore.XmlFileErrorLog>(options =>
             {
-                //options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
-                options.Path = @"elmah";
-                options.ConnectionString = "Server=.;Database=elmahtest;Trusted_Connection=True;";
+                options.Path = "CMS/ErrorLog";
+                options.LogPath = "/elmah";
+                options.Notifiers.Add(new MyNotifier());
+                options.Filters.Add(new CmsErrorLogFilter());
             });
 
             services.AddControllersWithViews();
@@ -75,6 +78,28 @@ namespace ElmahCore.DemoCore5
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+        }
+    }
+    public class MyNotifier : IErrorNotifier
+    {
+        public void Notify(Error error)
+        {
+            Debug.WriteLine(error.Message);
+        }
+
+        public string Name => "my";
+    }
+    public class CmsErrorLogFilter : IErrorFilter
+    {
+        public void OnErrorModuleFiltering(object sender, ExceptionFilterEventArgs args)
+        {
+            if (args.Exception.GetBaseException() is FileNotFoundException)
+                args.Dismiss();
+            if (args.Context is HttpContext httpContext)
+            {
+                if (httpContext.Response.StatusCode == 404)
+                    args.Dismiss();
+            }
         }
     }
 }
