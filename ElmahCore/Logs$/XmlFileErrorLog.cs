@@ -59,18 +59,25 @@ namespace ElmahCore
         
         public override string Log(Error error)
         {
+            var errorId = Guid.NewGuid();
+
+            Log(errorId, error);
+
+            return errorId.ToString();
+        }
+
+        public override void Log(Guid id, Error error)
+        {
             var logPath = LogPath;
             if (!Directory.Exists(logPath))
                 Directory.CreateDirectory(logPath);
 
-            var errorId = Guid.NewGuid().ToString();
-            
             var timeStamp = (error.Time > DateTime.MinValue ? error.Time : DateTime.Now);
             
             var fileName = string.Format(CultureInfo.InvariantCulture, 
                                   @"error-{0:yyyy-MM-ddHHmmssZ}-{1}.xml", 
                                   /* 0 */ timeStamp.ToUniversalTime(), 
-                                  /* 1 */ errorId);
+                                  /* 1 */ id);
 
             var path = Path.Combine(logPath, fileName);
 
@@ -78,7 +85,7 @@ namespace ElmahCore
             {
                 using var writer = new XmlTextWriter(path, Encoding.UTF8) {Formatting = Formatting.Indented};
                 writer.WriteStartElement("error");
-                writer.WriteAttributeString("errorId", errorId);
+                writer.WriteAttributeString("errorId", id.ToString());
                 ErrorXml.Encode(error, writer);
                 writer.WriteEndElement();
                 writer.Flush();
@@ -93,8 +100,6 @@ namespace ElmahCore
                 File.Delete(path);
                 throw;
             }
-
-            return errorId;
         }
 
         /// <summary>

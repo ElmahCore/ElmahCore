@@ -52,11 +52,19 @@ namespace ElmahCore.Sql
 
         public override string Log(Error error)
         {
+            var id = Guid.NewGuid();
+
+            Log(id, error);
+
+            return id.ToString();
+        }
+
+        public override void Log(Guid id, Error error)
+        {
             if (error == null)
                 throw new ArgumentNullException(nameof(error));
 
             var errorXml = ErrorXml.EncodeString(error);
-            var id = Guid.NewGuid();
 
             using (var connection = new SqlConnection(ConnectionString))
             using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
@@ -64,7 +72,6 @@ namespace ElmahCore.Sql
                 command.Connection = connection;
                 connection.Open();
                 command.ExecuteNonQuery();
-                return id.ToString();
             }
         }
 

@@ -81,6 +81,15 @@ namespace ElmahCore
 
         public override string Log(Error error)
         {
+            var newId = Guid.NewGuid();
+
+            Log(newId, error);
+
+            return newId.ToString();
+        }
+
+        public override void Log(Guid id, Error error)
+        {
             if (error == null)
                 throw new ArgumentNullException(nameof(error));
 
@@ -91,8 +100,7 @@ namespace ElmahCore
 
             error = error.Clone();
             error.ApplicationName = ApplicationName;
-            var newId = Guid.NewGuid();
-            var entry = new ErrorLogEntry(this, newId.ToString(), error);
+            var entry = new ErrorLogEntry(this, id.ToString(), error);
 
             Lock.EnterWriteLock(); 
 
@@ -105,8 +113,6 @@ namespace ElmahCore
             {
                 Lock.ExitWriteLock();
             }
-            
-            return newId.ToString();
         }
 
         /// <summary>
