@@ -86,6 +86,10 @@ services.AddElmah(options =>
 });
 ```
 
+## Log the request body
+Since version 2.0.5 ElmahCore can log the request body.
+Just add paths to source files.
+
 ## Using UseElmahExceptionPage
 You can replace UseDeveloperExceptionPage to UseElmahExceptionPage
 ```csharp
