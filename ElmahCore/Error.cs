@@ -51,7 +51,7 @@ namespace ElmahCore
         /// context during the exception.
         /// </summary>
 
-        public Error(Exception e, HttpContext context = null)
+        internal Error(Exception e, HttpContext context = null, string body = null)
         {
             var baseException = e?.GetBaseException();
             _message = baseException?.Message;
@@ -120,6 +120,12 @@ namespace ElmahCore
                 _serverVariables.Add("HttpStatusCode", StatusCode.ToString());
                 _queryString = CopyCollection(QueryHelpers.ParseQuery(request.QueryString.Value));
                 _form = CopyCollection(request.HasFormContentType ? request.Form : null);
+                if (!string.IsNullOrEmpty(body))
+                {
+                    _form ??= new NameValueCollection();
+                    _form.Add("$request-body", body);
+                }
+
                 _cookies = CopyCollection(request.Cookies);
                 _messageLog = context.Features.Get<ElmahLogFeature>()?.Log ?? new List<ElmahLogMessageEntry>();
             }
@@ -260,6 +266,16 @@ namespace ElmahCore
 	        set => _typeName = value;
         }
 
+        /// <summary>
+        /// Gets or sets the Request Body
+        /// </summary>
+        
+        public string Body
+        { 
+            get => _form == null ? null : (_form["$request-body"] ?? string.Empty);
+            // ReSharper disable once ValueParameterNotUsed
+            set { }
+    }
         /// <summary>
         /// Gets or sets the source that is the cause of the error.
         /// </summary>

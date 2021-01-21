@@ -31,7 +31,7 @@ namespace ElmahCore
             _logPath = options.Value.LogPath;
             if (_logPath.StartsWith("~/"))
             {
-                _logPath = Path.Combine(hostingEnvironment.WebRootPath, _logPath.Substring(2));
+                _logPath = Path.Combine(hostingEnvironment.WebRootPath ?? hostingEnvironment.ContentRootPath , _logPath.Substring(2));
             }
         }
 
@@ -100,7 +100,7 @@ namespace ElmahCore
         /// <summary>
         /// Returns a page of errors from the folder in descending order 
         /// of logged time as defined by the sortable file names.
-        /// </summary>
+        /// </summary>  
 
         public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {

@@ -65,6 +65,13 @@ namespace ElmahCore.Mvc
             // ReSharper disable once ValueParameterNotUsed
             set {}
         }
+        [XmlElement("Body")]
+        public string Body
+        {
+            get  => _error.Body;
+            // ReSharper disable once ValueParameterNotUsed
+            set {}
+        }
 
         [XmlElement("Source")]
         public string Source
@@ -209,6 +216,7 @@ namespace ElmahCore.Mvc
         {
             get =>
                 _error.Form.AllKeys
+                    .Where(i=>i != "$request-body")
                     .ToSerializableDictionary(k => k, k => _error.Form[k]);
             // ReSharper disable once ValueParameterNotUsed
             set {}

@@ -51,11 +51,16 @@ namespace ElmahCore
         /// Application Name
         /// </summary>
         public string ApplicationName { get; set; }
-
+        /// <summary>
+        /// List of paths to sources
+        /// </summary>
         public string[] SourcePaths { get; set; }
-
         public virtual bool PermissionCheck(HttpContext context) => OnPermissionCheck(context);
         public virtual Task Error(HttpContext context, Error error) => OnError(context, error);
+        /// <summary>
+        /// Enable/Disable request body logging 
+        /// </summary>
+        public bool LogRequestBody { get; set; } = true;
     }
 
 }
