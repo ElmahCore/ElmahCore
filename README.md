@@ -9,7 +9,7 @@ Add nuget package **elmahcore**
 
 ## Simple usage
  Startup.cs
-```sh
+```csharp
 1)	services.AddElmah() in ConfigureServices 
 2)	app.UseElmah(); in Configure
 ```
@@ -18,11 +18,11 @@ Add nuget package **elmahcore**
 Default elmah path `~/elmah`.
 
 ## Change URL path
-```sh
+```csharp
 services.AddElmah(options => options.Path = "you_path_here")
 ```
 ## Restrict access to the Elmah url
-```sh
+```csharp
 services.AddElmah(options =>
 {
         options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
@@ -37,7 +37,7 @@ app.UseElmah();
 or the user will be redirected to the sign in screen even if he is authenticated.
 ## Change Error Log type
 You can create your own error log, which will store errors anywhere.
-```sh
+```csharp
     class MyErrorLog: ErrorLog
     //implement ErrorLog
 ```
@@ -47,20 +47,20 @@ You can create your own error log, which will store errors anywhere.
  - SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
  - MysqlErrorLog - store errors in MySQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
  - PgsqlErrorLog - store errors in PostgreSQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
-```sh
+```csharp
 services.AddElmah<XmlFileErrorLog>(options =>
 {
     options.LogPath = "~/log"; // OR options.LogPath = "с:\errors";
 });
 ```
-```sh
+```csharp
 services.AddElmah<SqlErrorLog>(options =>
 {
     options.ConnectionString = "connection_string";
 });
 ```
 ## Rise exception
-```sh
+```csharp
 public IActionResult Test()
 {
     HttpContext.RiseError(new InvalidOperationException("Test"));
@@ -74,7 +74,7 @@ Since version 2.0 ElmahCore support Microsoft.Extensions.Logging
 ## Source Preview
 Since version 2.0.1 ElmahCore support source preview.
 Just add paths to source files.
-```sh
+```csharp
 services.AddElmah(options =>
 {
    options.SourcePaths = new []
@@ -86,9 +86,19 @@ services.AddElmah(options =>
 });
 ```
 
+## Using UseElmahExceptionPage
+You can replace UseDeveloperExceptionPage to UseElmahExceptionPage
+```csharp
+if (env.IsDevelopment())
+{
+   //app.UseDeveloperExceptionPage();
+   app.UseElmahExceptionPage();
+}
+```
+
 ## Using Notifiers
 You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
-```sh
+```csharp
 services.AddElmah<XmlFileErrorLog>(options =>
 {
     options.Path = @"errors";
@@ -99,7 +109,7 @@ services.AddElmah<XmlFileErrorLog>(options =>
 Each notifier must have unique name.
 ## Using Filters
 You can use Elmah XML filter configuration in separate file, create and add custom filters:
-```sh
+```csharp
 services.AddElmah<XmlFileErrorLog>(options =>
 {
     options.FiltersConfig = "elmah.xml";
@@ -108,7 +118,7 @@ services.AddElmah<XmlFileErrorLog>(options =>
 ```
 Custom filter must implement IErrorFilter.
 XML filter config example:
-```sh
+```csharp
 <?xml version="1.0" encoding="utf-8" ?>
 <elmah>
 	<errorFilter>
