@@ -30,14 +30,14 @@ namespace ElmahCore
 
         /// <summary>
         /// When overridden in a subclass, starts a task that asynchronously
-        /// does the same as <see cref="Log"/>.
+        /// does the same as <see cref="Log(Error)"/>.
         /// </summary>
 
         public Task<string> LogAsync(Error error) => LogAsync(error, CancellationToken.None);
 
         /// <summary>
         /// When overridden in a subclass, starts a task that asynchronously
-        /// does the same as <see cref="Log"/>. An additional parameter
+        /// does the same as <see cref="Log(Error)"/>. An additional parameter
         /// specifies a <see cref="CancellationToken"/> to use.
         /// </summary>
 
@@ -46,7 +46,7 @@ namespace ElmahCore
 
         /// <summary>
         /// When overridden in a subclass, begins an asynchronous version 
-        /// of <see cref="Log"/>.
+        /// of <see cref="Log(Error)"/>.
         /// </summary>
 
         public virtual IAsyncResult BeginLog(Error error, AsyncCallback asyncCallback, object asyncState) 
@@ -54,7 +54,7 @@ namespace ElmahCore
 
         /// <summary>
         /// When overridden in a subclass, ends an asynchronous version 
-        /// of <see cref="Log"/>.
+        /// of <see cref="Log(Error)"/>.
         /// </summary>
 
         public virtual string EndLog(IAsyncResult asyncResult) => EndApmizedTask<string>(asyncResult);

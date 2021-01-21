@@ -107,7 +107,7 @@ WriteLiteral("            <p>Generated: ");
 
             
             //#line 27 "..\..\ErrorMailHtmlPage.cshtml"
-                     Write(error.Time.ToUniversalTime().ToString("r"));
+                     Write(error.Time.ToString("r"));
 
             
             //#line default
