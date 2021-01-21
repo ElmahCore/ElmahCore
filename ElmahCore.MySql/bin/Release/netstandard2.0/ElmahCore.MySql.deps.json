@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "ElmahCore.MySql/2.0.4": {
+      "ElmahCore.MySql/2.0.5": {
         "dependencies": {
           "ElmahCore.Common": "2.0.4",
           "MySql.Data": "8.0.22",
@@ -1063,7 +1063,7 @@
     }
   },
   "libraries": {
-    "ElmahCore.MySql/2.0.4": {
+    "ElmahCore.MySql/2.0.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
