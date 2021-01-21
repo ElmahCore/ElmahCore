@@ -29,6 +29,7 @@ namespace ElmahCore.Mvc
         private readonly Func<HttpContext, bool> _checkPermissionAction = context => true;
         private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
         private readonly bool _logRequestBody = true;
+        internal static bool ShowDebugPage = false;
 
         private static readonly string[] SupportedContentTypes = {
             "application/json",
@@ -184,10 +185,12 @@ namespace ElmahCore.Mvc
             }
             catch (Exception exception)
             {
-                await LogException(exception, context, _onError, body);
+                var id = await LogException(exception, context, _onError, body);
 
                 //To next middleware
-                throw;
+                if (!ShowDebugPage) throw;
+                //Show Debug page
+                context.Response.Redirect($"{_elmahRoot}/detail/{id}");
             }
         }
         private async Task<string> GetBody(HttpRequest request)
@@ -257,7 +260,7 @@ namespace ElmahCore.Mvc
         }
 
         
-        internal async Task LogException(Exception e, HttpContext context, Func<HttpContext, Error, Task> onError, string body = null)
+        internal async Task<string> LogException(Exception e, HttpContext context, Func<HttpContext, Error, Task> onError, string body = null)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));
@@ -277,7 +280,7 @@ namespace ElmahCore.Mvc
                     OnFiltering(args);
 
                     if (args.Dismissed && !args.DismissedNotifiers.Any())
-                        return;
+                        return null;
                 }
 
                 //
@@ -314,6 +317,8 @@ namespace ElmahCore.Mvc
             }
             if (entry != null)
                 OnLogged(new ErrorLoggedEventArgs(entry));
+            
+            return entry?.Id;
         }
 
         /// <summary>

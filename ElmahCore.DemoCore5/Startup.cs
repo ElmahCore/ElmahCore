@@ -59,7 +59,7 @@ namespace ElmahCore.DemoCore5
             app.UseCors("MyPolicy");
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                app.UseElmahExceptionPage();
                 app.UseMigrationsEndPoint();
             }
             else

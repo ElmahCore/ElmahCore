@@ -9,6 +9,12 @@ namespace ElmahCore.Mvc
 {
     public static class BuilderHelper
     {
+
+        public static IApplicationBuilder UseElmahExceptionPage(this IApplicationBuilder app)
+        {
+            ErrorLogMiddleware.ShowDebugPage = true;
+            return app;
+        }
         public static IApplicationBuilder UseElmah(this IApplicationBuilder app)
         {
             //app.UseMiddleware<ErrorLogMiddleware>();
