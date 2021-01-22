@@ -34,7 +34,7 @@ namespace ElmahCore
 			{
 				var aggregate = task.Exception;
 				Debug.Assert(aggregate != null);
-                source.TrySetException(aggregate.InnerExceptions);
+                if (aggregate != null) source.TrySetException(aggregate.InnerExceptions);
             }
 			else if (TaskStatus.RanToCompletion == task.Status)
 			{
