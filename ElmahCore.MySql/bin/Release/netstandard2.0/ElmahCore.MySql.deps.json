@@ -7,9 +7,9 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "ElmahCore.MySql/2.0.5": {
+      "ElmahCore.MySql/2.0.6": {
         "dependencies": {
-          "ElmahCore.Common": "2.0.4",
+          "ElmahCore.Common": "2.0.6",
           "MySql.Data": "8.0.22",
           "NETStandard.Library": "2.0.3"
         },
@@ -1048,7 +1048,7 @@
           }
         }
       },
-      "ElmahCore.Common/2.0.4": {
+      "ElmahCore.Common/2.0.6": {
         "dependencies": {
           "Microsoft.AspNetCore.Hosting.Abstractions": "2.2.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -1063,7 +1063,7 @@
     }
   },
   "libraries": {
-    "ElmahCore.MySql/2.0.5": {
+    "ElmahCore.MySql/2.0.6": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -1670,7 +1670,7 @@
       "path": "system.xml.xpath.xmldocument/4.0.1",
       "hashPath": "system.xml.xpath.xmldocument.4.0.1.nupkg.sha512"
     },
-    "ElmahCore.Common/2.0.4": {
+    "ElmahCore.Common/2.0.6": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
