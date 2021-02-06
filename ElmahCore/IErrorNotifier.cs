@@ -2,7 +2,7 @@
 {
     public interface IErrorNotifier
     {
-        void Notify(Error error);
         string Name { get; }
+        void Notify(Error error);
     }
 }

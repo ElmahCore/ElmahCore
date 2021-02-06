@@ -3,23 +3,31 @@ using System.Collections.Generic;
 
 namespace ElmahCore.Assertions
 {
-
     internal sealed class LogicalAssertion : CompositeAssertion
     {
-        private readonly bool _not;
         private readonly bool _all;
+        private readonly bool _not;
 
-        public static LogicalAssertion LogicalAnd(IAssertion[] operands) => new LogicalAssertion(operands, false, true);
-
-        public static LogicalAssertion LogicalOr(IAssertion[] operands) => new LogicalAssertion(operands, false, false);
-
-        public static LogicalAssertion LogicalNot(IAssertion[] operands) => new LogicalAssertion(operands, true, true);
-
-        private LogicalAssertion(IEnumerable<IAssertion> assertions, bool not, bool all) : 
+        private LogicalAssertion(IEnumerable<IAssertion> assertions, bool not, bool all) :
             base(assertions)
         {
             _not = not;
             _all = all;
+        }
+
+        public static LogicalAssertion LogicalAnd(IAssertion[] operands)
+        {
+            return new LogicalAssertion(operands, false, true);
+        }
+
+        public static LogicalAssertion LogicalOr(IAssertion[] operands)
+        {
+            return new LogicalAssertion(operands, false, false);
+        }
+
+        public static LogicalAssertion LogicalNot(IAssertion[] operands)
+        {
+            return new LogicalAssertion(operands, true, true);
         }
 
         public override bool Test(object context)
@@ -43,10 +51,10 @@ namespace ElmahCore.Assertions
                     continue;
 
                 var testResult = assertion.Test(context);
-                
-                if (_not) 
+
+                if (_not)
                     testResult = !testResult;
-                
+
                 if (testResult)
                 {
                     if (!_all) return true;

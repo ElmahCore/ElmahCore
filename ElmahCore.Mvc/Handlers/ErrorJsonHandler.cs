@@ -6,10 +6,9 @@ using Microsoft.AspNetCore.Http;
 namespace ElmahCore.Mvc.Handlers
 {
     /// <summary>
-    /// Renders an error as JSON Text (RFC 4627).
+    ///     Renders an error as JSON Text (RFC 4627).
     /// </summary>
-
-    static class ErrorJsonHandler
+    internal static class ErrorJsonHandler
     {
         public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog)
         {
@@ -33,17 +32,14 @@ namespace ElmahCore.Mvc.Handlers
             // the reason, pretend it does not exist.
             //
 
-            if (entry == null)
-            {
-                context.Response.StatusCode = 404;
-            }
+            if (entry == null) context.Response.StatusCode = 404;
 
             // 
             // Stream out the error as formatted JSON.
             //
             var jsonSerializerOptions = new JsonSerializerOptions {IgnoreNullValues = true};
             var err = new ErrorWrapper(entry?.Error, errorLog.SourcePaths) {HtmlMessage = null};
-            var jsonString = JsonSerializer.Serialize(err,jsonSerializerOptions);
+            var jsonString = JsonSerializer.Serialize(err, jsonSerializerOptions);
             await response.WriteAsync(jsonString);
         }
     }

@@ -14,7 +14,7 @@ namespace ElmahCore.Mvc.Logger
         private Func<string, LogLevel, bool> _filter;
 
 
-        internal ElmahLogger(string name, Func<string, LogLevel, bool> filter, IExternalScopeProvider scopeProvider, 
+        internal ElmahLogger(string name, Func<string, LogLevel, bool> filter, IExternalScopeProvider scopeProvider,
             IHttpContextAccessor accessor)
         {
             _accessor = accessor;
@@ -36,22 +36,25 @@ namespace ElmahCore.Mvc.Logger
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
             Func<TState, Exception, string> formatter)
         {
-            if (!IsEnabled(logLevel))
-            {
-                return;
-            }
+            if (!IsEnabled(logLevel)) return;
 
-            if (formatter == null)
-            {
-                throw new ArgumentNullException(nameof(formatter));
-            }
+            if (formatter == null) throw new ArgumentNullException(nameof(formatter));
 
             var message = formatter(state, exception);
 
             if (!string.IsNullOrEmpty(message) || exception != null)
-            {
                 WriteMessage(logLevel, Name, eventId.Id, message, exception);
-            }
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return _accessor?.HttpContext?.Features.Get<ElmahLogFeature>() != null && logLevel != LogLevel.None &&
+                   Filter(Name, logLevel);
+        }
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            return ScopeProvider?.Push(state) ?? NullScope.Instance;
         }
 
         public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message,
@@ -66,13 +69,7 @@ namespace ElmahCore.Mvc.Logger
                 Level = logLevel
             };
             _accessor?.HttpContext?.Features.Get<ElmahLogFeature>()?.AddMessage(entry);
-
         }
-
-        public bool IsEnabled(LogLevel logLevel) 
-            => _accessor?.HttpContext?.Features.Get<ElmahLogFeature>() != null && logLevel != LogLevel.None && Filter(Name, logLevel);
-
-        public IDisposable BeginScope<TState>(TState state) => ScopeProvider?.Push(state) ?? NullScope.Instance;
 
         // ReSharper disable once UnusedMember.Local
         private string GetScopeInformation()
@@ -96,16 +93,18 @@ namespace ElmahCore.Mvc.Logger
                     stringBuilder.AppendLine();
                 }
             }
+
             return stringBuilder.ToString();
         }
     }
+
     public class NullScope : IDisposable
     {
-        public static NullScope Instance { get; } = new NullScope();
-
         private NullScope()
         {
         }
+
+        public static NullScope Instance { get; } = new NullScope();
 
         /// <inheritdoc />
         public void Dispose()

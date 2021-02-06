@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore.Mvc.Handlers
 {
-    static class ErrorApiHandler
+    internal static class ErrorApiHandler
     {
         public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog, string path)
         {
@@ -18,13 +17,10 @@ namespace ElmahCore.Mvc.Handlers
             {
                 case "api/error":
                     var errorId = context.Request.Query["id"].ToString();
-                    if (string.IsNullOrEmpty(errorId))
-                    {
-                        await context.Response.WriteAsync("{}");
-                    }
-                    
+                    if (string.IsNullOrEmpty(errorId)) await context.Response.WriteAsync("{}");
+
                     var error = await GetErrorAsync(errorLog, errorId);
-                    
+
                     var jRes = JsonSerializer.Serialize(error, new JsonSerializerOptions
                     {
                         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
@@ -40,7 +36,7 @@ namespace ElmahCore.Mvc.Handlers
                     int.TryParse(context.Request.Query["s"].ToString(), out var pageSize);
 
                     var entities = await GetErrorsAsync(errorLog, errorIndex, pageSize);
-                    
+
                     var json = JsonSerializer.Serialize(entities, new JsonSerializerOptions
                     {
                         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
@@ -54,7 +50,7 @@ namespace ElmahCore.Mvc.Handlers
                     var id = context.Request.Query["id"].ToString();
 
                     var newEntities = await GetNewErrorsAsync(errorLog, id);
-                    
+
                     var jsonResult = JsonSerializer.Serialize(newEntities, new JsonSerializerOptions
                     {
                         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
@@ -86,6 +82,7 @@ namespace ElmahCore.Mvc.Handlers
                 TotalCount = totalCount
             };
         }
+
         private static async Task<ErrorsList> GetNewErrorsAsync(ErrorLog errorLog, string id)
         {
             if (string.IsNullOrEmpty(id)) return await GetErrorsAsync(errorLog, 0, 50);

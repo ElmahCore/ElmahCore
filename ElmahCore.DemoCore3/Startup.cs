@@ -29,8 +29,8 @@ namespace ElmahCore.DemoCore3
             });
 
             //services.AddElmah<XmlFileErrorLog>(options =>
-            services.AddElmah<SqlErrorLog>(options => 
-            //services.AddElmah(options =>
+            services.AddElmah<SqlErrorLog>(options =>
+                //services.AddElmah(options =>
             {
                 //options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
                 options.Path = @"elmah";
@@ -82,8 +82,8 @@ namespace ElmahCore.DemoCore3
             {
                 //routes.MapApplication();
                 routes.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    "default",
+                    "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

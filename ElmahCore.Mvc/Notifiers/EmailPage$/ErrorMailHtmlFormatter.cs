@@ -1,4 +1,5 @@
 #region License, Terms and Author(s)
+
 //
 // ELMAH - Error Logging Modules and Handlers for ASP.NET
 // Copyright (c) 2004-9 Atif Aziz. All rights reserved.
@@ -19,38 +20,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 //[assembly: Elmah.Scc("$Id: ErrorMailHtmlFormatter.cs 640 2009-06-01 17:22:02Z azizatif $")]
 
 using System;
-using ElmahCore.Mvc.ErrorMailHtml;
+using System.IO;
+using ElmahCore.Mvc.Notifiers.ErrorMailHtml;
 
-namespace ElmahCore.Mvc
+namespace ElmahCore.Mvc.Notifiers
 {
     #region Imports
-
-	using TextWriter = System.IO.TextWriter;
 
     #endregion
 
     /// <summary>
-    /// Formats the HTML to display the details of a given error that is
-    /// suitable for sending as the body of an e-mail message.
+    ///     Formats the HTML to display the details of a given error that is
+    ///     suitable for sending as the body of an e-mail message.
     /// </summary>
-
     internal class ErrorMailHtmlFormatter : ErrorTextFormatter
     {
         /// <summary>
-        /// Returns the text/html MIME type that is the format provided 
-        /// by this <see cref="ErrorTextFormatter"/> implementation.
+        ///     Returns the text/html MIME type that is the format provided
+        ///     by this <see cref="ErrorTextFormatter" /> implementation.
         /// </summary>
 
         public override string MimeType => "text/html";
 
         /// <summary>
-        /// Formats a complete HTML document describing the given 
-        /// <see cref="Error"/> instance.
+        ///     Formats a complete HTML document describing the given
+        ///     <see cref="Error" /> instance.
         /// </summary>
         public override void Format(TextWriter writer, Error error)
         {
@@ -60,7 +60,5 @@ namespace ElmahCore.Mvc
             var page = new ErrorMailHtmlPage(error);
             writer.Write(page.TransformText());
         }
-
-
     }
 }

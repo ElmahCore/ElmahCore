@@ -4,60 +4,94 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
+
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedMember.Global
 
 namespace ElmahCore.Assertions
 {
-
     /// <summary>
-    /// Represents the method that will be responsible for creating an 
-    /// assertion object and initializing it from an XML configuration
-    /// element.
+    ///     Represents the method that will be responsible for creating an
+    ///     assertion object and initializing it from an XML configuration
+    ///     element.
     /// </summary>
-
     internal delegate IAssertion AssertionFactoryHandler(XmlElement config);
 
     /// <summary>
-    /// Holds factory methods for creating configured assertion objects.
+    ///     Holds factory methods for creating configured assertion objects.
     /// </summary>
-
     internal static class AssertionFactory
     {
-        public static IAssertion assert_is_null(IContextExpression binding) 
-            => new IsNullAssertion(binding);
+        private static readonly string[]
+            Truths = {"true", "yes", "on", "1"}; // TODO Remove duplication with SecurityConfiguration
 
-        public static IAssertion assert_is_not_null(IContextExpression binding) 
-            => new UnaryNotAssertion(assert_is_null(binding));
+        public static IAssertion assert_is_null(IContextExpression binding)
+        {
+            return new IsNullAssertion(binding);
+        }
 
-        public static IAssertion assert_equal(IContextExpression binding, TypeCode type, string value) 
-            => new ComparisonAssertion(ComparisonResults.Equal, binding, type, value);
+        public static IAssertion assert_is_not_null(IContextExpression binding)
+        {
+            return new UnaryNotAssertion(assert_is_null(binding));
+        }
 
-        public static IAssertion assert_not_equal(IContextExpression binding, TypeCode type, string value) 
-            => new UnaryNotAssertion(assert_equal(binding, type, value));
+        public static IAssertion assert_equal(IContextExpression binding, TypeCode type, string value)
+        {
+            return new ComparisonAssertion(ComparisonResults.Equal, binding, type, value);
+        }
 
-        public static IAssertion assert_lesser(IContextExpression binding, TypeCode type, string value) 
-            => new ComparisonAssertion(ComparisonResults.Lesser, binding, type, value);
+        public static IAssertion assert_not_equal(IContextExpression binding, TypeCode type, string value)
+        {
+            return new UnaryNotAssertion(assert_equal(binding, type, value));
+        }
 
-        public static IAssertion assert_lesser_or_equal(IContextExpression binding, TypeCode type, string value) 
-            => new ComparisonAssertion(ComparisonResults.LesserOrEqual, binding, type, value);
+        public static IAssertion assert_lesser(IContextExpression binding, TypeCode type, string value)
+        {
+            return new ComparisonAssertion(ComparisonResults.Lesser, binding, type, value);
+        }
 
-        public static IAssertion assert_greater(IContextExpression binding, TypeCode type, string value) 
-            => new ComparisonAssertion(ComparisonResults.Greater, binding, type, value);
+        public static IAssertion assert_lesser_or_equal(IContextExpression binding, TypeCode type, string value)
+        {
+            return new ComparisonAssertion(ComparisonResults.LesserOrEqual, binding, type, value);
+        }
 
-        public static IAssertion assert_greater_or_equal(IContextExpression binding, TypeCode type, string value) => new ComparisonAssertion(ComparisonResults.GreaterOrEqual, binding, type, value);
+        public static IAssertion assert_greater(IContextExpression binding, TypeCode type, string value)
+        {
+            return new ComparisonAssertion(ComparisonResults.Greater, binding, type, value);
+        }
 
-        public static IAssertion assert_and(XmlElement config) => LogicalAssertion.LogicalAnd(Create(config.ChildNodes));
+        public static IAssertion assert_greater_or_equal(IContextExpression binding, TypeCode type, string value)
+        {
+            return new ComparisonAssertion(ComparisonResults.GreaterOrEqual, binding, type, value);
+        }
 
-        public static IAssertion assert_or(XmlElement config) => LogicalAssertion.LogicalOr(Create(config.ChildNodes));
+        public static IAssertion assert_and(XmlElement config)
+        {
+            return LogicalAssertion.LogicalAnd(Create(config.ChildNodes));
+        }
 
-        public static IAssertion assert_not(XmlElement config) => LogicalAssertion.LogicalNot(Create(config.ChildNodes));
+        public static IAssertion assert_or(XmlElement config)
+        {
+            return LogicalAssertion.LogicalOr(Create(config.ChildNodes));
+        }
 
-        public static IAssertion assert_is_type(IContextExpression binding, Type type) => new TypeAssertion(binding, type, /* byCompatibility */ false);
+        public static IAssertion assert_not(XmlElement config)
+        {
+            return LogicalAssertion.LogicalNot(Create(config.ChildNodes));
+        }
 
-        public static IAssertion assert_is_type_compatible(IContextExpression binding, Type type) => new TypeAssertion(binding, type, /* byCompatibility */ true);
+        public static IAssertion assert_is_type(IContextExpression binding, Type type)
+        {
+            return new TypeAssertion(binding, type, /* byCompatibility */ false);
+        }
 
-        public static IAssertion assert_regex(IContextExpression binding, string pattern, bool caseSensitive, bool dontCompile)
+        public static IAssertion assert_is_type_compatible(IContextExpression binding, Type type)
+        {
+            return new TypeAssertion(binding, type, /* byCompatibility */ true);
+        }
+
+        public static IAssertion assert_regex(IContextExpression binding, string pattern, bool caseSensitive,
+            bool dontCompile)
         {
             if ((pattern ?? string.Empty).Length == 0)
                 return StaticAssertion.False;
@@ -100,7 +134,7 @@ namespace ElmahCore.Assertions
 
         public static IAssertion[] Create(XmlNodeList nodes)
         {
-            if (nodes == null) 
+            if (nodes == null)
                 throw new ArgumentNullException(nameof(nodes));
 
             //
@@ -126,10 +160,8 @@ namespace ElmahCore.Assertions
                 //
 
                 if (nodeType != XmlNodeType.Element)
-                {
                     throw new Exception(
                         $"Unexpected type of node ({nodeType.ToString()}).");
-                }
 
                 elementCount++;
             }
@@ -143,10 +175,8 @@ namespace ElmahCore.Assertions
             elementCount = 0;
 
             foreach (XmlNode node in nodes)
-            {
                 if (node.NodeType == XmlNodeType.Element)
                     assertions[elementCount++] = Create((XmlElement) node);
-            }
 
             return assertions;
         }
@@ -156,23 +186,21 @@ namespace ElmahCore.Assertions
             Debug.Assert(config != null);
 
             var name = "assert_" + config.LocalName;
-            
+
             if (name.IndexOf('-') > 0)
                 name = name.Replace("-", "_");
-            
+
             Type factoryType;
 
             var xmlns = config.NamespaceURI;
 
             if (xmlns.Length > 0)
             {
-                if (!DecodeClrTypeNamespaceFromXmlNamespace(xmlns, out var ns, out var assemblyName) 
+                if (!DecodeClrTypeNamespaceFromXmlNamespace(xmlns, out var ns, out var assemblyName)
                     || ns.Length == 0 || assemblyName.Length == 0)
-                {
                     throw new Exception(
                         $"Error decoding CLR type namespace and assembly from the XML namespace '{xmlns}'.");
-                }
-                
+
                 var assembly = Assembly.Load(assemblyName);
                 factoryType = assembly.GetType(ns + ".AssertionFactory", /* throwOnError */ true);
             }
@@ -183,41 +211,39 @@ namespace ElmahCore.Assertions
 
             var method = factoryType.GetMethod(name, BindingFlags.Public | BindingFlags.Static);
             if (method == null)
-            {
                 throw new MissingMemberException($"{factoryType} does not have a method named {name}. " +
                                                  "Ensure that the method is named correctly and that it is public and static.");
-            }
 
             var parameters = method.GetParameters();
 
-            if (parameters.Length == 1 
+            if (parameters.Length == 1
                 && parameters[0].ParameterType == typeof(XmlElement)
                 && method.ReturnType == typeof(IAssertion))
             {
-                var handler = (AssertionFactoryHandler) Delegate.CreateDelegate(typeof(AssertionFactoryHandler), factoryType, name);
+                var handler =
+                    (AssertionFactoryHandler) Delegate.CreateDelegate(typeof(AssertionFactoryHandler), factoryType,
+                        name);
                 return handler(config); // TODO Check if Delegate.CreateDelegate could return null
             }
 
             return (IAssertion) method.Invoke(null, ParseArguments(method, config));
         }
 
-        private static object[] ParseArguments(MethodInfo method, XmlElement config) 
+        private static object[] ParseArguments(MethodInfo method, XmlElement config)
         {
             Debug.Assert(method != null);
             Debug.Assert(config != null);
 
             var parameters = method.GetParameters();
             var args = new object[parameters.Length];
-            
+
             foreach (var parameter in parameters)
                 args[parameter.Position] = ParseArgument(parameter, config);
 
             return args;
         }
 
-        private static readonly string[] Truths = { "true", "yes", "on", "1" }; // TODO Remove duplication with SecurityConfiguration
-        
-        private static object ParseArgument(ParameterInfo parameter, XmlElement config) 
+        private static object ParseArgument(ParameterInfo parameter, XmlElement config)
         {
             Debug.Assert(parameter != null);
             Debug.Assert(config != null);
@@ -250,8 +276,6 @@ namespace ElmahCore.Assertions
             {
                 text = text.Trim().ToLowerInvariant();
                 return bool.TrueString.Equals(Array.IndexOf(Truths, text) >= 0 ? bool.TrueString : text);
-
-	            
             }
 
             var converter = TypeDescriptor.GetConverter(type);
@@ -259,12 +283,12 @@ namespace ElmahCore.Assertions
         }
 
         /// <remarks>
-        /// Ideally, we would be able to use SoapServices.DecodeXmlNamespaceForClrTypeNamespace
-        /// but that requires a link demand permission that will fail in partially trusted
-        /// environments such as ASP.NET medium trust.
+        ///     Ideally, we would be able to use SoapServices.DecodeXmlNamespaceForClrTypeNamespace
+        ///     but that requires a link demand permission that will fail in partially trusted
+        ///     environments such as ASP.NET medium trust.
         /// </remarks>
-        
-        private static bool DecodeClrTypeNamespaceFromXmlNamespace(string xmlns, out string typeNamespace, out string assemblyName)
+        private static bool DecodeClrTypeNamespaceFromXmlNamespace(string xmlns, out string typeNamespace,
+            out string assemblyName)
         {
             Debug.Assert(xmlns != null);
 
@@ -274,19 +298,19 @@ namespace ElmahCore.Assertions
             const string assemblyNs = "http://schemas.microsoft.com/clr/assem/";
             const string namespaceNs = "http://schemas.microsoft.com/clr/ns/";
             const string fullNs = "http://schemas.microsoft.com/clr/nsassem/";
-            
+
             if (OrdinalStringStartsWith(xmlns, assemblyNs))
             {
                 assemblyName = Uri.UnescapeDataString(xmlns.Substring(assemblyNs.Length));
                 return assemblyName.Length > 0;
             }
-            
+
             if (OrdinalStringStartsWith(xmlns, namespaceNs))
             {
                 typeNamespace = xmlns.Substring(namespaceNs.Length);
                 return typeNamespace.Length > 0;
             }
-            
+
             if (OrdinalStringStartsWith(xmlns, fullNs))
             {
                 var index = xmlns.IndexOf("/", fullNs.Length, StringComparison.InvariantCultureIgnoreCase);
@@ -297,14 +321,14 @@ namespace ElmahCore.Assertions
 
             return false;
         }
-        
+
         private static bool OrdinalStringStartsWith(string s, string prefix)
         {
             Debug.Assert(s != null);
             Debug.Assert(prefix != null);
-            
-            return s.Length >= prefix.Length && 
-                string.CompareOrdinal(s.Substring(0, prefix.Length), prefix) == 0;
+
+            return s.Length >= prefix.Length &&
+                   string.CompareOrdinal(s.Substring(0, prefix.Length), prefix) == 0;
         }
     }
 }

@@ -2,13 +2,13 @@ using System;
 
 namespace ElmahCore
 {
-    sealed class DelegatingDisposable : IDisposable
+    internal sealed class DelegatingDisposable : IDisposable
     {
         private Action _disposer;
 
         public DelegatingDisposable(Action disposer)
         {
-	        _disposer = disposer ?? throw new ArgumentNullException(nameof(disposer));
+            _disposer = disposer ?? throw new ArgumentNullException(nameof(disposer));
         }
 
         public void Dispose()

@@ -7,22 +7,24 @@ using ElmahCore.Assertions;
 namespace ElmahCore
 {
     /// <summary>
-    /// HTTP module implementation that logs unhanded exceptions in an
-    /// ASP.NET Web application to an error log.
+    ///     HTTP module implementation that logs unhanded exceptions in an
+    ///     ASP.NET Web application to an error log.
     /// </summary>
 
     // ReSharper disable once UnusedMember.Global
     // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     internal class ErrorFilter : IErrorFilter, INotifierProvider
     {
-        // ReSharper disable once MemberCanBeProtected.Global
-        public virtual IAssertion Assertion { get; } = StaticAssertion.False;
+        private readonly List<string> _notifiers;
 
         internal ErrorFilter(IAssertion assertion, List<string> notList)
         {
             Assertion = assertion;
             _notifiers = notList;
         }
+
+        // ReSharper disable once MemberCanBeProtected.Global
+        public virtual IAssertion Assertion { get; } = StaticAssertion.False;
 
         public void OnErrorModuleFiltering(object sender, ExceptionFilterEventArgs args)
         {
@@ -36,10 +38,7 @@ namespace ElmahCore
             {
                 if (Assertion.Test(new AssertionHelperContext(sender, args.Exception, args.Context)))
                 {
-                    if (Notifiers.Any())
-                    {
-                        args.DismissForNotifiers(Notifiers);
-                    }
+                    if (Notifiers.Any()) args.DismissForNotifiers(Notifiers);
                     args.Dismiss();
                 }
             }
@@ -50,9 +49,6 @@ namespace ElmahCore
             }
         }
 
-        private readonly List<string> _notifiers;
-
         public IEnumerable<string> Notifiers => _notifiers;
-
     }
 }

@@ -8,11 +8,10 @@ using Microsoft.AspNetCore.Http;
 namespace ElmahCore.Mvc.Handlers
 {
     /// <summary>
-    /// Renders a XML using the RSS 0.91 vocabulary that displays, at most,
-    /// the 15 most recent errors recorded in the error log.
+    ///     Renders a XML using the RSS 0.91 vocabulary that displays, at most,
+    ///     the 15 most recent errors recorded in the error log.
     /// </summary>
-
-    static class ErrorRssHandler
+    internal static class ErrorRssHandler
     {
         public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog, string elmahRoot)
         {
@@ -38,7 +37,7 @@ namespace ElmahCore.Mvc.Handlers
                     "An error of type " + error.Type + " occurred. " + error.Message,
                     error.Time,
                     baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
-            
+
             var rss = RssXml.Rss(title, link, "AddMessage of recent errors", items);
 
             await response.WriteAsync(XmlText.StripIllegalXmlCharacters(rss.ToString()));

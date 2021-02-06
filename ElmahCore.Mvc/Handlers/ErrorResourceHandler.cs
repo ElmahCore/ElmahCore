@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore.Mvc.Handlers
 {
-    static class ErrorResourceHandler
+    internal static class ErrorResourceHandler
     {
-        static readonly string[] ResourceNames = typeof(ErrorLogMiddleware).GetTypeInfo().Assembly.GetManifestResourceNames();
+        private static readonly string[] ResourceNames =
+            typeof(ErrorLogMiddleware).GetTypeInfo().Assembly.GetManifestResourceNames();
+
         public static async Task ProcessRequest(HttpContext context, string path, string elmahRoot)
         {
             path = path.ToLower();
@@ -30,11 +32,13 @@ namespace ElmahCore.Mvc.Handlers
                     return;
                 }
             }
+
             if (!((IList) ResourceNames).Contains(resName))
             {
                 context.Response.StatusCode = 404;
                 return;
             }
+
             var ext = Path.GetExtension(path).ToLower();
             if (ext == ".svg")
                 context.Response.ContentType = "image/svg+xml";
@@ -42,7 +46,7 @@ namespace ElmahCore.Mvc.Handlers
                 context.Response.ContentType = "text/css";
             if (ext == ".js")
                 context.Response.ContentType = "text/javascript";
-            
+
 
             using (var resource = assembly.GetManifestResourceStream(resName))
             {

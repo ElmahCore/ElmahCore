@@ -5,9 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace ElmahCore.Mvc
 {
-    static class StackTraceParser
+    internal static class StackTraceParser
     {
-        static readonly Regex Regex = new Regex(@"
+        private static readonly Regex Regex = new Regex(@"
             ^
             \s*
             \w+ \s+ 
@@ -40,7 +40,7 @@ namespace ElmahCore.Mvc
             | RegexOptions.Compiled);
 
         public static IEnumerable<TFrame> Parse<TToken, TMethod, TParameters, TParameter, TSourceLocation, TFrame>(
-            string text, 
+            string text,
             Func<int, int, string, TToken> tokenSelector,
             Func<TToken, TToken, TMethod> methodSelector,
             Func<TToken, TToken, TParameter> parameterSelector,
@@ -49,25 +49,26 @@ namespace ElmahCore.Mvc
             Func<TToken, TMethod, TParameters, TSourceLocation, TFrame> selector)
         {
             return from Match m in Regex.Matches(text)
-                   select m.Groups into groups
-                   let pt = groups["pt"].Captures
-                   let pn = groups["pn"].Captures
-                   select selector(Token(groups["frame"], tokenSelector),
-                                   methodSelector(
-                                       Token(groups["type"], tokenSelector), 
-                                       Token(groups["method"], tokenSelector)), 
-                                   parametersSelector(
-                                       Token(groups["params"], tokenSelector), 
-                                       from i in Enumerable.Range(0, pt.Count)
-                                       select parameterSelector(Token(pt[i], tokenSelector), 
-                                                                Token(pn[i], tokenSelector))),
-                                   sourceLocationSelector(Token(groups["file"], tokenSelector), 
-                                                          Token(groups["line"], tokenSelector),
-                                                          Token(groups["method"], tokenSelector),
-                                                          Token(groups["type"], tokenSelector)));
+                select m.Groups
+                into groups
+                let pt = groups["pt"].Captures
+                let pn = groups["pn"].Captures
+                select selector(Token(groups["frame"], tokenSelector),
+                    methodSelector(
+                        Token(groups["type"], tokenSelector),
+                        Token(groups["method"], tokenSelector)),
+                    parametersSelector(
+                        Token(groups["params"], tokenSelector),
+                        from i in Enumerable.Range(0, pt.Count)
+                        select parameterSelector(Token(pt[i], tokenSelector),
+                            Token(pn[i], tokenSelector))),
+                    sourceLocationSelector(Token(groups["file"], tokenSelector),
+                        Token(groups["line"], tokenSelector),
+                        Token(groups["method"], tokenSelector),
+                        Token(groups["type"], tokenSelector)));
         }
 
-        static T Token<T>(Capture capture, Func<int, int, string, T> tokenSelector)
+        private static T Token<T>(Capture capture, Func<int, int, string, T> tokenSelector)
         {
             return tokenSelector(capture.Index, capture.Length, capture.Value);
         }

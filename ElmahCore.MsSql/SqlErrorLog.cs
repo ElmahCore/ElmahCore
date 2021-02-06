@@ -7,48 +7,46 @@ using Microsoft.Extensions.Options;
 namespace ElmahCore.Sql
 {
     /// <summary>
-    /// An <see cref="ErrorLog"/> implementation that uses MSSQL
-    /// as its backing store.
+    ///     An <see cref="ErrorLog" /> implementation that uses MSSQL
+    ///     as its backing store.
     /// </summary>
-    ///
     // ReSharper disable once UnusedType.Global
     public class SqlErrorLog : ErrorLog
     {
-        private readonly string _connectionString;
-
         private const int MaxAppNameLength = 60;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlErrorLog"/> class
-        /// using a dictionary of configured settings.
+        ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
+        ///     using a dictionary of configured settings.
         /// </summary>
         public SqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString)
-        { }
+        {
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlErrorLog"/> class
-        /// to use a specific connection string for connecting to the database.
+        ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
+        ///     to use a specific connection string for connecting to the database.
         /// </summary>
         public SqlErrorLog(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
 
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
 
             CreateTableIfNotExists();
         }
 
         /// <summary>
-        /// Gets the name of this error log implementation.
+        ///     Gets the name of this error log implementation.
         /// </summary>
         public override string Name => "MSSQL Error Log";
 
         /// <summary>
-        /// Gets the connection string used by the log to connect to the database.
+        ///     Gets the connection string used by the log to connect to the database.
         /// </summary>
         // ReSharper disable once MemberCanBeProtected.Global
-        public virtual string ConnectionString => _connectionString;
+        public virtual string ConnectionString { get; }
 
         public override string Log(Error error)
         {
@@ -67,7 +65,8 @@ namespace ElmahCore.Sql
             var errorXml = ErrorXml.EncodeString(error);
 
             using (var connection = new SqlConnection(ConnectionString))
-            using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
+            using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
+                error.Message, error.User, error.StatusCode, error.Time, errorXml))
             {
                 command.Connection = connection;
                 connection.Open();
@@ -98,7 +97,7 @@ namespace ElmahCore.Sql
             {
                 command.Connection = connection;
                 connection.Open();
-                errorXml = (string)command.ExecuteScalar();
+                errorXml = (string) command.ExecuteScalar();
             }
 
             if (errorXml == null)
@@ -142,7 +141,7 @@ namespace ElmahCore.Sql
         }
 
         /// <summary>
-        /// Creates the necessary tables and sequences used by this implementation
+        ///     Creates the necessary tables and sequences used by this implementation
         /// </summary>
         private void CreateTableIfNotExists()
         {
@@ -154,25 +153,21 @@ namespace ElmahCore.Sql
                 {
                     cmdCheck.Connection = connection;
                     // ReSharper disable once PossibleNullReferenceException
-                    var exists = (int?)cmdCheck.ExecuteScalar();
+                    var exists = (int?) cmdCheck.ExecuteScalar();
 
-                    if (!exists.HasValue)
-                    {
-                        ExecuteBatchNonQuery(Commands._createTableSql, connection);
-                    }
+                    if (!exists.HasValue) ExecuteBatchNonQuery(Commands._createTableSql, connection);
                 }
-
-
             }
         }
-        private void ExecuteBatchNonQuery(string sql, SqlConnection conn) {
-            string sqlBatch = string.Empty;
+
+        private void ExecuteBatchNonQuery(string sql, SqlConnection conn)
+        {
+            var sqlBatch = string.Empty;
             using (var cmd = new SqlCommand(string.Empty, conn))
             {
                 sql += "\nGO"; // make sure last batch is executed.
-                foreach (string line in sql.Split(new[] {"\n", "\r"},
+                foreach (var line in sql.Split(new[] {"\n", "\r"},
                     StringSplitOptions.RemoveEmptyEntries))
-                {
                     if (line.ToUpperInvariant().Trim() == "GO")
                     {
                         cmd.CommandText = sqlBatch;
@@ -183,31 +178,13 @@ namespace ElmahCore.Sql
                     {
                         sqlBatch += line + "\n";
                     }
-                }
             }
         }
 
         private static class Commands
         {
-            public static SqlCommand CheckTable()
-            {
-                var command = new SqlCommand
-                {
-                    CommandText = @"
-SELECT 1 
-WHERE EXISTS (
-   SELECT 1
-   FROM   INFORMATION_SCHEMA.TABLES 
-   WHERE  TABLE_SCHEMA = 'dbo'
-   AND    TABLE_NAME = 'ELMAH_Error'
-   )
-"
-                };
-                return command;
-            }
-
-            public static string _createTableSql =
-@"
+            public static readonly string _createTableSql =
+                @"
 CREATE TABLE [dbo].[ELMAH_Error]
 (
     [ErrorId]     UNIQUEIDENTIFIER NOT NULL,
@@ -239,6 +216,23 @@ CREATE NONCLUSTERED INDEX [IX_ELMAH_Error_App_Time_Seq] ON [dbo].[ELMAH_Error]
     [Sequence]      DESC
 ) 
 ON [PRIMARY]";
+
+            public static SqlCommand CheckTable()
+            {
+                var command = new SqlCommand
+                {
+                    CommandText = @"
+SELECT 1 
+WHERE EXISTS (
+   SELECT 1
+   FROM   INFORMATION_SCHEMA.TABLES 
+   WHERE  TABLE_SCHEMA = 'dbo'
+   AND    TABLE_NAME = 'ELMAH_Error'
+   )
+"
+                };
+                return command;
+            }
 
 
             public static SqlCommand LogError(

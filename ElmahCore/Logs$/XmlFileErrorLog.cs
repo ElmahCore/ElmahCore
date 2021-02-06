@@ -12,8 +12,8 @@ using Microsoft.Extensions.Options;
 namespace ElmahCore
 {
     /// <summary>
-    /// An <see cref="ErrorLog"/> implementation that uses XML files stored on 
-    /// disk as its backing store.
+    ///     An <see cref="ErrorLog" /> implementation that uses XML files stored on
+    ///     disk as its backing store.
     /// </summary>
 
     // ReSharper disable once UnusedType.Global
@@ -22,41 +22,38 @@ namespace ElmahCore
         private readonly string _logPath;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlFileErrorLog"/> class
-        /// using a dictionary of configured settings.
+        ///     Initializes a new instance of the <see cref="XmlFileErrorLog" /> class
+        ///     using a dictionary of configured settings.
         /// </summary>
-        
         public XmlFileErrorLog(IOptions<ElmahOptions> options, IHostingEnvironment hostingEnvironment)
         {
             _logPath = options.Value.LogPath;
             if (_logPath.StartsWith("~/"))
-            {
-                _logPath = Path.Combine(hostingEnvironment.WebRootPath ?? hostingEnvironment.ContentRootPath , _logPath.Substring(2));
-            }
+                _logPath = Path.Combine(hostingEnvironment.WebRootPath ?? hostingEnvironment.ContentRootPath,
+                    _logPath.Substring(2));
         }
 
 
         /// <summary>
-        /// Gets the path to where the log is stored.
+        ///     Gets the path to where the log is stored.
         /// </summary>
 
         protected virtual string LogPath => _logPath;
 
-	    /// <summary>
-        /// Gets the name of this error log implementation.
+        /// <summary>
+        ///     Gets the name of this error log implementation.
         /// </summary>
-        
+
         public override string Name => "XML File-Based Error Log";
 
-	    /// <summary>
-        /// Logs an error to the database.
+        /// <summary>
+        ///     Logs an error to the database.
         /// </summary>
         /// <remarks>
-        /// Logs an error as a single XML file stored in a folder. XML files are named with a
-        /// sortable date and a unique identifier. Currently the XML files are stored indefinately.
-        /// As they are stored as files, they may be managed using standard scheduled jobs.
+        ///     Logs an error as a single XML file stored in a folder. XML files are named with a
+        ///     sortable date and a unique identifier. Currently the XML files are stored indefinately.
+        ///     As they are stored as files, they may be managed using standard scheduled jobs.
         /// </remarks>
-        
         public override string Log(Error error)
         {
             var errorId = Guid.NewGuid();
@@ -72,12 +69,12 @@ namespace ElmahCore
             if (!Directory.Exists(logPath))
                 Directory.CreateDirectory(logPath);
 
-            var timeStamp = (error.Time > DateTime.MinValue ? error.Time : DateTime.Now);
-            
-            var fileName = string.Format(CultureInfo.InvariantCulture, 
-                                  @"error-{0:yyyy-MM-ddHHmmssZ}-{1}.xml", 
-                                  /* 0 */ timeStamp.ToUniversalTime(), 
-                                  /* 1 */ id);
+            var timeStamp = error.Time > DateTime.MinValue ? error.Time : DateTime.Now;
+
+            var fileName = string.Format(CultureInfo.InvariantCulture,
+                @"error-{0:yyyy-MM-ddHHmmssZ}-{1}.xml",
+                /* 0 */ timeStamp.ToUniversalTime(),
+                /* 1 */ id);
 
             var path = Path.Combine(logPath, fileName);
 
@@ -103,10 +100,9 @@ namespace ElmahCore
         }
 
         /// <summary>
-        /// Returns a page of errors from the folder in descending order 
-        /// of logged time as defined by the sortable file names.
-        /// </summary>  
-
+        ///     Returns a page of errors from the folder in descending order
+        ///     of logged time as defined by the sortable file names.
+        /// </summary>
         public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
@@ -122,10 +118,10 @@ namespace ElmahCore
                 return 0;
 
             var files = infos.Where(info => IsUserFile(info.Attributes))
-                             .OrderBy(info => info.Name, StringComparer.OrdinalIgnoreCase)
-                             .Select(info => Path.Combine(logPath, info.Name))
-                             .Reverse()
-                             .ToArray();
+                .OrderBy(info => info.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(info => Path.Combine(logPath, info.Name))
+                .Reverse()
+                .ToArray();
 
             if (errorEntryList == null) return files.Length; // Return total
 
@@ -142,13 +138,12 @@ namespace ElmahCore
         private ErrorLogEntry LoadErrorLogEntry(string path)
         {
             for (var i = 0; i < 5; i++)
-            {
                 try
                 {
                     using var reader = XmlReader.Create(path);
                     if (!reader.IsStartElement("error"))
                         return null;
-                                           
+
                     var id = reader.GetAttribute("errorId");
                     var error = ErrorXml.Decode(reader);
                     return new ErrorLogEntry(this, id, error);
@@ -158,19 +153,18 @@ namespace ElmahCore
                     //ignored
                     Task.Delay(500).GetAwaiter().GetResult();
                 }
-            }
+
             throw new IOException("");
         }
 
         /// <summary>
-        /// Returns the specified error from the filesystem, or throws an exception if it does not exist.
+        ///     Returns the specified error from the filesystem, or throws an exception if it does not exist.
         /// </summary>
-        
         public override ErrorLogEntry GetError(string id)
         {
             try
             {
-                id = (new Guid(id)).ToString(); // validate GUID
+                id = new Guid(id).ToString(); // validate GUID
             }
             catch (FormatException e)
             {
@@ -178,8 +172,8 @@ namespace ElmahCore
             }
 
             var file = new DirectoryInfo(LogPath).GetFiles($"error-*-{id}.xml")
-                                                 .FirstOrDefault();
-            
+                .FirstOrDefault();
+
             if (file == null)
                 return null;
 
@@ -190,9 +184,11 @@ namespace ElmahCore
             return new ErrorLogEntry(this, id, ErrorXml.Decode(reader));
         }
 
-        private static bool IsUserFile(FileAttributes attributes) =>
-            0 == (attributes & (FileAttributes.Directory | 
-                                FileAttributes.Hidden | 
-                                FileAttributes.System));
+        private static bool IsUserFile(FileAttributes attributes)
+        {
+            return 0 == (attributes & (FileAttributes.Directory |
+                                       FileAttributes.Hidden |
+                                       FileAttributes.System));
+        }
     }
 }

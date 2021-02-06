@@ -6,17 +6,22 @@ using System.Linq;
 namespace ElmahCore.Assertions
 {
     /// <summary>
-    /// Read-only collection of <see cref="Assertions.IAssertion"/> instances.
+    ///     Read-only collection of <see cref="Assertions.IAssertion" /> instances.
     /// </summary>
-
-    [ Serializable ]
+    [Serializable]
     internal abstract class CompositeAssertion : ReadOnlyCollection<IAssertion>, IAssertion
     {
-        protected CompositeAssertion() : 
-            this(Enumerable.Empty<IAssertion>()) {}
+        protected CompositeAssertion() :
+            this(Enumerable.Empty<IAssertion>())
+        {
+        }
 
-        protected CompositeAssertion(IEnumerable<IAssertion> assertions) : 
-            base(Validate(assertions).ToArray()) {}
+        protected CompositeAssertion(IEnumerable<IAssertion> assertions) :
+            base(Validate(assertions).ToArray())
+        {
+        }
+
+        public abstract bool Test(object context);
 
         private static IEnumerable<IAssertion> Validate(IEnumerable<IAssertion> assertions)
         {
@@ -33,7 +38,5 @@ namespace ElmahCore.Assertions
                 yield return assertion;
             }
         }
-
-        public abstract bool Test(object context);
     }
 }

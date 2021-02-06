@@ -6,6 +6,5 @@ namespace ElmahCore.Mvc.Notifiers
     {
         public List<ErrorLogEntryWrapper> Errors { get; set; }
         public int TotalCount { get; set; }
-
     }
 }

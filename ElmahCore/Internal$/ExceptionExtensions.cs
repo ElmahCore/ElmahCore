@@ -7,16 +7,16 @@ namespace ElmahCore
     {
         private const string CallerInfoKey = "ElmahCallerInfo";
 
-	    public static CallerInfo TryGetCallerInfo(this Exception exception)
+        public static CallerInfo TryGetCallerInfo(this Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
-            var datum = exception.IsData() 
-                      ? exception.Data[CallerInfoKey] 
-                      : null;
+            var datum = exception.IsData()
+                ? exception.Data[CallerInfoKey]
+                : null;
             return datum as CallerInfo;
         }
 
-	    static bool IsData(this Exception exception, bool writable = false)
+        private static bool IsData(this Exception exception, bool writable = false)
         {
             Debug.Assert(exception != null);
 
@@ -28,9 +28,9 @@ namespace ElmahCore
             //
             // http://msdn.microsoft.com/en-us/library/system.exception.data(v=vs.80).aspx
 
-                                // ReSharper disable ConditionIsAlwaysTrueOrFalse
+            // ReSharper disable ConditionIsAlwaysTrueOrFalse
             return data != null // ReSharper restore ConditionIsAlwaysTrueOrFalse
-                && (!writable || !data.IsReadOnly);
+                   && (!writable || !data.IsReadOnly);
         }
     }
 }

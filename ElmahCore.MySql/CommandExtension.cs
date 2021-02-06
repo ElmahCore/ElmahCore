@@ -1,5 +1,5 @@
-﻿using MySql.Data.MySqlClient;
-using System;
+﻿using System;
+using MySql.Data.MySqlClient;
 
 namespace ElmahCore.MySql
 {
@@ -9,7 +9,7 @@ namespace ElmahCore.MySql
         {
             var command = new MySqlCommand();
             command.CommandText =
-            @"
+                @"
             SELECT EXISTS (
                SELECT 1
                FROM   information_schema.tables 
@@ -27,7 +27,7 @@ namespace ElmahCore.MySql
         {
             var command = new MySqlCommand();
             command.CommandText =
-            @"
+                @"
             CREATE TABLE ELMAH_Error
             (
                 ErrorId		VARCHAR(64) NOT NULL,
@@ -58,20 +58,20 @@ namespace ElmahCore.MySql
         }
 
         public static MySqlCommand LogError(
-             Guid id,
-             string appName,
-             string hostName,
-             string typeName,
-             string source,
-             string message,
-             string user,
-             int statusCode,
-             DateTime time,
-             string xml)
+            Guid id,
+            string appName,
+            string hostName,
+            string typeName,
+            string source,
+            string message,
+            string user,
+            int statusCode,
+            DateTime time,
+            string xml)
         {
             var command = new MySqlCommand();
             command.CommandText =
-            @"
+                @"
             INSERT INTO ELMAH_Error (ErrorId, Application, Host, Type, Source, Message, User, StatusCode, TimeUtc, AllXml)
             VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusCode, @TimeUtc, @AllXml)
             ";
@@ -94,7 +94,7 @@ namespace ElmahCore.MySql
         {
             var command = new MySqlCommand();
             command.CommandText =
-            @"
+                @"
             SELECT AllXml FROM ELMAH_Error 
             WHERE 
                 Application = @Application 
@@ -111,7 +111,7 @@ namespace ElmahCore.MySql
         {
             var command = new MySqlCommand();
             command.CommandText =
-            @"
+                @"
             SELECT ErrorId, AllXml FROM ELMAH_Error
             WHERE
                 Application = @Application
@@ -121,7 +121,7 @@ namespace ElmahCore.MySql
             ";
 
             var offset = errorIndex;
-            command.Parameters.Add("@Application", MySqlDbType.String).Value= appName;
+            command.Parameters.Add("@Application", MySqlDbType.String).Value = appName;
             command.Parameters.Add("@offset", MySqlDbType.Int32).Value = offset;
             command.Parameters.Add("@limit", MySqlDbType.Int32).Value = pageSize;
             return command;

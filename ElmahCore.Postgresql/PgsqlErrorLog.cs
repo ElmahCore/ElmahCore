@@ -1,59 +1,50 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.Options;
+using Npgsql;
+using NpgsqlTypes;
+
 namespace ElmahCore.Postgresql
 {
-    using System;
-    using System.Collections.Generic;
-    using Npgsql;
-    using NpgsqlTypes;
-    using ElmahCore;
-    using Microsoft.Extensions.Options;
-
     /// <summary>
-    /// An <see cref="ErrorLog"/> implementation that uses PostgreSQL
-    /// as its backing store.
+    ///     An <see cref="ErrorLog" /> implementation that uses PostgreSQL
+    ///     as its backing store.
     /// </summary>
-    ///
     public class PgsqlErrorLog : ErrorLog
     {
-        private readonly string _connectionString;
-
         private const int MaxAppNameLength = 60;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PgsqlErrorLog"/> class
-        /// using a dictionary of configured settings.
+        ///     Initializes a new instance of the <see cref="PgsqlErrorLog" /> class
+        ///     using a dictionary of configured settings.
         /// </summary>
         public PgsqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString)
-        { }
+        {
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PgsqlErrorLog"/> class
-        /// to use a specific connection string for connecting to the database.
+        ///     Initializes a new instance of the <see cref="PgsqlErrorLog" /> class
+        ///     to use a specific connection string for connecting to the database.
         /// </summary>
         public PgsqlErrorLog(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException("connectionString");
 
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
 
             CreateTableIfNotExists();
         }
 
         /// <summary>
-        /// Gets the name of this error log implementation.
+        ///     Gets the name of this error log implementation.
         /// </summary>
-        public override string Name
-        {
-            get { return "PostgreSQL Error Log"; }
-        }
+        public override string Name => "PostgreSQL Error Log";
 
         /// <summary>
-        /// Gets the connection string used by the log to connect to the database.
+        ///     Gets the connection string used by the log to connect to the database.
         /// </summary>
-        public virtual string ConnectionString
-        {
-            get { return _connectionString; }
-        }
+        public virtual string ConnectionString { get; }
 
         public override string Log(Error error)
         {
@@ -72,7 +63,8 @@ namespace ElmahCore.Postgresql
             var errorXml = ErrorXml.EncodeString(error);
 
             using (var connection = new NpgsqlConnection(ConnectionString))
-            using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
+            using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
+                error.Message, error.User, error.StatusCode, error.Time, errorXml))
             {
                 command.Connection = connection;
                 connection.Open();
@@ -103,7 +95,7 @@ namespace ElmahCore.Postgresql
             {
                 command.Connection = connection;
                 connection.Open();
-                errorXml = (string)command.ExecuteScalar();
+                errorXml = (string) command.ExecuteScalar();
             }
 
             if (errorXml == null)
@@ -147,7 +139,7 @@ namespace ElmahCore.Postgresql
         }
 
         /// <summary>
-        /// Creates the neccessary tables and sequences used by this implementation
+        ///     Creates the neccessary tables and sequences used by this implementation
         /// </summary>
         private void CreateTableIfNotExists()
         {
@@ -159,19 +151,15 @@ namespace ElmahCore.Postgresql
                 {
                     cmdCheck.Connection = connection;
                     // ReSharper disable once PossibleNullReferenceException
-                    var exists = (bool)cmdCheck.ExecuteScalar();
+                    var exists = (bool) cmdCheck.ExecuteScalar();
 
                     if (!exists)
-                    {
                         using (var cmdCreate = Commands.CreateTable())
                         {
                             cmdCreate.Connection = connection;
                             cmdCreate.ExecuteNonQuery();
                         }
-                    }
                 }
-
-
             }
         }
 
@@ -182,7 +170,7 @@ namespace ElmahCore.Postgresql
             {
                 var command = new NpgsqlCommand();
                 command.CommandText =
-@"
+                    @"
 SELECT EXISTS (
    SELECT 1
    FROM   information_schema.tables 
@@ -197,7 +185,7 @@ SELECT EXISTS (
             {
                 var command = new NpgsqlCommand();
                 command.CommandText =
-@"
+                    @"
 CREATE SEQUENCE ELMAH_Error_SEQUENCE;
 CREATE TABLE ELMAH_Error
 (
@@ -241,7 +229,7 @@ CREATE INDEX IX_ELMAH_Error_App_Time_Seq ON ELMAH_Error USING BTREE
             {
                 var command = new NpgsqlCommand();
                 command.CommandText =
-@"
+                    @"
 INSERT INTO Elmah_Error (ErrorId, Application, Host, Type, Source, Message, ""User"", StatusCode, TimeUtc, AllXml)
 VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusCode, @TimeUtc, @AllXml)
 ";
@@ -264,7 +252,7 @@ VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusC
                 var command = new NpgsqlCommand();
 
                 command.CommandText =
-@"
+                    @"
 SELECT AllXml FROM Elmah_Error 
 WHERE 
     Application = @Application 
@@ -282,7 +270,7 @@ WHERE
                 var command = new NpgsqlCommand();
 
                 command.CommandText =
-@"
+                    @"
 SELECT ErrorId, AllXml FROM Elmah_Error
 WHERE
     Application = @Application

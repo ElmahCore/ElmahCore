@@ -1,8 +1,10 @@
-﻿using ElmahCore.DemoCore5.Models;
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using ElmahCore.DemoCore5.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Diagnostics;
 
 namespace ElmahCore.DemoCore5.Controllers
 {
@@ -17,18 +19,35 @@ namespace ElmahCore.DemoCore5.Controllers
 
         public IActionResult Index()
         {
-            /*_logger.LogTrace("Test");
+            TestMethod("test", 100);
+
+
+            _logger.LogTrace("Test");
             _logger.LogDebug("Test");
             _logger.LogError("Test");
             _logger.LogInformation("Test");
-            _logger.LogWarning("Test");*/
+            _logger.LogWarning("Test");
             _logger.LogCritical(new InvalidOperationException("Test"), "Test");
+
             ElmahExtensions.RiseError(new Exception("test2"));
+
             var r = 0;
             // ReSharper disable once UnusedVariable
             // ReSharper disable once IntDivisionByZero
             var d = 100 / r;
             return View();
+        }
+
+        public void TestMethod(string p1, int p2)
+        {
+            this.LogParams((nameof(p1), p1), (nameof(p2), p2));
+
+            using var connection = new SqlConnection("Server=.;Database=elmahtest;Trusted_Connection=True;");
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT TOP (@top) * FROM ELMAH_error";
+            command.Parameters.Add("@top", SqlDbType.Int).Value = p2;
+            command.ExecuteReader();
         }
 
         public IActionResult Privacy()
@@ -39,7 +58,7 @@ namespace ElmahCore.DemoCore5.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
     }
 }

@@ -1,4 +1,5 @@
 #region License, Terms and Author(s)
+
 //
 // ELMAH - Error Logging Modules and Handlers for ASP.NET
 // Copyright (c) 2004-9 Atif Aziz. All rights reserved.
@@ -19,6 +20,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 //[assembly: Elmah.Scc("$Id: ErrorMailModule.cs 923 2011-12-23 22:02:10Z azizatif $")]
@@ -26,168 +28,164 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Mail;
+using System.Text;
+using System.Threading;
 
 namespace ElmahCore.Mvc.Notifiers
 {
     #region Imports
 
-	using MailAttachment = Attachment;
-	using ThreadPool = System.Threading.ThreadPool;
-	using Encoding = System.Text.Encoding;
-    using NetworkCredential = System.Net.NetworkCredential;
+    using MailAttachment = Attachment;
 
     #endregion
 
     /// <summary>
-    /// HTTP module that sends an e-mail whenever an unhandled exception
-    /// occurs in an ASP.NET web application.
+    ///     HTTP module that sends an e-mail whenever an unhandled exception
+    ///     occurs in an ASP.NET web application.
     /// </summary>
-
     public class ErrorMailNotifier : IErrorNotifier
     {
-        private readonly string _mailSender;
-        private readonly string _mailRecipient;
-        private readonly string _mailCopyRecipient;
-        private readonly string _mailSubjectFormat;
-        private readonly MailPriority _mailPriority;
         private readonly bool _reportAsynchronously;
-        private readonly string _smtpServer;
-        private readonly int _smtpPort;
-        private readonly string _authUserName;
-        private readonly string _authPassword;
-        private readonly bool _noYsod;
-        private readonly bool _useSsl;
 
         /// <summary>
-        /// Initializes the module and prepares it to handle requests.
+        ///     Initializes the module and prepares it to handle requests.
         /// </summary>
-        
         public ErrorMailNotifier(string name, EmailOptions options)
         {
             Name = name;
             //
             // Extract the settings.
             //
-         
 
-            _mailRecipient = options.MailRecipient;
-            _mailSender = options.MailSender;
-            _mailCopyRecipient = options.MailCopyRecipient;
-            _mailSubjectFormat = options.MailSubjectFormat;
-            _mailPriority = options.MailPriority;
+
+            MailRecipient = options.MailRecipient;
+            MailSender = options.MailSender;
+            MailCopyRecipient = options.MailCopyRecipient;
+            MailSubjectFormat = options.MailSubjectFormat;
+            MailPriority = options.MailPriority;
             _reportAsynchronously = options.ReportAsynchronously;
-            _smtpServer = options.SmtpServer;
-            _smtpPort = options.SmtpPort;
-            _authUserName = options.AuthUserName;
-            _authPassword = options.AuthPassword;
-            _noYsod = !options.SendYsod;
-            _useSsl = options.UseSsl;
+            SmtpServer = options.SmtpServer;
+            SmtpPort = options.SmtpPort;
+            AuthUserName = options.AuthUserName;
+            AuthPassword = options.AuthPassword;
+            NoYsod = !options.SendYsod;
+            UseSsl = options.UseSsl;
         }
-        
 
 
         /// <summary>
-        /// Gets the e-mail address of the sender.
+        ///     Gets the e-mail address of the sender.
         /// </summary>
-        
-        protected virtual string MailSender => _mailSender;
+
+        protected virtual string MailSender { get; }
 
         /// <summary>
-        /// Gets the e-mail address of the recipient, or a 
-        /// comma-/semicolon-delimited list of e-mail addresses in case of 
-        /// multiple recipients.
-        /// </summary>
-        /// <remarks>
-        /// When using System.Web.Mail components under .NET Framework 1.x, 
-        /// multiple recipients must be semicolon-delimited.
-        /// When using System.Net.Mail components under .NET Framework 2.0
-        /// or later, multiple recipients must be comma-delimited.
-        /// </remarks>
-
-        protected virtual string MailRecipient => _mailRecipient;
-
-        /// <summary>
-        /// Gets the e-mail address of the recipient for mail carbon 
-        /// copy (CC), or a comma-/semicolon-delimited list of e-mail 
-        /// addresses in case of multiple recipients.
+        ///     Gets the e-mail address of the recipient, or a
+        ///     comma-/semicolon-delimited list of e-mail addresses in case of
+        ///     multiple recipients.
         /// </summary>
         /// <remarks>
-        /// When using System.Web.Mail components under .NET Framework 1.x, 
-        /// multiple recipients must be semicolon-delimited.
-        /// When using System.Net.Mail components under .NET Framework 2.0
-        /// or later, multiple recipients must be comma-delimited.
+        ///     When using System.Web.Mail components under .NET Framework 1.x,
+        ///     multiple recipients must be semicolon-delimited.
+        ///     When using System.Net.Mail components under .NET Framework 2.0
+        ///     or later, multiple recipients must be comma-delimited.
         /// </remarks>
 
-        protected virtual string MailCopyRecipient => _mailCopyRecipient;
+        protected virtual string MailRecipient { get; }
 
         /// <summary>
-        /// Gets the text used to format the e-mail subject.
+        ///     Gets the e-mail address of the recipient for mail carbon
+        ///     copy (CC), or a comma-/semicolon-delimited list of e-mail
+        ///     addresses in case of multiple recipients.
         /// </summary>
         /// <remarks>
-        /// The subject text specification may include {0} where the
-        /// error message (<see cref="Error.Message"/>) should be inserted 
-        /// and {1} <see cref="Error.Type"/> where the error type should 
-        /// be insert.
+        ///     When using System.Web.Mail components under .NET Framework 1.x,
+        ///     multiple recipients must be semicolon-delimited.
+        ///     When using System.Net.Mail components under .NET Framework 2.0
+        ///     or later, multiple recipients must be comma-delimited.
         /// </remarks>
 
-        protected virtual string MailSubjectFormat => _mailSubjectFormat;
+        protected virtual string MailCopyRecipient { get; }
 
         /// <summary>
-        /// Gets the priority of the e-mail. 
-        /// </summary>
-        
-        protected virtual MailPriority MailPriority => _mailPriority;
-
-        /// <summary>
-        /// Gets the SMTP server host name used when sending the mail.
-        /// </summary>
-
-        protected string SmtpServer => _smtpServer;
-
-        /// <summary>
-        /// Gets the SMTP port used when sending the mail.
-        /// </summary>
-
-        protected int SmtpPort => _smtpPort;
-
-        /// <summary>
-        /// Gets the user name to use if the SMTP server requires authentication.
-        /// </summary>
-
-        protected string AuthUserName => _authUserName;
-
-        /// <summary>
-        /// Gets the clear-text password to use if the SMTP server requires 
-        /// authentication.
-        /// </summary>
-
-        protected string AuthPassword => _authPassword;
-
-        /// <summary>
-        /// Indicates whether <a href="http://en.wikipedia.org/wiki/Screens_of_death#ASP.NET">YSOD</a> 
-        /// is attached to the e-mail or not. If <c>true</c>, the YSOD is 
-        /// not attached.
-        /// </summary>
-        
-        protected bool NoYsod => _noYsod;
-
-        /// <summary>
-        /// Determines if SSL will be used to encrypt communication with the 
-        /// mail server.
-        /// </summary>
-
-        protected bool UseSsl => _useSsl;
-
-
-        /// <summary>
-        /// Schedules the error to be e-mailed asynchronously.
+        ///     Gets the text used to format the e-mail subject.
         /// </summary>
         /// <remarks>
-        /// The default implementation uses the <see cref="ThreadPool"/>
-        /// to queue the reporting.
+        ///     The subject text specification may include {0} where the
+        ///     error message (<see cref="Error.Message" />) should be inserted
+        ///     and {1} <see cref="Error.Type" /> where the error type should
+        ///     be insert.
         /// </remarks>
 
+        protected virtual string MailSubjectFormat { get; }
+
+        /// <summary>
+        ///     Gets the priority of the e-mail.
+        /// </summary>
+
+        protected virtual MailPriority MailPriority { get; }
+
+        /// <summary>
+        ///     Gets the SMTP server host name used when sending the mail.
+        /// </summary>
+
+        protected string SmtpServer { get; }
+
+        /// <summary>
+        ///     Gets the SMTP port used when sending the mail.
+        /// </summary>
+
+        protected int SmtpPort { get; }
+
+        /// <summary>
+        ///     Gets the user name to use if the SMTP server requires authentication.
+        /// </summary>
+
+        protected string AuthUserName { get; }
+
+        /// <summary>
+        ///     Gets the clear-text password to use if the SMTP server requires
+        ///     authentication.
+        /// </summary>
+
+        protected string AuthPassword { get; }
+
+        /// <summary>
+        ///     Indicates whether <a href="http://en.wikipedia.org/wiki/Screens_of_death#ASP.NET">YSOD</a>
+        ///     is attached to the e-mail or not. If <c>true</c>, the YSOD is
+        ///     not attached.
+        /// </summary>
+
+        protected bool NoYsod { get; }
+
+        /// <summary>
+        ///     Determines if SSL will be used to encrypt communication with the
+        ///     mail server.
+        /// </summary>
+
+        protected bool UseSsl { get; }
+
+
+        public void Notify(Error error)
+        {
+            if (_reportAsynchronously)
+                ReportErrorAsync(error);
+            else
+                ReportError(error);
+        }
+
+        public string Name { get; }
+
+
+        /// <summary>
+        ///     Schedules the error to be e-mailed asynchronously.
+        /// </summary>
+        /// <remarks>
+        ///     The default implementation uses the <see cref="ThreadPool" />
+        ///     to queue the reporting.
+        /// </remarks>
         protected virtual void ReportErrorAsync(Error error)
         {
             if (error == null)
@@ -230,9 +228,8 @@ namespace ElmahCore.Mvc.Notifiers
         }
 
         /// <summary>
-        /// Schedules the error to be e-mailed synchronously.
+        ///     Schedules the error to be e-mailed synchronously.
         /// </summary>
-
         protected virtual void ReportError(Error error)
         {
             if (error == null)
@@ -261,18 +258,12 @@ namespace ElmahCore.Mvc.Notifiers
 
             mail.From = new MailAddress(sender);
             var recipients = recipient.Split(';');
-            foreach (var r in recipients)
-            {
-                mail.To.Add(r);
-            }
+            foreach (var r in recipients) mail.To.Add(r);
 
             if (copyRecipient.Length > 0)
             {
                 recipients = copyRecipient.Split(';');
-                foreach (var r in recipients)
-                {
-                    mail.CC.Add(r);
-                }
+                foreach (var r in recipients) mail.CC.Add(r);
             }
 
             //
@@ -280,8 +271,8 @@ namespace ElmahCore.Mvc.Notifiers
             // 
 
             var subjectFormat = MailSubjectFormat ?? "Error ({1}): {0}";
-            mail.Subject = string.Format(subjectFormat, error.Message, error.Type).
-                Replace('\r', ' ').Replace('\n', ' ');
+            mail.Subject = string.Format(subjectFormat, error.Message, error.Type).Replace('\r', ' ')
+                .Replace('\n', ' ');
 
             //
             // Format the mail body.
@@ -295,10 +286,14 @@ namespace ElmahCore.Mvc.Notifiers
 
             switch (formatter.MimeType)
             {
-                case "text/html": mail.IsBodyHtml = true; break;
-                case "text/plain": mail.IsBodyHtml = false; break;
+                case "text/html":
+                    mail.IsBodyHtml = true;
+                    break;
+                case "text/plain":
+                    mail.IsBodyHtml = false;
+                    break;
 
-                default :
+                default:
                 {
                     throw new ApplicationException(string.Format(
                         "The error mail module does not know how to handle the {1} media type that is created by the {0} formatter.",
@@ -337,25 +332,22 @@ namespace ElmahCore.Mvc.Notifiers
 
         private static MailAttachment CreateHtmlAttachment(string name, string html)
         {
-
             return MailAttachment.CreateAttachmentFromString(html,
                 name + ".html", Encoding.UTF8, "text/html");
         }
 
         /// <summary>
-        /// Creates the <see cref="ErrorTextFormatter"/> implementation to 
-        /// be used to format the body of the e-mail.
+        ///     Creates the <see cref="ErrorTextFormatter" /> implementation to
+        ///     be used to format the body of the e-mail.
         /// </summary>
-
         internal virtual ErrorTextFormatter CreateErrorFormatter()
         {
             return new ErrorMailHtmlFormatter();
         }
 
         /// <summary>
-        /// Sends the e-mail using SmtpMail or SmtpClient.
+        ///     Sends the e-mail using SmtpMail or SmtpClient.
         /// </summary>
-
         protected virtual void SendMail(MailMessage mail)
         {
             if (mail == null)
@@ -391,17 +383,6 @@ namespace ElmahCore.Mvc.Notifiers
 
             client.Send(mail);
         }
-
-
-        public void Notify(Error error)
-        {
-            if (_reportAsynchronously)
-                ReportErrorAsync(error);
-            else
-                ReportError(error);
-        }
-
-        public string Name { get; }
     }
 
     public class EmailOptions

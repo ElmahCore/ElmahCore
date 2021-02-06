@@ -7,12 +7,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore.Mvc.Handlers
 {
-
     /// <summary>
-    /// Renders an error as an XML document.
+    ///     Renders an error as an XML document.
     /// </summary>
-
-    static class ErrorXmlHandler
+    internal static class ErrorXmlHandler
     {
         public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog)
         {
@@ -36,10 +34,7 @@ namespace ElmahCore.Mvc.Handlers
             // the reason, pretend it does not exist.
             //
 
-            if (entry == null)
-            {
-                context.Response.StatusCode = 404;
-            }
+            if (entry == null) context.Response.StatusCode = 404;
 
             //
             // Stream out the error as formatted XML.
@@ -47,13 +42,11 @@ namespace ElmahCore.Mvc.Handlers
 
             var wrappedError = new ErrorWrapper(entry?.Error, errorLog.SourcePaths);
             var xmlSerializer = new XmlSerializer(wrappedError.GetType(), new XmlRootAttribute("Error"));
-            using(var textWriter = new StringWriter())
+            using (var textWriter = new StringWriter())
             {
                 xmlSerializer.Serialize(textWriter, wrappedError);
                 await response.WriteAsync(textWriter.ToString(), Encoding.UTF8);
             }
-
         }
     }
-
 }

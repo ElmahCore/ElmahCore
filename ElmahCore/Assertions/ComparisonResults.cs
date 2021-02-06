@@ -2,7 +2,6 @@ using System;
 
 namespace ElmahCore.Assertions
 {
-
     internal static class ComparisonResults
     {
         public static readonly Predicate<int> Equal = result => result == 0;

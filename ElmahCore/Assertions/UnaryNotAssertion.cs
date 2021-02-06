@@ -2,7 +2,6 @@ using System;
 
 namespace ElmahCore.Assertions
 {
-
     internal sealed class UnaryNotAssertion : IAssertion
     {
         public UnaryNotAssertion(IAssertion operand)
@@ -13,6 +12,9 @@ namespace ElmahCore.Assertions
         // ReSharper disable once MemberCanBePrivate.Global
         public IAssertion Operand { get; }
 
-        public bool Test(object context) => !Operand.Test(context);
+        public bool Test(object context)
+        {
+            return !Operand.Test(context);
+        }
     }
 }

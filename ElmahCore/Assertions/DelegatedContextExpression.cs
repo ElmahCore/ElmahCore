@@ -2,7 +2,7 @@ using System;
 
 namespace ElmahCore.Assertions
 {
-	internal sealed class DelegatedContextExpression : IContextExpression
+    internal sealed class DelegatedContextExpression : IContextExpression
     {
         public DelegatedContextExpression(Func<object, object> handler)
         {
@@ -12,8 +12,14 @@ namespace ElmahCore.Assertions
         // ReSharper disable once MemberCanBePrivate.Global
         public Func<object, object> Handler { get; }
 
-        public object Evaluate(object context) => Handler(context);
+        public object Evaluate(object context)
+        {
+            return Handler(context);
+        }
 
-        public override string ToString() => Handler.ToString();
+        public override string ToString()
+        {
+            return Handler.ToString();
+        }
     }
 }

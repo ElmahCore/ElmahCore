@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using ElmahCore.Mvc.MoreLinq;
+using System.Net;
 
 namespace ElmahCore.Mvc
 {
-    class SourceInfo
+    internal class SourceInfo
     {
         public string Type { get; set; }
         public string Method { get; set; }
@@ -15,11 +15,14 @@ namespace ElmahCore.Mvc
         public int Line { get; set; }
     }
 
-    static class ErrorDetailHelper
+    internal static class ErrorDetailHelper
     {
-        internal static Dictionary<string,StackFrameSourceCodeInfo> Cache = new Dictionary<string, StackFrameSourceCodeInfo>();
+        internal static Dictionary<string, StackFrameSourceCodeInfo> Cache =
+            new Dictionary<string, StackFrameSourceCodeInfo>();
+
         // make it internal to enable unit testing
-        internal static StackFrameSourceCodeInfo GetStackFrameSourceCodeInfo(string[] sourcePath, string method, string type, string filePath, int lineNumber)
+        internal static StackFrameSourceCodeInfo GetStackFrameSourceCodeInfo(string[] sourcePath, string method,
+            string type, string filePath, int lineNumber)
         {
             var key = $"{method}:{type}:{filePath}:{lineNumber}";
             lock (Cache)
@@ -36,27 +39,18 @@ namespace ElmahCore.Mvc
                 Line = lineNumber
             };
 
-            if (string.IsNullOrEmpty(stackFrame.File))
-            {
-                return stackFrame;
-            }
+            if (string.IsNullOrEmpty(stackFrame.File)) return stackFrame;
 
             IEnumerable<string> lines = null;
             var path = GetPath(sourcePath, filePath);
 
-            if (path != null)
-            {
-                lines = File.ReadLines(path);
-            }
+            if (path != null) lines = File.ReadLines(path);
 
-            if (lines != null)
-            {
-                ReadFrameContent(stackFrame, lines, stackFrame.Line, stackFrame.Line);
-            }
-            
+            if (lines != null) ReadFrameContent(stackFrame, lines, stackFrame.Line, stackFrame.Line);
+
             lock (Cache)
             {
-                if (!Cache.ContainsKey(key)) Cache.Add(key,stackFrame);
+                if (!Cache.ContainsKey(key)) Cache.Add(key, stackFrame);
             }
 
             return stackFrame;
@@ -79,8 +73,8 @@ namespace ElmahCore.Mvc
                         return curPath;
                     curLen += subPath.Length + 1;
                 }
-
             }
+
             return null;
         }
 
@@ -99,15 +93,15 @@ namespace ElmahCore.Mvc
                 .Take(postErrorLineNumberInFile - preErrorLineNumberInFile + 1)
                 .ToArray();
 
-            var numOfErrorLines = (errorEndLineNumberInFile - errorStartLineNumberInFile) + 1;
+            var numOfErrorLines = errorEndLineNumberInFile - errorStartLineNumberInFile + 1;
             var errorStartLineNumberInArray = errorStartLineNumberInFile - preErrorLineNumberInFile;
 
             frame.PreContextLine = preErrorLineNumberInFile;
-            frame.PreContextCode = string.Join("\n",codeBlock.Take(errorStartLineNumberInArray));
-            frame.ContextCode = string.Join("\n",codeBlock
+            frame.PreContextCode = string.Join("\n", codeBlock.Take(errorStartLineNumberInArray));
+            frame.ContextCode = string.Join("\n", codeBlock
                 .Skip(errorStartLineNumberInArray)
                 .Take(numOfErrorLines));
-            frame.PostContextCode = string.Join("\n",codeBlock
+            frame.PostContextCode = string.Join("\n", codeBlock
                 .Skip(errorStartLineNumberInArray + numOfErrorLines));
         }
 
@@ -124,26 +118,26 @@ namespace ElmahCore.Mvc
                 (idx, len, txt) => new
                 {
                     Index = idx,
-                    End   = idx + len,
-                    Html  = txt.Length > 0
-                        ? Html.Encode(txt).ToHtmlString()
-                        : string.Empty,
+                    End = idx + len,
+                    Html = txt.Length > 0
+                        ? WebUtility.HtmlEncode(txt)
+                        : string.Empty
                 },
                 (t, m) => new
                 {
-                    Type   = new { t.Index, t.End, Html = "<span class='st-type'>" + t.Html + "</span>" },
-                    Method = new { m.Index, m.End, Html = "<span class='st-method'>" + m.Html + "</span>" }
+                    Type = new {t.Index, t.End, Html = "<span class='st-type'>" + t.Html + "</span>"},
+                    Method = new {m.Index, m.End, Html = "<span class='st-method'>" + m.Html + "</span>"}
                 },
                 (t, n) => new
                 {
                     Type = new {t.Index, t.End, Html = "<span class='st-param-type'>" + t.Html + "</span>"},
                     Name = new {n.Index, n.End, Html = "<span class='st-param-name'>" + n.Html + "</span>"}
                 },
-                (p, ps) => new { List = p, Parameters = ps.ToArray() },
+                (p, ps) => new {List = p, Parameters = ps.ToArray()},
                 (f, l, m, t) =>
                 {
-                    if (int.TryParse(l.Html, out int line))
-                        list.Add( new SourceInfo
+                    if (int.TryParse(l.Html, out var line))
+                        list.Add(new SourceInfo
                         {
                             Source = f.Html,
                             Line = line,
@@ -157,7 +151,7 @@ namespace ElmahCore.Mvc
                             : null,
                         Line = l.Html.Length > 0
                             ? new {l.Index, l.End, Html = "<span class='st-line'>" + l.Html + "</span>"}
-                            : null,
+                            : null
                     };
                 },
                 (f, tm, p, fl) =>
@@ -165,21 +159,21 @@ namespace ElmahCore.Mvc
                     {
                         new[]
                         {
-                            new { f.Index, End = f.Index, Html = "<span class='st-frame'>" },
+                            new {f.Index, End = f.Index, Html = "<span class='st-frame'>"},
                             tm.Type,
                             tm.Method,
-                            new { p.List.Index, End = p.List.Index, Html = "<span class='params'>" },
+                            new {p.List.Index, End = p.List.Index, Html = "<span class='params'>"}
                         },
                         from pe in p.Parameters
-                        from e in new[] { pe.Type, pe.Name }
+                        from e in new[] {pe.Type, pe.Name}
                         select e,
                         new[]
                         {
-                            new { Index = p.List.End, p.List.End, Html = "</span>" },
+                            new {Index = p.List.End, p.List.End, Html = "</span>"},
                             fl.File,
                             fl.Line,
-                            new { Index = f.End, f.End, Html = "</span>" },
-                        },
+                            new {Index = f.End, f.End, Html = "</span>"}
+                        }
                     }
                     from token in tokens
                     where token != null
@@ -187,19 +181,20 @@ namespace ElmahCore.Mvc
             );
 
             var markups =
-                from token in Enumerable.Repeat(new { Index = 0, End = 0, Html = string.Empty }, 1)
+                from token in Enumerable.Repeat(new {Index = 0, End = 0, Html = string.Empty}, 1)
                     .Concat(from tokens in frames from token in tokens select token)
-                    .Pairwise((prev, curr) => new { Previous = prev, Current = curr })
+                    .Pairwise((prev, curr) => new {Previous = prev, Current = curr})
                 from m in new object[]
                 {
                     text.Substring(token.Previous.End, token.Current.Index - token.Previous.End),
-                    Html.Raw(token.Current.Html)
+                    token.Current.Html
                 }
-                select Html.Encode(m).ToHtmlString() into m
+                select m.ToString()
+                into m
                 where m.Length > 0
                 select m;
 
-            return markups.ToDelimitedString(string.Empty);
+            return string.Join(String.Empty, markups);
         }
     }
 }

@@ -10,8 +10,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore.Mvc.Handlers
 {
-
-    static class ErrorLogDownloadHandler
+    internal static class ErrorLogDownloadHandler
     {
         private const int PageSize = 100;
 
@@ -46,10 +45,12 @@ namespace ElmahCore.Mvc.Handlers
         public static Task ProcessRequestAsync(ErrorLog errorLog, HttpContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            return ProcessRequestPrelude(context, (format, maxDownloadCount) => ProcessRequestAsync(errorLog,context, format, maxDownloadCount));
+            return ProcessRequestPrelude(context,
+                (format, maxDownloadCount) => ProcessRequestAsync(errorLog, context, format, maxDownloadCount));
         }
 
-        private static async Task ProcessRequestAsync(ErrorLog log, HttpContext context, Format format, int maxDownloadCount)
+        private static async Task ProcessRequestAsync(ErrorLog log, HttpContext context, Format format,
+            int maxDownloadCount)
         {
             var response = context.Response;
             var output = response;
@@ -60,7 +61,7 @@ namespace ElmahCore.Mvc.Handlers
             var errorEntryList = new List<ErrorLogEntry>(PageSize);
             var downloadCount = 0;
 
-            for (var pageIndex = 0; ; pageIndex++)
+            for (var pageIndex = 0;; pageIndex++)
             {
                 var total = await log.GetErrorsAsync(pageIndex, PageSize, errorEntryList);
                 var count = errorEntryList.Count;
@@ -87,10 +88,8 @@ namespace ElmahCore.Mvc.Handlers
                 if (count == 0 || downloadCount == maxDownloadCount)
                 {
                     if (count > 0)
-                    {
                         foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
                             await response.WriteAsync(entry);
-                    }
                     break;
                 }
 
@@ -117,17 +116,18 @@ namespace ElmahCore.Mvc.Handlers
 
         private abstract class Format
         {
-            private readonly HttpContext _context;
-
             protected Format(HttpContext context)
             {
                 Debug.Assert(context != null);
-                _context = context;
+                Context = context;
             }
 
-            protected HttpContext Context => _context;
+            protected HttpContext Context { get; }
 
-            public virtual IEnumerable<string> Header() { yield break; }
+            public virtual IEnumerable<string> Header()
+            {
+                yield break;
+            }
 
             public IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int total)
             {
@@ -139,15 +139,18 @@ namespace ElmahCore.Mvc.Handlers
 
         private sealed class CsvFormat : Format
         {
-            public CsvFormat(HttpContext context) : 
-                base(context) {}
+            public CsvFormat(HttpContext context) :
+                base(context)
+            {
+            }
 
             public override IEnumerable<string> Header()
             {
                 var response = Context.Response;
                 response.Headers.Add("Content-Type", "text/csv; header=present");
                 response.Headers.Add("Content-Disposition", "attachment; filename=errorlog.csv");
-                yield return "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n";
+                yield return
+                    "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n";
             }
 
             public override IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
@@ -163,7 +166,7 @@ namespace ElmahCore.Mvc.Handlers
                 // Setup to emit CSV records.
                 //
 
-                var writer = new StringWriter { NewLine = "\r\n" };
+                var writer = new StringWriter {NewLine = "\r\n"};
                 var csv = new CsvWriter(writer);
 
                 var culture = CultureInfo.InvariantCulture;
@@ -182,18 +185,18 @@ namespace ElmahCore.Mvc.Handlers
                     var requestUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
 
                     csv.Field(error.ApplicationName)
-                       .Field(error.HostName)
-                       .Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture))
-                       .Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture))
-                       .Field(error.Type)
-                       .Field(error.Source)
-                       .Field(error.User)
-                       .Field(error.StatusCode.ToString(culture))
-                       .Field(error.Message)
-                       .Field($"{requestUrl}detail{query}")
-                       .Field($"{requestUrl}detail{query}")
-                       .Field($"{requestUrl}detail{query}")
-                       .Record();
+                        .Field(error.HostName)
+                        .Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture))
+                        .Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture))
+                        .Field(error.Type)
+                        .Field(error.Source)
+                        .Field(error.User)
+                        .Field(error.StatusCode.ToString(culture))
+                        .Field(error.Message)
+                        .Field($"{requestUrl}detail{query}")
+                        .Field($"{requestUrl}detail{query}")
+                        .Field($"{requestUrl}detail{query}")
+                        .Record();
                 }
 
                 yield return writer.ToString();
@@ -211,13 +214,16 @@ namespace ElmahCore.Mvc.Handlers
                 | RegexOptions.IgnorePatternWhitespace
                 | RegexOptions.CultureInvariant);
 
-            private string _callback;
             private readonly bool _wrapped;
 
-            public JsonPaddingFormat(HttpContext context) :
-                this(context, false) {}
+            private string _callback;
 
-            public JsonPaddingFormat(HttpContext context, bool wrapped) : 
+            public JsonPaddingFormat(HttpContext context) :
+                this(context, false)
+            {
+            }
+
+            public JsonPaddingFormat(HttpContext context, bool wrapped) :
                 base(context)
             {
                 _wrapped = wrapped;
@@ -225,9 +231,9 @@ namespace ElmahCore.Mvc.Handlers
 
             public override IEnumerable<string> Header()
             {
-                var callback = Context.Request.Query["callback"].FirstOrDefault() 
-                                  ?? string.Empty;
-                
+                var callback = Context.Request.Query["callback"].FirstOrDefault()
+                               ?? string.Empty;
+
                 if (callback.Length == 0)
                     throw new Exception("The JSONP callback parameter is missing.");
 
@@ -240,14 +246,15 @@ namespace ElmahCore.Mvc.Handlers
 
                 if (!_wrapped)
                 {
-                    response.Headers.Add("Content-Type", "text/javascript") ;
+                    response.Headers.Add("Content-Type", "text/javascript");
                     response.Headers.Add("Content-Disposition", "attachment; filename=errorlog.js");
                 }
                 else
                 {
                     response.Headers.Add("Content-Type", "text/html");
 
-                    yield return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+                    yield return
+                        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
                     yield return @"
                     <html xmlns='http://www.w3.org/1999/xhtml'>
                     <head>
@@ -264,14 +271,14 @@ namespace ElmahCore.Mvc.Handlers
                 Debug.Assert(index >= 0);
                 Debug.Assert(index + count <= entries.Count);
 
-                var writer = new StringWriter { NewLine = "\n" };
+                var writer = new StringWriter {NewLine = "\n"};
 
                 if (_wrapped)
                 {
                     writer.WriteLine("<script type='text/javascript' language='javascript'>");
                     writer.WriteLine("//<[!CDATA[");
                 }
-                
+
                 writer.Write(_callback);
                 writer.Write('(');
 
@@ -290,28 +297,28 @@ namespace ElmahCore.Mvc.Handlers
                     writer.Write("  ");
 
                     var urlTemplate = $"{requestUrl}?id=" + Uri.EscapeDataString(entry.Id);
-                    
+
                     json.Object();
-                            ErrorJson.EncodeMembers(entry.Error, json);
-                            json.Member("hrefs")
-                            .Array()
-                                .Object()
-                                    .Member("type").String("text/html")
-                                    .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
-                                .Object()
-                                    .Member("type").String("application/json")
-                                    .Member("href").String(string.Format(urlTemplate, "json")).Pop()
-                                .Object()
-                                    .Member("type").String("application/xml")
-                                    .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
-                            .Pop()
+                    ErrorJson.EncodeMembers(entry.Error, json);
+                    json.Member("hrefs")
+                        .Array()
+                        .Object()
+                        .Member("type").String("text/html")
+                        .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
+                        .Object()
+                        .Member("type").String("application/json")
+                        .Member("href").String(string.Format(urlTemplate, "json")).Pop()
+                        .Object()
+                        .Member("type").String("application/xml")
+                        .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
+                        .Pop()
                         .Pop();
                 }
 
                 json.Pop();
                 json.Pop();
 
-                if (count > 0) 
+                if (count > 0)
                     writer.WriteLine();
 
                 writer.WriteLine(");");
@@ -331,10 +338,9 @@ namespace ElmahCore.Mvc.Handlers
 
         private sealed class CsvWriter
         {
+            private static readonly char[] Reserved = {'\"', ',', '\r', '\n'};
             private readonly TextWriter _writer;
             private int _column;
-
-            private static readonly char[] Reserved = new char[] { '\"', ',', '\r', '\n' };
 
             public CsvWriter(TextWriter writer)
             {

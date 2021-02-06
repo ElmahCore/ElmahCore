@@ -6,14 +6,13 @@ namespace ElmahCore.Mvc.Xml
 {
     #region Imports
 
-	using SystemXmlSerializer = System.Xml.Serialization.XmlSerializer;
+    using SystemXmlSerializer = System.Xml.Serialization.XmlSerializer;
 
     #endregion
 
     /// <summary>
-    /// Serializes object to and from XML documents.
+    ///     Serializes object to and from XML documents.
     /// </summary>
-    
     internal static class XmlSerializer
     {
         public static string Serialize(object obj)

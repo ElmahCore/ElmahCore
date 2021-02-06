@@ -2,19 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace ElmahCore
 {
     /// <summary>
-    /// An <see cref="ErrorLog"/> implementation that uses memory as its 
-    /// backing store. 
+    ///     An <see cref="ErrorLog" /> implementation that uses memory as its
+    ///     backing store.
     /// </summary>
     /// <remarks>
-    /// All <see cref="MemoryErrorLog"/> instances will share the same memory 
-    /// store that is bound to the application (not an instance of this class).
+    ///     All <see cref="MemoryErrorLog" /> instances will share the same memory
+    ///     store that is bound to the application (not an instance of this class).
     /// </remarks>
-
     public sealed class MemoryErrorLog : ErrorLog
     {
         //
@@ -25,6 +25,18 @@ namespace ElmahCore
         private static EntryCollection _entries;
         private static readonly ReaderWriterLockSlim Lock = new ReaderWriterLockSlim();
 
+        /// <summary>
+        ///     The maximum number of errors that will ever be allowed to be stored
+        ///     in memory.
+        /// </summary>
+        private static readonly int MaximumSize = 500;
+
+        /// <summary>
+        ///     The maximum number of errors that will be held in memory by default
+        ///     if no size is specified.
+        /// </summary>
+        private static readonly int DefaultSize = 15;
+
         //
         // IMPORTANT! The size must be the same for all instances
         // for the entries collection to be initialized correctly.
@@ -33,52 +45,41 @@ namespace ElmahCore
         private readonly int _size;
 
         /// <summary>
-        /// The maximum number of errors that will ever be allowed to be stored
-        /// in memory.
-        /// </summary>
-        private static readonly int MaximumSize = 500;
-        
-        /// <summary>
-        /// The maximum number of errors that will be held in memory by default 
-        /// if no size is specified.
-        /// </summary>
-        private static readonly int DefaultSize = 15;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryErrorLog"/> class
-        /// with a default size for maximum recordable entries.
+        ///     Initializes a new instance of the <see cref="MemoryErrorLog" /> class
+        ///     with a default size for maximum recordable entries.
         /// </summary>
 
         // ReSharper disable once UnusedMember.Global
-        public MemoryErrorLog() : this(DefaultSize) {}
+        public MemoryErrorLog() : this(DefaultSize)
+        {
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryErrorLog"/> class
-        /// with a specific size for maximum recordable entries.
+        ///     Initializes a new instance of the <see cref="MemoryErrorLog" /> class
+        ///     with a specific size for maximum recordable entries.
         /// </summary>
 
         // ReSharper disable once MemberCanBePrivate.Global
         public MemoryErrorLog(int size)
         {
-            if (size < 0 || size > MaximumSize)   
+            if (size < 0 || size > MaximumSize)
                 throw new ArgumentOutOfRangeException(nameof(size), size, $"Size must be between 0 and {MaximumSize}.");
 
             _size = size;
         }
 
         /// <summary>
-        /// Gets the name of this error log implementation.
+        ///     Gets the name of this error log implementation.
         /// </summary>
 
         public override string Name => "In-Memory Error Log";
 
-	    /// <summary>
-        /// Logs an error to the application memory.
+        /// <summary>
+        ///     Logs an error to the application memory.
         /// </summary>
         /// <remarks>
-        /// If the log is full then the oldest error entry is removed.
+        ///     If the log is full then the oldest error entry is removed.
         /// </remarks>
-
         public override string Log(Error error)
         {
             var newId = Guid.NewGuid();
@@ -102,7 +103,7 @@ namespace ElmahCore
             error.ApplicationName = ApplicationName;
             var entry = new ErrorLogEntry(this, id.ToString(), error);
 
-            Lock.EnterWriteLock(); 
+            Lock.EnterWriteLock();
 
             try
             {
@@ -116,10 +117,9 @@ namespace ElmahCore
         }
 
         /// <summary>
-        /// Returns the specified error from application memory, or null 
-        /// if it does not exist.
+        ///     Returns the specified error from application memory, or null
+        ///     if it does not exist.
         /// </summary>
-
         public override ErrorLogEntry GetError(string id)
         {
             Lock.EnterReadLock();
@@ -150,10 +150,9 @@ namespace ElmahCore
         }
 
         /// <summary>
-        /// Returns a page of errors from the application memory in
-        /// descending order of logged time.
+        ///     Returns a page of errors from the application memory in
+        ///     descending order of logged time.
         /// </summary>
-
         public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
@@ -182,7 +181,7 @@ namespace ElmahCore
                 var startIndex = errorIndex;
                 var endIndex = Math.Min(startIndex + pageSize, totalCount);
                 var count = Math.Max(0, endIndex - startIndex);
-                
+
                 if (count > 0)
                 {
                     selectedEntries = new ErrorLogEntry[count];
@@ -200,7 +199,6 @@ namespace ElmahCore
             }
 
             if (errorEntryList != null && selectedEntries != null)
-            {
                 //
                 // Return copies of fetched entries. If the Error class would 
                 // be immutable then this step wouldn't be necessary.
@@ -211,12 +209,11 @@ namespace ElmahCore
                     var error = entry.Error.Clone();
                     errorEntryList.Add(new ErrorLogEntry(this, entry.Id, error));
                 }
-            }
 
             return totalCount;
         }
 
-        sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
+        private sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
         {
             private readonly int _size;
 
@@ -237,6 +234,7 @@ namespace ElmahCore
                     RemoveAt(0);
                     index--;
                 }
+
                 base.InsertItem(index, item);
             }
         }

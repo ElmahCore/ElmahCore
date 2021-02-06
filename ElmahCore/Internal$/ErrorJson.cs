@@ -6,26 +6,23 @@ using System.Linq;
 
 namespace ElmahCore
 {
-
     /// <summary>
-    /// Responsible for primarily encoding the JSON representation of
-    /// <see cref="Error"/> objects.
+    ///     Responsible for primarily encoding the JSON representation of
+    ///     <see cref="Error" /> objects.
     /// </summary>
-
     internal static class ErrorJson
     {
-	    /// <summary>
-        /// Encodes the default JSON representation of an <see cref="Error"/> 
-        /// object to a <see cref="TextWriter" />.
+        /// <summary>
+        ///     Encodes the default JSON representation of an <see cref="Error" />
+        ///     object to a <see cref="TextWriter" />.
         /// </summary>
         /// <remarks>
-        /// Only properties and collection entires with non-null
-        /// and non-empty strings are emitted.
+        ///     Only properties and collection entires with non-null
+        ///     and non-empty strings are emitted.
         /// </remarks>
-
         public static void Encode(Error error, TextWriter writer)
         {
-            if (error == null) throw new ArgumentNullException(nameof(error));            
+            if (error == null) throw new ArgumentNullException(nameof(error));
             if (writer == null) throw new ArgumentNullException(nameof(writer));
 
             EncodeEnclosed(error, new JsonTextWriter(writer));
@@ -96,7 +93,7 @@ namespace ElmahCore
             // Bail out early if the collection is null or empty.
             //
 
-            if (collection == null || collection.Count == 0) 
+            if (collection == null || collection.Count == 0)
                 return;
 
             //
@@ -118,21 +115,21 @@ namespace ElmahCore
             //
 
             var items = from i in Enumerable.Range(0, collection.Count)
-                        let values = collection.GetValues(i)
-                        where values != null && values.Length > 0
-                        let some = // Neither null nor empty
-                            from v in values
-                            where !string.IsNullOrEmpty(v)
-                            select v
-                        let nom = some.Take(2).Count()
-                        where nom > 0
-                        select new
-                        {
-                            Key = collection.GetKey(i), 
-                            IsArray = nom > 1, 
-                            Values = some,
-                        };
-            
+                let values = collection.GetValues(i)
+                where values != null && values.Length > 0
+                let some = // Neither null nor empty
+                    from v in values
+                    where !string.IsNullOrEmpty(v)
+                    select v
+                let nom = some.Take(2).Count()
+                where nom > 0
+                select new
+                {
+                    Key = collection.GetKey(i),
+                    IsArray = nom > 1,
+                    Values = some
+                };
+
             foreach (var item in items)
             {
                 //
@@ -155,8 +152,8 @@ namespace ElmahCore
                 foreach (var value in item.Values)
                     writer.String(value);
 
-                if (item.IsArray) 
-                    writer.Pop();   // Close multiples array
+                if (item.IsArray)
+                    writer.Pop(); // Close multiples array
             }
 
             //

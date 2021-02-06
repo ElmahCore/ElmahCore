@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using ElmahCore.DemoCore3.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace ElmahCore.DemoCore3.Controllers
@@ -14,6 +14,7 @@ namespace ElmahCore.DemoCore3.Controllers
         {
             _logger = logger;
         }
+
         public IActionResult Index()
         {
             ElmahExtensions.RiseError(new InvalidOperationException("This is the Test Exception from code."));
@@ -30,8 +31,10 @@ namespace ElmahCore.DemoCore3.Controllers
             if (DateTime.Now.Millisecond < 500)
             {
                 string str = null;
+                // ReSharper disable once PossibleNullReferenceException
                 foreach (var cc in str)
                 {
+                    Debug.WriteLine(cc);
                 }
             }
 
@@ -50,7 +53,7 @@ namespace ElmahCore.DemoCore3.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
     }
 }

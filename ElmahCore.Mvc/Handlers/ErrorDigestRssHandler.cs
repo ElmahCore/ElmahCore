@@ -3,28 +3,29 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using ElmahCore.Mvc.Notifiers;
 using ElmahCore.Mvc.Xml;
 using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore.Mvc.Handlers
 {
     /// <summary>
-    /// Renders an RSS feed that is a daily digest of the most recently 
-    /// recorded errors in the error log. The feed spans at most 15
-    /// days on which errors occurred.
+    ///     Renders an RSS feed that is a daily digest of the most recently
+    ///     recorded errors in the error log. The feed spans at most 15
+    ///     days on which errors occurred.
     /// </summary>
-
-    static class ErrorDigestRssHandler
+    internal static class ErrorDigestRssHandler
     {
         public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog, string elmahRoot)
         {
             var log = errorLog;
 
             var response = context.Response;
-            
+
             response.ContentType = "application/xml";
 
             var title = $@"Daily digest of errors in {log.ApplicationName} on {Environment.MachineName}";
@@ -37,8 +38,8 @@ namespace ElmahCore.Mvc.Handlers
 
             await context.Response.WriteAsync(XmlText.StripIllegalXmlCharacters(rss.ToString()));
         }
-        
-        private static IEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit) 
+
+        private static IEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit)
         {
             Debug.Assert(log != null);
             Debug.Assert(baseUrl != null);
@@ -52,10 +53,10 @@ namespace ElmahCore.Mvc.Handlers
             var sb = new StringBuilder();
             var writer = new StringWriter(sb);
 
-            var source = GetErrors(log, pageSize, (p, e) => new { PageIndex = p, Entry = e });
+            var source = GetErrors(log, pageSize, (p, e) => new {PageIndex = p, Entry = e});
 
-            foreach (var entry in from item in source.TakeWhile(e => e.PageIndex < maxPageLimit) 
-                                   select item.Entry)
+            foreach (var entry in from item in source.TakeWhile(e => e.PageIndex < maxPageLimit)
+                select item.Entry)
             {
                 var error = entry.Error;
                 var time = error.Time.ToUniversalTime();
@@ -73,7 +74,7 @@ namespace ElmahCore.Mvc.Handlers
                         RenderEnd(writer);
                         Debug.Assert(title != null);
                         Debug.Assert(pubDate != null);
-                        if (pubDate != null) yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
+                        yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
                     }
 
                     runningDay = day;
@@ -93,7 +94,7 @@ namespace ElmahCore.Mvc.Handlers
                 RenderEnd(writer);
                 Debug.Assert(title != null);
                 Debug.Assert(pubDate != null);
-                if (pubDate != null) yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
+                yield return RssXml.Item(title, sb.ToString(), pubDate.Value);
             }
         }
 
@@ -104,7 +105,7 @@ namespace ElmahCore.Mvc.Handlers
             Debug.Assert(resultor != null);
 
             var entries = new List<ErrorLogEntry>(pageSize);
-            for (var pageIndex = 0; ; pageIndex++)
+            for (var pageIndex = 0;; pageIndex++)
             {
                 log.GetErrors(pageIndex, pageSize, entries);
                 if (!entries.Any())
@@ -117,14 +118,14 @@ namespace ElmahCore.Mvc.Handlers
 
         // TODO Consider moving the rest to a Razor template
 
-        private static void RenderStart(TextWriter writer) 
+        private static void RenderStart(TextWriter writer)
         {
             Debug.Assert(writer != null);
 
             writer.Write("<ul>");
         }
 
-        private static void RenderError(TextWriter writer, ErrorLogEntry entry, Uri baseUrl) 
+        private static void RenderError(TextWriter writer, ErrorLogEntry entry, Uri baseUrl)
         {
             Debug.Assert(writer != null);
             Debug.Assert(entry != null);
@@ -139,20 +140,21 @@ namespace ElmahCore.Mvc.Handlers
             if (errorType.Length > 0)
             {
                 var abbreviated = errorType.Length < error.Type.Length;
-                        
-                if (abbreviated)
-                    writer.Write("<span title='{0}'>", Html.Encode(error.Type).ToHtmlString());
 
-                writer.Write(Html.Encode(errorType).ToHtmlString());
-                        
+                if (abbreviated)
+                    writer.Write("<span title='{0}'>", WebUtility.HtmlEncode(error.Type));
+
+                writer.Write(WebUtility.HtmlEncode(errorType));
+
                 if (abbreviated)
                     writer.Write("</span>");
 
                 writer.Write(": ");
             }
 
-            writer.Write("<a href='{0}'>", Html.Encode(baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id)).ToHtmlString());
-            writer.Write(Html.Encode(error.Message).ToHtmlString());
+            writer.Write("<a href='{0}'>",
+                WebUtility.HtmlEncode(baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id)));
+            writer.Write(WebUtility.HtmlEncode(error.Message));
             writer.Write("</a>");
 
             writer.Write("</li>");

@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace ElmahCore.Mvc.Xml
 {
-    static class RssXml
+    internal static class RssXml
     {
         public static XElement Rss(string title, string link, string description, IEnumerable<XElement> items)
         {

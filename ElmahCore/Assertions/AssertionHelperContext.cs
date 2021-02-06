@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
+
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedMember.Global
@@ -15,7 +16,8 @@ namespace ElmahCore.Assertions
 
         public AssertionHelperContext(Exception e, object context) :
             this(null, e, context)
-        { }
+        {
+        }
 
         public AssertionHelperContext(object source, Exception e, object context)
         {

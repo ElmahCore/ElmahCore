@@ -1,18 +1,15 @@
 using System.Diagnostics;
 using System.IO;
 using ElmahCore.DemoCore5.Data;
+using ElmahCore.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ElmahCore.Mvc;
-using ElmahCore.Sql;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.EventLog;
 
 namespace ElmahCore.DemoCore5
 {
@@ -68,6 +65,7 @@ namespace ElmahCore.DemoCore5
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -81,12 +79,13 @@ namespace ElmahCore.DemoCore5
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    "default",
+                    "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
         }
     }
+
     public class MyNotifier : IErrorNotifier
     {
         public void Notify(Error error)
@@ -96,6 +95,7 @@ namespace ElmahCore.DemoCore5
 
         public string Name => "my";
     }
+
     public class CmsErrorLogFilter : IErrorFilter
     {
         public void OnErrorModuleFiltering(object sender, ExceptionFilterEventArgs args)
@@ -103,10 +103,8 @@ namespace ElmahCore.DemoCore5
             if (args.Exception.GetBaseException() is FileNotFoundException)
                 args.Dismiss();
             if (args.Context is HttpContext httpContext)
-            {
                 if (httpContext.Response.StatusCode == 404)
                     args.Dismiss();
-            }
         }
     }
 }

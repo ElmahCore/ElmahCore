@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace ElmahCore.Mvc
 {
-    [Serializable()]
+    [Serializable]
     public class SerializableDictionary<TKey, TVal> : Dictionary<TKey, TVal>, IXmlSerializable, ISerializable
     {
         #region Constants
+
         private const string ItemNodeName = "Item";
         private const string KeyNodeName = "Key";
         private const string ValueNodeName = "Value";
+
         #endregion
+
         #region Constructors
+
         public SerializableDictionary()
         {
         }
@@ -44,23 +50,24 @@ namespace ElmahCore.Mvc
         }
 
         #endregion
+
         #region ISerializable Members
 
         protected SerializableDictionary(SerializationInfo info, StreamingContext context)
         {
-            int itemCount = info.GetInt32("ItemCount");
-            for (int i = 0; i < itemCount; i++)
+            var itemCount = info.GetInt32("ItemCount");
+            for (var i = 0; i < itemCount; i++)
             {
-                KeyValuePair<TKey, TVal> kvp = (KeyValuePair<TKey, TVal>)info.GetValue($"Item{i}", typeof(KeyValuePair<TKey, TVal>));
-                this.Add(kvp.Key, kvp.Value);
+                var kvp = (KeyValuePair<TKey, TVal>) info.GetValue($"Item{i}", typeof(KeyValuePair<TKey, TVal>));
+                Add(kvp.Key, kvp.Value);
             }
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("ItemCount", this.Count);
-            int itemIdx = 0;
-            foreach (KeyValuePair<TKey, TVal> kvp in this)
+            info.AddValue("ItemCount", Count);
+            var itemIdx = 0;
+            foreach (var kvp in this)
             {
                 info.AddValue($"Item{itemIdx}", kvp, typeof(KeyValuePair<TKey, TVal>));
                 itemIdx++;
@@ -68,11 +75,12 @@ namespace ElmahCore.Mvc
         }
 
         #endregion
+
         #region IXmlSerializable Members
 
-        void IXmlSerializable.WriteXml(System.Xml.XmlWriter writer)
+        void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            foreach (KeyValuePair<TKey, TVal> kvp in this)
+            foreach (var kvp in this)
             {
                 writer.WriteStartElement(ItemNodeName);
                 writer.WriteStartElement(KeyNodeName);
@@ -85,9 +93,16 @@ namespace ElmahCore.Mvc
             }
         }
 
-        void IXmlSerializable.ReadXml(System.Xml.XmlReader reader) => throw new NotImplementedException();
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            throw new NotImplementedException();
+        }
 
-        System.Xml.Schema.XmlSchema IXmlSerializable.GetSchema() => null;
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
         #endregion
     }
 }

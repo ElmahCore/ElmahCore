@@ -1,4 +1,5 @@
 #region License, Terms and Author(s)
+
 //
 // ELMAH - Error Logging Modules and Handlers for ASP.NET
 // Copyright (c) 2004-9 Atif Aziz. All rights reserved.
@@ -20,25 +21,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
 
-namespace ElmahCore.Mvc.ErrorMailHtml
+namespace ElmahCore.Mvc.Notifiers.ErrorMailHtml
 {
-	/// <summary>
-    /// Renders an HTML page displaying details about an error from the 
-    /// error log ready for emailing.
+    /// <summary>
+    ///     Renders an HTML page displaying details about an error from the
+    ///     error log ready for emailing.
     /// </summary>
-
-    partial class ErrorMailHtmlPage
+    internal partial class ErrorMailHtmlPage
     {
-        public Error Error { get; private set; }
-
         public ErrorMailHtmlPage(Error error)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
         }
+
+        public Error Error { get; }
     }
 }

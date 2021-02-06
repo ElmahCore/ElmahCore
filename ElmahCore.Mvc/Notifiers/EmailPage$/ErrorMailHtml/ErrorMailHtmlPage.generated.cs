@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 #pragma warning disable 1591
 //------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ElmahCore.Mvc.ErrorMailHtml
+namespace ElmahCore.Mvc.Notifiers.ErrorMailHtml
 {
 
 //#line 2 "..\..\ErrorMailHtmlPage.cshtml"

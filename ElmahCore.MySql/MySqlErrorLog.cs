@@ -6,44 +6,41 @@ using MySql.Data.MySqlClient;
 namespace ElmahCore.MySql
 {
     /// <summary>
-    /// An <see cref="ErrorLog"/> implementation that uses MySQL
-    /// as its backing store.
+    ///     An <see cref="ErrorLog" /> implementation that uses MySQL
+    ///     as its backing store.
     /// </summary>
-    ///
     public class MySqlErrorLog : ErrorLog
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MySqlErrorLog"/> class
-        /// using a dictionary of configured settings.
+        ///     Initializes a new instance of the <see cref="MySqlErrorLog" /> class
+        ///     using a dictionary of configured settings.
         /// </summary>
         public MySqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString)
-        { }
+        {
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MySqlErrorLog"/> class
-        /// to use a specific connection string for connecting to the database.
+        ///     Initializes a new instance of the <see cref="MySqlErrorLog" /> class
+        ///     to use a specific connection string for connecting to the database.
         /// </summary>
         public MySqlErrorLog(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException("connectionString");
 
-            this.ConnectionString = connectionString;
-            this.CreateTableIfNotExist();
+            ConnectionString = connectionString;
+            CreateTableIfNotExist();
         }
 
         /// <summary>
-        /// Gets the name of this error log implementation.
+        ///     Gets the name of this error log implementation.
         /// </summary>
-        public override string Name
-        {
-            get { return "MySQL Error Log"; }
-        }
+        public override string Name => "MySQL Error Log";
 
         /// <summary>
-        /// Gets the connection string used by the log to connect to the database.
+        ///     Gets the connection string used by the log to connect to the database.
         /// </summary>
-        public virtual string ConnectionString{ get; }
+        public virtual string ConnectionString { get; }
 
         public override string Log(Error error)
         {
@@ -62,7 +59,8 @@ namespace ElmahCore.MySql
             var errorXml = ErrorXml.EncodeString(error);
 
             using (var connection = new MySqlConnection(ConnectionString))
-            using (var command = CommandExtension.LogError(id, ApplicationName, error.HostName, error.Type, error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
+            using (var command = CommandExtension.LogError(id, ApplicationName, error.HostName, error.Type,
+                error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
             {
                 connection.Open();
                 command.Connection = connection;
@@ -72,7 +70,6 @@ namespace ElmahCore.MySql
 
         public override ErrorLogEntry GetError(string id)
         {
-
             if (id == null) throw new ArgumentNullException("id");
             if (id.Length == 0) throw new ArgumentException(null, "id");
 
@@ -94,7 +91,7 @@ namespace ElmahCore.MySql
             {
                 command.Connection = connection;
                 connection.Open();
-                errorXml = (string)command.ExecuteScalar();
+                errorXml = (string) command.ExecuteScalar();
             }
 
             if (errorXml == null)
@@ -129,33 +126,31 @@ namespace ElmahCore.MySql
                     }
                 }
 
-                return this.GetTotalErrorsXml(connection);
+                return GetTotalErrorsXml(connection);
             }
         }
 
         /// <summary>
-        /// Creates the neccessary tables used by this implementation
+        ///     Creates the neccessary tables used by this implementation
         /// </summary>
         private void CreateTableIfNotExist()
         {
-            using (var connection = new MySqlConnection(this.ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
                 connection.Open();
                 var databaseName = connection.Database;
 
-                using (var commandCheck= CommandExtension.CheckTable(databaseName))
+                using (var commandCheck = CommandExtension.CheckTable(databaseName))
                 {
                     commandCheck.Connection = connection;
-                    var exists = ((long)commandCheck.ExecuteScalar()) == 1;
+                    var exists = (long) commandCheck.ExecuteScalar() == 1;
 
                     if (!exists)
-                    {
                         using (var commandCreate = CommandExtension.CreateTable())
                         {
                             commandCreate.Connection = connection;
                             commandCreate.ExecuteNonQuery();
                         }
-                    }
                 }
             }
         }

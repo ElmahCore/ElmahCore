@@ -12,26 +12,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-
 namespace ElmahCore.Mvc
 {
     internal sealed class ErrorLogMiddleware
     {
-        private readonly RequestDelegate _next;
-        private readonly ErrorLog _errorLog;
-        private readonly IEnumerable<IErrorNotifier> _notifiers;
-        public event ExceptionFilterEventHandler Filtering;
-        // ReSharper disable once EventNeverSubscribedTo.Global
-        public event ErrorLoggedEventHandler Logged;
-        private readonly string _elmahRoot = @"/elmah";
-        private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
-        private readonly ILogger _logger;
-        private readonly Func<HttpContext, bool> _checkPermissionAction = context => true;
-        private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
-        private readonly bool _logRequestBody = true;
+        public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
+
         internal static bool ShowDebugPage = false;
 
-        private static readonly string[] SupportedContentTypes = {
+        private static readonly string[] SupportedContentTypes =
+        {
             "application/json",
             "application/x-www-form-urlencoded",
             "application/javascript",
@@ -45,9 +35,18 @@ namespace ElmahCore.Mvc
             "text/markdown"
         };
 
-        public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
+        private readonly Func<HttpContext, bool> _checkPermissionAction = context => true;
+        private readonly string _elmahRoot = @"/elmah";
+        private readonly ErrorLog _errorLog;
+        private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
+        private readonly ILogger _logger;
+        private readonly bool _logRequestBody = true;
+        private readonly RequestDelegate _next;
+        private readonly IEnumerable<IErrorNotifier> _notifiers;
+        private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
-        public ErrorLogMiddleware(RequestDelegate next, ErrorLog errorLog, ILoggerFactory loggerFactory, IOptions<ElmahOptions> elmahOptions)
+        public ErrorLogMiddleware(RequestDelegate next, ErrorLog errorLog, ILoggerFactory loggerFactory,
+            IOptions<ElmahOptions> elmahOptions)
         {
             ElmahExtensions.LogMiddleware = this;
             _next = next;
@@ -61,7 +60,7 @@ namespace ElmahCore.Mvc
                 return;
             var options = elmahOptions.Value;
 
-	        _checkPermissionAction = options.PermissionCheck;
+            _checkPermissionAction = options.PermissionCheck;
             _onError = options.Error;
 
             //Notifiers
@@ -70,17 +69,12 @@ namespace ElmahCore.Mvc
 
             //Filters
             _filters = elmahOptions.Value?.Filters.ToList();
-            foreach (var errorFilter in options.Filters)
-            {
-                Filtering += errorFilter.OnErrorModuleFiltering;
-            }
+            foreach (var errorFilter in options.Filters) Filtering += errorFilter.OnErrorModuleFiltering;
 
             _logRequestBody = elmahOptions.Value?.LogRequestBody == true;
-            
 
 
             if (!string.IsNullOrEmpty(options.FiltersConfig))
-            {
                 try
                 {
                     ConfigureFilters(options.FiltersConfig);
@@ -89,7 +83,6 @@ namespace ElmahCore.Mvc
                 {
                     _logger.LogError("Error in filters XML file");
                 }
-            }
 
             if (!string.IsNullOrEmpty(options.Path))
             {
@@ -97,16 +90,17 @@ namespace ElmahCore.Mvc
                 if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
                 if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0, _elmahRoot.Length - 1);
             }
-          
+
             if (!string.IsNullOrWhiteSpace(options.ApplicationName))
-            {
                 _errorLog.ApplicationName = elmahOptions.Value.ApplicationName;
-            }
             if (options.SourcePaths != null && options.SourcePaths.Any())
-            {
                 _errorLog.SourcePaths = elmahOptions.Value.SourcePaths;
-            }
         }
+
+        public event ExceptionFilterEventHandler Filtering;
+
+        // ReSharper disable once EventNeverSubscribedTo.Global
+        public event ErrorLoggedEventHandler Logged;
 
         private void ConfigureFilters(string config)
         {
@@ -123,10 +117,7 @@ namespace ElmahCore.Mvc
                             foreach (XmlElement notifier in notifiers)
                             {
                                 var name = notifier.Attributes["name"]?.Value;
-                                if (name != null)
-                                {
-                                    notList.Add(name);
-                                }
+                                if (name != null) notList.Add(name);
                             }
                     }
                     var assertionNode = (XmlElement) filterNode.SelectSingleNode("test/*");
@@ -149,25 +140,24 @@ namespace ElmahCore.Mvc
                 context.Features.Set(new ElmahLogFeature());
 
                 var sourcePath = context.Request.Path.Value;
-                if (sourcePath.Equals(_elmahRoot,StringComparison.InvariantCultureIgnoreCase) 
-                    || sourcePath.StartsWith(_elmahRoot+"/", StringComparison.InvariantCultureIgnoreCase))
+                if (sourcePath.Equals(_elmahRoot, StringComparison.InvariantCultureIgnoreCase)
+                    || sourcePath.StartsWith(_elmahRoot + "/", StringComparison.InvariantCultureIgnoreCase))
                 {
-
-		            if (!_checkPermissionAction(context))
-		            {
-			            await context.ChallengeAsync();
-			            return;
-		            }
+                    if (!_checkPermissionAction(context))
+                    {
+                        await context.ChallengeAsync();
+                        return;
+                    }
 
                     var path = sourcePath.Substring(_elmahRoot.Length, sourcePath.Length - _elmahRoot.Length);
-                    if (path.StartsWith("/"))  path = path.Substring(1);
-                    if (path.Contains('?'))  path = path.Substring(0, path.IndexOf('?'));
+                    if (path.StartsWith("/")) path = path.Substring(1);
+                    if (path.Contains('?')) path = path.Substring(0, path.IndexOf('?'));
                     await ProcessElmahRequest(context, path);
                     return;
                 }
 
                 var ct = context.Request.ContentType?.ToLower();
-                if ( _logRequestBody && !string.IsNullOrEmpty(ct) && SupportedContentTypes.Any(i=> ct.Contains(ct)))
+                if (_logRequestBody && !string.IsNullOrEmpty(ct) && SupportedContentTypes.Any(i => ct.Contains(ct)))
                     body = await GetBody(context.Request);
 
                 await _next(context);
@@ -178,9 +168,7 @@ namespace ElmahCore.Mvc
                     || context.Response.StatusCode >= 600
                     || context.Response.ContentLength.HasValue
                     || !string.IsNullOrEmpty(context.Response.ContentType))
-                {
-                   return;
-                }
+                    return;
                 await LogException(new HttpException(context.Response.StatusCode), context, _onError, body);
             }
             catch (Exception exception)
@@ -193,6 +181,7 @@ namespace ElmahCore.Mvc
                 context.Response.Redirect($"{_elmahRoot}/detail/{id}");
             }
         }
+
         private async Task<string> GetBody(HttpRequest request)
         {
             request.EnableBuffering();
@@ -215,16 +204,19 @@ namespace ElmahCore.Mvc
                     await ErrorApiHandler.ProcessRequest(context, _errorLog, resource);
                     return;
                 }
+
                 if (resource.StartsWith("exception/"))
                 {
                     await MsdnHandler.ProcessRequestException(context, resource.Substring("exception/".Length));
                     return;
                 }
+
                 if (resource.StartsWith("status/"))
                 {
                     await MsdnHandler.ProcessRequestStatus(context, resource.Substring("status/".Length));
                     return;
-                }                
+                }
+
                 switch (resource)
                 {
                     case "xml":
@@ -253,14 +245,15 @@ namespace ElmahCore.Mvc
             {
                 throw;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 _logger.LogError("Elmah request processing error");
             }
         }
 
-        
-        internal async Task<string> LogException(Exception e, HttpContext context, Func<HttpContext, Error, Task> onError, string body = null)
+
+        internal async Task<string> LogException(Exception e, HttpContext context,
+            Func<HttpContext, Error, Task> onError, string body = null)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));
@@ -296,11 +289,9 @@ namespace ElmahCore.Mvc
 
                 //Send notification
                 foreach (var notifier in _notifiers)
-                {
-                    if (!args.DismissedNotifiers.Any(i=>i.Equals(notifier.Name,StringComparison.InvariantCultureIgnoreCase)))
-                     notifier.Notify(error);
-                }
-
+                    if (!args.DismissedNotifiers.Any(i =>
+                        i.Equals(notifier.Name, StringComparison.InvariantCultureIgnoreCase)))
+                        notifier.Notify(error);
             }
             catch (Exception ex)
             {
@@ -315,14 +306,15 @@ namespace ElmahCore.Mvc
 
                 _logger.LogError(ex, "Elmah local exception");
             }
+
             if (entry != null)
                 OnLogged(new ErrorLoggedEventArgs(entry));
-            
+
             return entry?.Id;
         }
 
         /// <summary>
-        /// Raises the <see cref="Logged"/> event.
+        ///     Raises the <see cref="Logged" /> event.
         /// </summary>
         private void OnLogged(ErrorLoggedEventArgs args)
         {
@@ -330,7 +322,7 @@ namespace ElmahCore.Mvc
         }
 
         /// <summary>
-        /// Raises the <see cref="Filtering"/> event.
+        ///     Raises the <see cref="Filtering" /> event.
         /// </summary>
         private void OnFiltering(ExceptionFilterEventArgs args)
         {

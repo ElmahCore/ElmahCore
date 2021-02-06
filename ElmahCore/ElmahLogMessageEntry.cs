@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -11,6 +12,7 @@ namespace ElmahCore
         public string Scope { get; set; }
         public string Exception { get; set; }
         public LogLevel Level { get; set; }
+
         [XmlIgnore]
         public bool Collapsed
         {
@@ -18,5 +20,7 @@ namespace ElmahCore
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
+
+        public KeyValuePair<string, string>[] Params { get; set; }
     }
 }
