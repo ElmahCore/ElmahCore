@@ -71,7 +71,7 @@ namespace ElmahCore.Mvc
                     var cmd = GetValueFromAnonymousType<SqlCommand>(value.Value, "Command");
 
                     var query = cmd.Parameters.Cast<SqlParameter>().Aggregate(cmd.CommandText, (current, p) =>
-                        current.Replace(p.ParameterName, p.Value.ToString()));
+                        current.Replace(p.ParameterName, p.Value?.ToString()));
 
                     sqlLog.AddSql(id, new ElmahLogSqlEntry
                     {
