@@ -28,6 +28,7 @@
     <None Remove="wwwroot\js\*.js" />
     <None Remove="wwwroot\img\*.svg" />
     <None Remove="wwwroot\css\*.css" />
+    <None Remove="wwwroot\fonts\*.*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +36,7 @@
     <EmbeddedResource Include="wwwroot\js\*.js" />
     <EmbeddedResource Include="wwwroot\img\*.svg" />
     <EmbeddedResource Include="wwwroot\css\*.css" />
+    <EmbeddedResource Include="wwwroot\fonts\*.*" />
   </ItemGroup>
 
   <ItemGroup>
