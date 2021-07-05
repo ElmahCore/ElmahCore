@@ -205,7 +205,7 @@ namespace ElmahCore
 
         public async Task<int> GetNewErrorsAsync(string id, List<ErrorLogEntry> entries)
         {
-            const int page = 0;
+            var page = 0;
             int cnt, count;
             do
             {
@@ -217,6 +217,7 @@ namespace ElmahCore
                     if (el.Id == id) return count;
                     entries.Add(el);
                 }
+                page++;
             } while (cnt > 0);
 
             return count;
