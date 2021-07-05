@@ -245,9 +245,9 @@ namespace ElmahCore.Mvc
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.LogError("Elmah request processing error");
+                _logger.LogError(ex, "Elmah request processing error");
             }
         }
 
