@@ -19,7 +19,7 @@ namespace ElmahCore.DemoCore5.Controllers
 
         public IActionResult Index()
         {
-            TestMethod("test", 100);
+            //TestMethod("test", 100);
 
 
             _logger.LogTrace("Test");

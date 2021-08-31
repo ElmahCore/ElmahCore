@@ -205,18 +205,18 @@ namespace ElmahCore
 
         public async Task<int> GetNewErrorsAsync(string id, List<ErrorLogEntry> entries)
         {
-            const int page = 0;
-            int cnt, count;
+            int cnt = 0, count, page = 0;
             do
             {
                 var errors = new List<ErrorLogEntry>();
                 count = await GetErrorsAsync(page, 10, errors);
-                cnt = errors.Count;
                 foreach (var el in errors)
                 {
-                    if (el.Id == id) return count;
+                    if (el.Id == id) return cnt;
+                    cnt += 1;
                     entries.Add(el);
                 }
+                page += 1;
             } while (cnt > 0);
 
             return count;
