@@ -18,4 +18,8 @@
     <ProjectReference Include="..\ElmahCore.Mvc\ElmahCore.Mvc.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\log\" />
+  </ItemGroup>
+
 </Project>
