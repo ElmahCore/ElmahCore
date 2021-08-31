@@ -88,7 +88,26 @@ services.AddElmah(options =>
 
 ## Log the request body
 Since version 2.0.5 ElmahCore can log the request body.
-Just add paths to source files.
+
+## Logging SQL request body
+Since version 2.0.6 ElmahCore can log the SQL request body.
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-4.png)
+
+## Logging method parameters
+Since version 2.0.6 ElmahCore can log method parameters.
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-5.png)
+```csharp
+using ElmahCore;
+...
+
+public void TestMethod(string p1, int p2)
+{
+    // Logging method parameters
+    this.LogParams((nameof(p1), p1), (nameof(p2), p2));
+    ...
+}
+
+```
 
 ## Using UseElmahExceptionPage
 You can replace UseDeveloperExceptionPage to UseElmahExceptionPage

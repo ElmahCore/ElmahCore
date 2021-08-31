@@ -22,7 +22,7 @@ namespace ElmahCore
         public static Error DecodeString(string xml)
         {
             using (var sr = new StringReader(xml))
-            using (var reader = XmlReader.Create(sr))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings() { CheckCharacters = false }))
             {
                 if (!reader.IsStartElement("error"))
                     throw new ApplicationException("The error XML is not in the expected format.");
