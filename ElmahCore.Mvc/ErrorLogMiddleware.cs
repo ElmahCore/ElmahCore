@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+[assembly: InternalsVisibleTo("ElmahCore.Mvc.Tests")]
 namespace ElmahCore.Mvc
 {
     internal sealed class ErrorLogMiddleware
