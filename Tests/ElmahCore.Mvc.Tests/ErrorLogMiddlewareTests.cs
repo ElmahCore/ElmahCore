@@ -36,8 +36,8 @@ namespace ElmahCore.Mvc.Tests
         {
             var middleware = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options);
             var httpContext = new DefaultHttpContext();
-            Action act = () => ElmahExtensions.RiseError(httpContext, new Exception());
-            act.Should().NotThrow();
+            Func<Task> act = async () => await ElmahExtensions.RiseError(httpContext, new Exception());
+            act.Should().NotThrowAsync();
         }
     }
 }
