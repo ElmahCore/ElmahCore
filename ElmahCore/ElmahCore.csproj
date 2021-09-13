@@ -25,6 +25,10 @@
     <UserSecretsId>c3a38668-74c2-494f-b54d-1a06c261f315</UserSecretsId>
   </PropertyGroup>
 
+<PropertyGroup>
+  <MinVerDefaultPreReleasePhase>preview</MinVerDefaultPreReleasePhase>
+</PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Error2.cs" />
   </ItemGroup>
@@ -39,6 +43,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+    <PackageReference Include="MinVer" Version="2.5.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.Text.Json" Version="4.6.0" />
   </ItemGroup>
 
