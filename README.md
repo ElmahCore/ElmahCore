@@ -57,6 +57,8 @@ services.AddElmah<XmlFileErrorLog>(options =>
 services.AddElmah<SqlErrorLog>(options =>
 {
     options.ConnectionString = "connection_string";
+    options.SqlServerDatabaseSchemaName = "Errors"; //Defaults to dbo if not set
+    options.SqlServerDatabaseTableName = "ElmahError"; //Defaults to ELMAH_Error if not set
 });
 ```
 ## Rise exception

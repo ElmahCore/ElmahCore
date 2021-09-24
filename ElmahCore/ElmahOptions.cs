@@ -47,6 +47,18 @@ namespace ElmahCore
         public string ConnectionString { get; set; }
 
         /// <summary>
+        ///     Database table name. Used with SqlErrorLog
+        ///     Default value if not provided = "ELMAH_Error"
+        /// </summary>
+        public string SqlServerDatabaseTableName { get; set; }
+
+        /// <summary>
+        ///     Database schema name. Used with SqlErrorLog
+        ///     Default value if not provided = "dbo"
+        /// </summary>
+        public string SqlServerDatabaseSchemaName { get; set; }
+
+        /// <summary>
         ///     Permission Check callback
         /// </summary>
         public Func<HttpContext, bool> OnPermissionCheck { get; set; } = context => true;

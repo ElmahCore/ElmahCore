@@ -19,7 +19,8 @@ namespace ElmahCore.Sql
         ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
         ///     using a dictionary of configured settings.
         /// </summary>
-        public SqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString)
+        public SqlErrorLog(IOptions<ElmahOptions> option) 
+            : this(option.Value.ConnectionString, option.Value.SqlServerDatabaseSchemaName, option.Value.SqlServerDatabaseTableName)
         {
         }
 
@@ -27,12 +28,24 @@ namespace ElmahCore.Sql
         ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
         ///     to use a specific connection string for connecting to the database.
         /// </summary>
-        public SqlErrorLog(string connectionString)
+        public SqlErrorLog(string connectionString) 
+            : this(connectionString, null, null)
+        {
+
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
+        ///     to use a specific connection string for connecting to the database and a specific schema and table name.
+        /// </summary>
+        public SqlErrorLog(string connectionString, string schemaName, string tableName)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
 
             ConnectionString = connectionString;
+            DatabaseSchemaName = !string.IsNullOrWhiteSpace(schemaName) ? schemaName : "dbo";
+            DatabaseTableName = !string.IsNullOrWhiteSpace(tableName) ? tableName : "ELMAH_Error";
 
             CreateTableIfNotExists();
         }
@@ -47,6 +60,16 @@ namespace ElmahCore.Sql
         /// </summary>
         // ReSharper disable once MemberCanBeProtected.Global
         public virtual string ConnectionString { get; }
+
+        /// <summary>
+        /// Gets the Schema name to be used for the error table
+        /// </summary>
+        public virtual string DatabaseSchemaName { get; }
+
+        /// <summary>
+        /// Gets the Table name to be used for the error table
+        /// </summary>
+        public virtual string DatabaseTableName { get; }
 
         public override string Log(Error error)
         {
@@ -66,7 +89,8 @@ namespace ElmahCore.Sql
 
             using (var connection = new SqlConnection(ConnectionString))
             using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
-                error.Message, error.User, error.StatusCode, error.Time, errorXml))
+                error.Message, error.User, error.StatusCode, error.Time, errorXml,
+                DatabaseSchemaName, DatabaseTableName))
             {
                 command.Connection = connection;
                 connection.Open();
@@ -93,7 +117,8 @@ namespace ElmahCore.Sql
             string errorXml;
 
             using (var connection = new SqlConnection(ConnectionString))
-            using (var command = Commands.GetErrorXml(ApplicationName, errorGuid))
+            using (var command = Commands.GetErrorXml(ApplicationName, errorGuid,
+                DatabaseSchemaName, DatabaseTableName))
             {
                 command.Connection = connection;
                 connection.Open();
@@ -116,7 +141,8 @@ namespace ElmahCore.Sql
             {
                 connection.Open();
 
-                using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize))
+                using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize,
+                DatabaseSchemaName, DatabaseTableName))
                 {
                     command.Connection = connection;
 
@@ -132,7 +158,8 @@ namespace ElmahCore.Sql
                     }
                 }
 
-                using (var command = Commands.GetErrorsXmlTotal(ApplicationName))
+                using (var command = Commands.GetErrorsXmlTotal(ApplicationName,
+                DatabaseSchemaName, DatabaseTableName))
                 {
                     command.Connection = connection;
                     return int.Parse(command.ExecuteScalar().ToString());
@@ -149,13 +176,13 @@ namespace ElmahCore.Sql
             {
                 connection.Open();
 
-                using (var cmdCheck = Commands.CheckTable())
+                using (var cmdCheck = Commands.CheckTable(DatabaseSchemaName, DatabaseTableName))
                 {
                     cmdCheck.Connection = connection;
                     // ReSharper disable once PossibleNullReferenceException
                     var exists = (int?) cmdCheck.ExecuteScalar();
 
-                    if (!exists.HasValue) ExecuteBatchNonQuery(Commands._createTableSql, connection);
+                    if (!exists.HasValue) ExecuteBatchNonQuery(Commands.CreateTableSql(DatabaseSchemaName, DatabaseTableName), connection);
                 }
             }
         }
@@ -183,9 +210,11 @@ namespace ElmahCore.Sql
 
         private static class Commands
         {
-            public static readonly string _createTableSql =
-                @"
-CREATE TABLE [dbo].[ELMAH_Error]
+            public static string CreateTableSql(string schemaName, string tableName)
+            {
+                return
+                $@"
+CREATE TABLE [{schemaName}].[{tableName}]
 (
     [ErrorId]     UNIQUEIDENTIFIER NOT NULL,
     [Application] NVARCHAR(60)  NOT NULL,
@@ -201,33 +230,34 @@ CREATE TABLE [dbo].[ELMAH_Error]
 ) 
 GO
 
-ALTER TABLE [dbo].[ELMAH_Error] WITH NOCHECK ADD 
-    CONSTRAINT [PK_ELMAH_Error] PRIMARY KEY NONCLUSTERED ([ErrorId]) ON [PRIMARY] 
+ALTER TABLE [{schemaName}].[{tableName}] WITH NOCHECK ADD 
+    CONSTRAINT [PK_{tableName}] PRIMARY KEY NONCLUSTERED ([ErrorId]) ON [PRIMARY] 
 GO
 
-ALTER TABLE [dbo].[ELMAH_Error] ADD 
-    CONSTRAINT [DF_ELMAH_Error_ErrorId] DEFAULT (NEWID()) FOR [ErrorId]
+ALTER TABLE [{schemaName}].[{tableName}] ADD 
+    CONSTRAINT [DF_{tableName}_ErrorId] DEFAULT (NEWID()) FOR [ErrorId]
 GO
 
-CREATE NONCLUSTERED INDEX [IX_ELMAH_Error_App_Time_Seq] ON [dbo].[ELMAH_Error] 
+CREATE NONCLUSTERED INDEX [IX_{tableName}_App_Time_Seq] ON [{schemaName}].[{tableName}] 
 (
     [Application]   ASC,
     [TimeUtc]       DESC,
     [Sequence]      DESC
 ) 
-ON [PRIMARY]";
+ON [PRIMARY]"; 
+            }
 
-            public static SqlCommand CheckTable()
+            public static SqlCommand CheckTable(string schemaName, string tableName)
             {
                 var command = new SqlCommand
                 {
-                    CommandText = @"
+                    CommandText = $@"
 SELECT 1 
 WHERE EXISTS (
    SELECT 1
    FROM   INFORMATION_SCHEMA.TABLES 
-   WHERE  TABLE_SCHEMA = 'dbo'
-   AND    TABLE_NAME = 'ELMAH_Error'
+   WHERE  TABLE_SCHEMA = '{schemaName}'
+   AND    TABLE_NAME = '{tableName}'
    )
 "
                 };
@@ -245,12 +275,14 @@ WHERE EXISTS (
                 string user,
                 int statusCode,
                 DateTime time,
-                string xml)
+                string xml,
+                string schemaName, 
+                string tableName)
             {
                 var command = new SqlCommand
                 {
-                    CommandText = @"
-INSERT INTO ELMAH_Error (ErrorId, Application, Host, Type, Source, Message, ""User"", StatusCode, TimeUtc, AllXml)
+                    CommandText = $@"
+INSERT INTO [{schemaName}].[{tableName}] (ErrorId, Application, Host, Type, Source, Message, ""User"", StatusCode, TimeUtc, AllXml)
 VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusCode, @TimeUtc, @AllXml)
 "
                 };
@@ -268,12 +300,16 @@ VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusC
                 return command;
             }
 
-            public static SqlCommand GetErrorXml(string appName, Guid id)
+            public static SqlCommand GetErrorXml(
+                string appName, 
+                Guid id,
+                string schemaName,
+                string tableName)
             {
                 var command = new SqlCommand
                 {
-                    CommandText = @"
-SELECT AllXml FROM ELMAH_Error 
+                    CommandText = $@"
+SELECT AllXml FROM [{schemaName}].[{tableName}]
 WHERE 
     Application = @Application 
     AND ErrorId = @ErrorId
@@ -287,12 +323,17 @@ WHERE
                 return command;
             }
 
-            public static SqlCommand GetErrorsXml(string appName, int errorIndex, int pageSize)
+            public static SqlCommand GetErrorsXml(
+                string appName, 
+                int errorIndex, 
+                int pageSize,
+                string schemaName,
+                string tableName)
             {
                 var command = new SqlCommand
                 {
-                    CommandText = @"
-SELECT ErrorId, AllXml FROM ELMAH_Error
+                    CommandText = $@"
+SELECT ErrorId, AllXml FROM [{schemaName}].[{tableName}]
 WHERE
     Application = @Application
 ORDER BY [Sequence] DESC
@@ -309,11 +350,13 @@ FETCH NEXT @limit ROWS ONLY;
                 return command;
             }
 
-            public static SqlCommand GetErrorsXmlTotal(string appName)
+            public static SqlCommand GetErrorsXmlTotal(string appName,
+                string schemaName,
+                string tableName)
             {
                 var command = new SqlCommand
                 {
-                    CommandText = "SELECT COUNT(*) FROM ELMAH_Error WHERE Application = @Application"
+                    CommandText = $"SELECT COUNT(*) FROM [{schemaName}].[{tableName}] WHERE Application = @Application"
                 };
                 command.Parameters.Add("@Application", SqlDbType.NVarChar, MaxAppNameLength).Value = appName;
                 return command;
