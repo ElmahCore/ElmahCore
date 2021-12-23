@@ -18,19 +18,37 @@ namespace ElmahCore
                 throw new MiddlewareNotInitializedException("Elmah Middleware Not initialized");
         }
 
+        [Obsolete("Prefer RaiseError")]
         public static Task RiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
+        {
+            return RaiseError(ctx, ex, onError);
+        }
+
+        public static Task RaiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
         {
             GuardForNullMiddleware();
             return LogMiddleware.LogException(ex, ctx, onError);
         }
 
+        [Obsolete("Prefer RaiseError")]
         public static Task RiseError(this HttpContext ctx, Exception ex)
+        {
+            return RaiseError(ctx, ex);
+        }
+
+        public static Task RaiseError(this HttpContext ctx, Exception ex)
         {
             GuardForNullMiddleware();
             return LogMiddleware.LogException(ex, ctx, (context, error) => Task.CompletedTask);
         }
 
+        [Obsolete("Prefer RaiseError")]
         public static void RiseError(Exception ex)
+        {
+            RaiseError(ex);
+        }
+
+        public static void RaiseError(Exception ex)
         {
             LogMiddleware?.LogException(ex, InternalHttpContext.Current ?? new DefaultHttpContext(),
                 (context, error) => Task.CompletedTask);
