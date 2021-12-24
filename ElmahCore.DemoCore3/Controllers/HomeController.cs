@@ -17,7 +17,7 @@ namespace ElmahCore.DemoCore3.Controllers
 
         public IActionResult Index()
         {
-            ElmahExtensions.RiseError(new InvalidOperationException("This is the Test Exception from code."));
+            ElmahExtensions.RaiseError(new InvalidOperationException("This is the Test Exception from code."));
 
             _logger.LogTrace("Test");
             _logger.LogDebug("Test");
@@ -26,7 +26,7 @@ namespace ElmahCore.DemoCore3.Controllers
             _logger.LogWarning("Test");
             _logger.LogCritical(new InvalidOperationException("Test"), "Test");
 
-            ElmahExtensions.RiseError(new NullReferenceException());
+            ElmahExtensions.RaiseError(new NullReferenceException());
 
             if (DateTime.Now.Millisecond < 500)
             {
