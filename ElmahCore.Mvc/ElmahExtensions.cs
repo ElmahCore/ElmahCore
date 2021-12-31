@@ -24,10 +24,14 @@ namespace ElmahCore
             middleware?.LogException(ex, ctx, (context, error) => Task.CompletedTask);
         }
 
+        public static void RiseError(Exception ex, Func<HttpContext, Error, Task> onError)
+        {
+            LogMiddleware?.LogException(ex, InternalHttpContext.Current ?? new DefaultHttpContext(), onError);
+        }
+
         public static void RiseError(Exception ex)
         {
-            LogMiddleware?.LogException(ex, InternalHttpContext.Current ?? new DefaultHttpContext(),
-                (context, error) => Task.CompletedTask);
+            RiseError(ex, (context, error) => Task.CompletedTask);
         }
 
         public static void LogParams(this object source,
