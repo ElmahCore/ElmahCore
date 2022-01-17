@@ -143,7 +143,7 @@ namespace ElmahCore.MySql
                 using (var commandCheck = CommandExtension.CheckTable(databaseName))
                 {
                     commandCheck.Connection = connection;
-                    var exists = (long) commandCheck.ExecuteScalar() == 1;
+                    var exists = (int) commandCheck.ExecuteScalar() == 1;
 
                     if (!exists)
                         using (var commandCreate = CommandExtension.CreateTable())
