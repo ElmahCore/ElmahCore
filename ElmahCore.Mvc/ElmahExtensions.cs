@@ -2,8 +2,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ElmahCore.Mvc;
+using ElmahCore.Mvc.Exceptions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 namespace ElmahCore
@@ -12,19 +12,43 @@ namespace ElmahCore
     {
         internal static ErrorLogMiddleware LogMiddleware;
 
-        public static void RiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
+        private static void GuardForNullMiddleware()
         {
-            var middleware = ctx.RequestServices.GetService<ErrorLogMiddleware>();
-            middleware?.LogException(ex, ctx, onError);
+            if (LogMiddleware == null)
+                throw new MiddlewareNotInitializedException("Elmah Middleware Not initialized");
         }
 
-        public static void RiseError(this HttpContext ctx, Exception ex)
+        [Obsolete("Prefer RaiseError")]
+        public static Task RiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
         {
-            var middleware = ctx.RequestServices.GetService<ErrorLogMiddleware>();
-            middleware?.LogException(ex, ctx, (context, error) => Task.CompletedTask);
+            return RaiseError(ctx, ex, onError);
         }
 
+        public static Task RaiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
+        {
+            GuardForNullMiddleware();
+            return LogMiddleware.LogException(ex, ctx, onError);
+        }
+
+        [Obsolete("Prefer RaiseError")]
+        public static Task RiseError(this HttpContext ctx, Exception ex)
+        {
+            return RaiseError(ctx, ex);
+        }
+
+        public static Task RaiseError(this HttpContext ctx, Exception ex)
+        {
+            GuardForNullMiddleware();
+            return LogMiddleware.LogException(ex, ctx, (context, error) => Task.CompletedTask);
+        }
+
+        [Obsolete("Prefer RaiseError")]
         public static void RiseError(Exception ex)
+        {
+            RaiseError(ex);
+        }
+
+        public static void RaiseError(Exception ex)
         {
             LogMiddleware?.LogException(ex, InternalHttpContext.Current ?? new DefaultHttpContext(),
                 (context, error) => Task.CompletedTask);

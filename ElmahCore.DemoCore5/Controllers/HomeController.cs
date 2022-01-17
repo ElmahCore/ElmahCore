@@ -29,7 +29,7 @@ namespace ElmahCore.DemoCore5.Controllers
             _logger.LogWarning("Test");
             _logger.LogCritical(new InvalidOperationException("Test"), "Test");
 
-            ElmahExtensions.RiseError(new Exception("test2"));
+            ElmahExtensions.RaiseError(new Exception("test2"));
 
             var r = 0;
             // ReSharper disable once UnusedVariable
