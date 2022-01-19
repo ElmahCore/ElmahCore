@@ -7,9 +7,10 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "ElmahCore.MySql/2.0.7": {
+      "ElmahCore.MySql/2.0.8-preview.0.5": {
         "dependencies": {
-          "ElmahCore.Common": "2.0.7",
+          "ElmahCore.Common": "2.0.8",
+          "MinVer": "2.5.0",
           "MySql.Data": "8.0.22",
           "NETStandard.Library": "2.0.3"
         },
@@ -263,6 +264,7 @@
       },
       "Microsoft.NETCore.Platforms/1.1.0": {},
       "Microsoft.NETCore.Targets/1.1.0": {},
+      "MinVer/2.5.0": {},
       "MySql.Data/8.0.22": {
         "dependencies": {
           "BouncyCastle.NetCore": "1.8.3",
@@ -1048,7 +1050,7 @@
           }
         }
       },
-      "ElmahCore.Common/2.0.7": {
+      "ElmahCore.Common/2.0.8": {
         "dependencies": {
           "Microsoft.AspNetCore.Hosting.Abstractions": "2.2.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -1063,7 +1065,7 @@
     }
   },
   "libraries": {
-    "ElmahCore.MySql/2.0.7": {
+    "ElmahCore.MySql/2.0.8-preview.0.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -1221,6 +1223,13 @@
       "sha512": "sha512-aOZA3BWfz9RXjpzt0sRJJMjAscAUm3Hoa4UWAfceV9UTYxgwZ1lZt5nO2myFf+/jetYQo4uTP7zS8sJY67BBxg==",
       "path": "microsoft.netcore.targets/1.1.0",
       "hashPath": "microsoft.netcore.targets.1.1.0.nupkg.sha512"
+    },
+    "MinVer/2.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+vgY+COxnu93nZEVYScloRuboNRIYkElokxTdtKLt6isr/f6GllPt0oLfrHj7fzxgj7SC5xMZg5c2qvd6qyHDQ==",
+      "path": "minver/2.5.0",
+      "hashPath": "minver.2.5.0.nupkg.sha512"
     },
     "MySql.Data/8.0.22": {
       "type": "package",
@@ -1670,7 +1679,7 @@
       "path": "system.xml.xpath.xmldocument/4.0.1",
       "hashPath": "system.xml.xpath.xmldocument.4.0.1.nupkg.sha512"
     },
-    "ElmahCore.Common/2.0.7": {
+    "ElmahCore.Common/2.0.8": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
