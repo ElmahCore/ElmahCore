@@ -48,10 +48,15 @@ namespace ElmahCore
             RaiseError(ex);
         }
 
-        public static void RaiseError(Exception ex)
+        public static void RaiseError(Exception ex, Func<HttpContext, Error, Task> onError)
         {
             LogMiddleware?.LogException(ex, InternalHttpContext.Current ?? new DefaultHttpContext(),
                 (context, error) => Task.CompletedTask);
+        }
+
+        public static void RaiseError(Exception ex)
+        {
+            RaiseError(ex, (context, error) => Task.CompletedTask);
         }
 
         public static void LogParams(this object source,

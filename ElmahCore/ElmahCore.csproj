@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
-	  <Version>2.0.7</Version>
+	  <Version>2.0.8</Version>
 	  <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
 	  <AssemblyVersion>2.0.7.0</AssemblyVersion>
 	  <FileVersion>2.0.7.0</FileVersion>
