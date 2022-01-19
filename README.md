@@ -61,11 +61,11 @@ services.AddElmah<SqlErrorLog>(options =>
     options.SqlServerDatabaseTableName = "ElmahError"; //Defaults to ELMAH_Error if not set
 });
 ```
-## Rise exception
+## Raise exception
 ```csharp
 public IActionResult Test()
 {
-    HttpContext.RiseError(new InvalidOperationException("Test"));
+    HttpContext.RaiseError(new InvalidOperationException("Test"));
     ...
 }
 ```
