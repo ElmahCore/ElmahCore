@@ -1,7 +1,7 @@
 This project is licensed under the terms of the Apache license 2.0.
 
 # Using ElmahCore
-ELMAH for Net.Standard and Net.Core 
+ELMAH for Net.Standard and Net.Core (3.1, 5, 6)
 
 ![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-new-ui.png)
 
