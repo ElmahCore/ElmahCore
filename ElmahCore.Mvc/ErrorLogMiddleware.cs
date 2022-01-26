@@ -176,11 +176,14 @@ namespace ElmahCore.Mvc
             catch (Exception exception)
             {
                 var id = await LogException(exception, context, _onError, body);
+                var location = $"{_elmahRoot}/detail/{id}";
+
+                context.Features.Set<IElmahFeature>(new ElmahFeature(id, location));
 
                 //To next middleware
                 if (!ShowDebugPage) throw;
                 //Show Debug page
-                context.Response.Redirect($"{_elmahRoot}/detail/{id}");
+                context.Response.Redirect(location);
             }
         }
 
