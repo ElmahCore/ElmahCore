@@ -73,13 +73,18 @@ namespace ElmahCore.Mvc
                     var query = cmd.Parameters.Cast<SqlParameter>().Aggregate(cmd.CommandText, (current, p) =>
                         current.Replace(p.ParameterName, p.Value?.ToString()));
 
-                    sqlLog.AddSql(id, new ElmahLogSqlEntry
+                    if (!query.Contains("/* elmah */"))
                     {
-                        CommandType = cmd.CommandType.ToString(),
-                        SqlText = query,
-                        TimeStamp = DateTime.Now,
-                        DurationMs = 0
-                    });
+
+                        sqlLog.AddSql(id, new ElmahLogSqlEntry
+                        {
+                            CommandType = cmd.CommandType.ToString(),
+                            SqlText = query,
+                            TimeStamp = DateTime.Now,
+                            DurationMs = 0
+                        });
+                    }
+
                     break;
                 }
             }

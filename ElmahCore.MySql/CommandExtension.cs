@@ -72,6 +72,7 @@ namespace ElmahCore.MySql
             var command = new MySqlCommand();
             command.CommandText =
                 @"
+            /* elmah */
             INSERT INTO ELMAH_Error (ErrorId, Application, Host, Type, Source, Message, User, StatusCode, TimeUtc, AllXml)
             VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusCode, @TimeUtc, @AllXml)
             ";

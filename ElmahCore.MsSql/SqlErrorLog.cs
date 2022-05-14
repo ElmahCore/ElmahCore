@@ -282,6 +282,7 @@ WHERE EXISTS (
                 var command = new SqlCommand
                 {
                     CommandText = $@"
+/* elmah */
 INSERT INTO [{schemaName}].[{tableName}] (ErrorId, Application, Host, Type, Source, Message, ""User"", StatusCode, TimeUtc, AllXml)
 VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusCode, @TimeUtc, @AllXml)
 "
