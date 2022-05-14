@@ -301,8 +301,13 @@ namespace ElmahCore.Mvc
                 //Send notification
                 foreach (var notifier in _notifiers)
                     if (!args.DismissedNotifiers.Any(i =>
-                        i.Equals(notifier.Name, StringComparison.InvariantCultureIgnoreCase)))
-                        notifier.Notify(error);
+                            i.Equals(notifier.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        if (notifier is IErrorNotifierWithId notifierWithId)
+                            notifierWithId.Notify(id, error);
+                        else
+                            notifier.Notify(error);
+                    }
             }
             catch (Exception ex)
             {

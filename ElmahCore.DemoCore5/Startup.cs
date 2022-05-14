@@ -44,6 +44,7 @@ namespace ElmahCore.DemoCore5
             {
                 options.LogPath = "~/log";
                 options.Notifiers.Add(new MyNotifier());
+                options.Notifiers.Add(new MyNotifierWithId());
                 options.Filters.Add(new CmsErrorLogFilter());
             });
 
@@ -94,6 +95,20 @@ namespace ElmahCore.DemoCore5
         }
 
         public string Name => "my";
+    }
+    public class MyNotifierWithId : IErrorNotifierWithId
+    {
+        public void Notify(Error error)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Notify(string id, Error error)
+        {
+            Debug.WriteLine(error.Message);
+        }
+
+        public string Name => "myWithId";
     }
 
     public class CmsErrorLogFilter : IErrorFilter
