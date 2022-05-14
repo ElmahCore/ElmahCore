@@ -122,7 +122,7 @@ if (env.IsDevelopment())
 ```
 
 ## Using Notifiers
-You can create your own notifiers by implement IErrorNotifier interface and add notifier to Elmah options:
+You can create your own notifiers by implement IErrorNotifier or IErrorNotifierWithId interface and add notifier to Elmah options:
 ```csharp
 services.AddElmah<XmlFileErrorLog>(options =>
 {
