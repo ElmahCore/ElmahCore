@@ -221,7 +221,7 @@ CREATE TABLE [{schemaName}].[{tableName}]
     [Host]        NVARCHAR(50)  NOT NULL,
     [Type]        NVARCHAR(100) NOT NULL,
     [Source]      NVARCHAR(60)  NOT NULL,
-    [Message]     NVARCHAR(500) NOT NULL,
+    [Message]     NVARCHAR(MAX) NOT NULL,
     [User]        NVARCHAR(50)  NOT NULL,
     [StatusCode]  INT NOT NULL,
     [TimeUtc]     DATETIME NOT NULL,

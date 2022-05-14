@@ -86,17 +86,20 @@ namespace ElmahCore.Mvc
                     _logger.LogError("Error in filters XML file");
                 }
 
-            if (!string.IsNullOrEmpty(options.Path))
+            if (elmahOptions.Value != null)
             {
-                _elmahRoot = elmahOptions.Value.Path.ToLower();
-                if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
-                if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0, _elmahRoot.Length - 1);
-            }
+                if (!string.IsNullOrEmpty(options.Path))
+                {
+                    _elmahRoot = elmahOptions.Value.Path.ToLower();
+                    if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
+                    if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0, _elmahRoot.Length - 1);
+                }
 
-            if (!string.IsNullOrWhiteSpace(options.ApplicationName))
-                _errorLog.ApplicationName = elmahOptions.Value.ApplicationName;
-            if (options.SourcePaths != null && options.SourcePaths.Any())
-                _errorLog.SourcePaths = elmahOptions.Value.SourcePaths;
+                if (!string.IsNullOrWhiteSpace(options.ApplicationName))
+                    _errorLog.ApplicationName = elmahOptions.Value.ApplicationName;
+                if (options.SourcePaths != null && options.SourcePaths.Any())
+                    _errorLog.SourcePaths = elmahOptions.Value.SourcePaths;
+            }
         }
 
         public event ExceptionFilterEventHandler Filtering;
