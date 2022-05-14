@@ -56,7 +56,16 @@ namespace ElmahCore.Mvc
             if (value.Value == null || value.Key != "System.Data.SqlClient.WriteCommandBefore" &&
                 value.Key != "System.Data.SqlClient.WriteCommandAfter") return;
 
-            var sqlLog = _provider.GetService<IHttpContextAccessor>()?.HttpContext?.Features.Get<ElmahLogFeature>();
+            ElmahLogFeature sqlLog;
+            try
+            {
+                sqlLog = _provider.GetService<IHttpContextAccessor>()?.HttpContext?.Features.Get<ElmahLogFeature>();
+	
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
             if (sqlLog == null) return;
 
             var id = GetValueFromAnonymousType<Guid>(value.Value, "OperationId");
