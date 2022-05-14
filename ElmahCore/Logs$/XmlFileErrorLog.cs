@@ -140,7 +140,7 @@ namespace ElmahCore
             for (var i = 0; i < 5; i++)
                 try
                 {
-                    using var reader = XmlReader.Create(path);
+                    using var reader = XmlReader.Create(path, new XmlReaderSettings() { CheckCharacters = false });
                     if (!reader.IsStartElement("error"))
                         return null;
 
@@ -180,7 +180,7 @@ namespace ElmahCore
             if (!IsUserFile(file.Attributes))
                 return null;
 
-            using var reader = XmlReader.Create(file.FullName);
+            using var reader = XmlReader.Create(file.FullName, new XmlReaderSettings() { CheckCharacters = false });
             return new ErrorLogEntry(this, id, ErrorXml.Decode(reader));
         }
 
