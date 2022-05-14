@@ -159,7 +159,9 @@ namespace ElmahCore.Mvc
                 }
 
                 var ct = context.Request.ContentType?.ToLower();
-                if (_logRequestBody && !string.IsNullOrEmpty(ct) && SupportedContentTypes.Any(i => ct.Contains(ct)))
+                var tEnc = string.Join(",", context.Request.Headers["Transfer-Encoding"].ToArray());
+                if (_logRequestBody && !string.IsNullOrEmpty(ct) && SupportedContentTypes.Any(i => ct.Contains(ct))
+                    && !tEnc.Contains("chunked"))
                     body = await GetBody(context.Request);
 
                 await _next(context);
