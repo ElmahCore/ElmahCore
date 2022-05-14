@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -37,7 +38,10 @@ namespace ElmahCore.Mvc.Handlers
             // 
             // Stream out the error as formatted JSON.
             //
-            var jsonSerializerOptions = new JsonSerializerOptions {IgnoreNullValues = true};
+            var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault 
+            };
             var err = new ErrorWrapper(entry?.Error, errorLog.SourcePaths) {HtmlMessage = null};
             var jsonString = JsonSerializer.Serialize(err, jsonSerializerOptions);
             await response.WriteAsync(jsonString);

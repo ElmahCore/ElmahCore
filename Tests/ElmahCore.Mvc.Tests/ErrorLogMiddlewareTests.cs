@@ -27,14 +27,14 @@ namespace ElmahCore.Mvc.Tests
         [Fact]
         public void WhenInitMiddlewareSetsStaticExtension()
         {
-            var middleware = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options);
+            var _ = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options);
             ElmahExtensions.LogMiddleware.Should().NotBeNull();
         }
 
         [Fact]
         public void RiseErrorOkWhenMiddlewareInitialized()
         {
-            var middleware = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options);
+            var _ = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options);
             var httpContext = new DefaultHttpContext();
             Func<Task> act = async () => await ElmahExtensions.RaiseError(httpContext, new Exception());
             act.Should().NotThrowAsync();
