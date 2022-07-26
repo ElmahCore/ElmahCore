@@ -172,7 +172,7 @@ namespace ElmahCore.Sql
         }
 
         /// <summary>
-        ///     Creates the necessary tables and sequences used by this implementation
+        ///  Creates the necessary tables and sequences used by this implementation
         /// </summary>
         private void CreateTableIfNotExists()
         {
