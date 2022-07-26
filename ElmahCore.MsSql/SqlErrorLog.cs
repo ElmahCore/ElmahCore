@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq.Expressions;
 using Microsoft.Extensions.Options;
 
 namespace ElmahCore.Sql
@@ -20,7 +21,7 @@ namespace ElmahCore.Sql
         ///     using a dictionary of configured settings.
         /// </summary>
         public SqlErrorLog(IOptions<ElmahOptions> option) 
-            : this(option.Value.ConnectionString, option.Value.SqlServerDatabaseSchemaName, option.Value.SqlServerDatabaseTableName)
+            : this(option.Value.ConnectionString, option.Value.SqlServerDatabaseSchemaName, option.Value.SqlServerDatabaseTableName, option.Value.CreateTablesIfNotExist)
         {
         }
 
@@ -29,7 +30,7 @@ namespace ElmahCore.Sql
         ///     to use a specific connection string for connecting to the database.
         /// </summary>
         public SqlErrorLog(string connectionString) 
-            : this(connectionString, null, null)
+            : this(connectionString, null, null, true)
         {
 
         }
@@ -38,7 +39,7 @@ namespace ElmahCore.Sql
         ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
         ///     to use a specific connection string for connecting to the database and a specific schema and table name.
         /// </summary>
-        public SqlErrorLog(string connectionString, string schemaName, string tableName)
+        public SqlErrorLog(string connectionString, string schemaName, string tableName, bool createTablesIfNotExist)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
@@ -47,7 +48,8 @@ namespace ElmahCore.Sql
             DatabaseSchemaName = !string.IsNullOrWhiteSpace(schemaName) ? schemaName : "dbo";
             DatabaseTableName = !string.IsNullOrWhiteSpace(tableName) ? tableName : "ELMAH_Error";
 
-            CreateTableIfNotExists();
+            if (createTablesIfNotExist)
+                CreateTableIfNotExists();
         }
 
         /// <summary>
@@ -74,27 +76,29 @@ namespace ElmahCore.Sql
         public override string Log(Error error)
         {
             var id = Guid.NewGuid();
-
             Log(id, error);
-
             return id.ToString();
         }
 
         public override void Log(Guid id, Error error)
         {
-            if (error == null)
-                throw new ArgumentNullException(nameof(error));
-
-            var errorXml = ErrorXml.EncodeString(error);
-
-            using (var connection = new SqlConnection(ConnectionString))
-            using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
-                error.Message, error.User, error.StatusCode, error.Time, errorXml,
-                DatabaseSchemaName, DatabaseTableName))
+            try
             {
-                command.Connection = connection;
-                connection.Open();
-                command.ExecuteNonQuery();
+                var errorXml = ErrorXml.EncodeString(error);
+
+                using (var connection = new SqlConnection(ConnectionString))
+                using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
+                           error.Message, error.User, error.StatusCode, error.Time, errorXml,
+                           DatabaseSchemaName, DatabaseTableName))
+                {
+                    command.Connection = connection;
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch
+            {
+                //guard: silently fail, this can't bubble up or it will create a stack overflow from errors attempting to log errors....
             }
         }
 

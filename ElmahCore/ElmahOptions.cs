@@ -58,6 +58,8 @@ namespace ElmahCore
         /// </summary>
         public string SqlServerDatabaseSchemaName { get; set; }
 
+        public bool CreateTablesIfNotExist { get; set; } = true;
+
         /// <summary>
         ///     Permission Check callback
         /// </summary>
