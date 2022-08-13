@@ -1,0 +1,147 @@
+﻿<error errorId="8a836b7e-6255-41cb-b2ae-bedb5630aeb4" application="ElmahCore.DemoCore3" host="ZOLAIKHA-DELL" type="System.NullReferenceException" message="Object reference not set to an instance of an object." detail="# caller: @D:\Repos\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xD;&#xA;System.NullReferenceException: Object reference not set to an instance of an object." time="2022-08-13T20:10:59.8882314Z" statusCode="500">
+  <serverVariables>
+    <item name="HttpVersion">
+      <value string="2.0" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="GET" />
+    </item>
+    <item name="PathBase">
+      <value string="" />
+    </item>
+    <item name="Path">
+      <value string="/" />
+    </item>
+    <item name="QueryString">
+      <value string="" />
+    </item>
+    <item name="RawTarget">
+      <value string="/" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="56436" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="44306" />
+    </item>
+    <item name="RequestConnectionId">
+      <value string="18230571306091283486" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="8000041f-0003-fd00-b63f-84710c7967bb" />
+    </item>
+    <item name="Header_Accept">
+      <value string="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-US,en;q=0.9" />
+    </item>
+    <item name="Header_Connection">
+      <value string="close" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:44306" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36" />
+    </item>
+    <item name="Header_sec-ch-ua">
+      <value string="&quot;Chromium&quot;;v=&quot;104&quot;, &quot; Not A;Brand&quot;;v=&quot;99&quot;, &quot;Google Chrome&quot;;v=&quot;104&quot;" />
+    </item>
+    <item name="Header_sec-ch-ua-mobile">
+      <value string="?0" />
+    </item>
+    <item name="Header_sec-ch-ua-platform">
+      <value string="&quot;Windows&quot;" />
+    </item>
+    <item name="Header_upgrade-insecure-requests">
+      <value string="1" />
+    </item>
+    <item name="Header_sec-fetch-site">
+      <value string="none" />
+    </item>
+    <item name="Header_sec-fetch-mode">
+      <value string="navigate" />
+    </item>
+    <item name="Header_sec-fetch-user">
+      <value string="?1" />
+    </item>
+    <item name="Header_sec-fetch-dest">
+      <value string="document" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="StatusCode">
+      <value string="200" />
+    </item>
+    <item name="Connection_Id">
+      <value string="18230571306091283486" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="56436" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="44306" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="500" />
+    </item>
+  </serverVariables>
+  <messageLog>
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6021768Z" message="Initializing Razor view compiler with compiled view: '/Views/Home/Index.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6079436Z" message="Initializing Razor view compiler with compiled view: '/Views/Home/Privacy.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6096890Z" message="Initializing Razor view compiler with compiled view: '/Views/Shared/Error.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6123288Z" message="Initializing Razor view compiler with compiled view: '/Views/Shared/_CookieConsentPartial.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6142811Z" message="Initializing Razor view compiler with compiled view: '/Views/Shared/_Layout.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6166478Z" message="Initializing Razor view compiler with compiled view: '/Views/Shared/_ValidationScriptsPartial.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6190223Z" message="Initializing Razor view compiler with compiled view: '/Views/_ViewImports.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6214821Z" message="Initializing Razor view compiler with compiled view: '/Views/_ViewStart.cshtml'." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6432266Z" message="1 candidate(s) found for the request path '/'" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6482595Z" message="Endpoint 'ElmahCore.DemoCore3.Controllers.HomeController.Index (ElmahCore.DemoCore3)' with route pattern '{controller=Home}/{action=Index}/{id?}' is valid for the request path '/'" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6515132Z" message="Request matched endpoint 'ElmahCore.DemoCore3.Controllers.HomeController.Index (ElmahCore.DemoCore3)'" />
+    <message level="Information" time-stamp="2022-08-13T20:10:59.6582561Z" message="Executing endpoint 'ElmahCore.DemoCore3.Controllers.HomeController.Index (ElmahCore.DemoCore3)'" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.6655839Z" message="Registered model binder providers, in the following order: Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BinderTypeModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ServicesModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BodyModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.HeaderModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FloatingPointTypeModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.EnumTypeModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.SimpleTypeModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CancellationTokenModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ByteArrayModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormFileModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormCollectionModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.KeyValuePairModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DictionaryModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ArrayModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CollectionModelBinderProvider, Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ComplexTypeModelBinderProvider" />
+    <message level="Information" time-stamp="2022-08-13T20:10:59.7120390Z" message="Route matched with {action = &quot;Index&quot;, controller = &quot;Home&quot;}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller ElmahCore.DemoCore3.Controllers.HomeController (ElmahCore.DemoCore3)." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.7142760Z" message="Execution plan of authorization filters (in the following order): None" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.7164840Z" message="Execution plan of resource filters (in the following order): Microsoft.AspNetCore.Mvc.ViewFeatures.Filters.SaveTempDataFilter" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.7234787Z" message="Execution plan of action filters (in the following order): Microsoft.AspNetCore.Mvc.Filters.ControllerActionFilter (Order: -2147483648), Microsoft.AspNetCore.Mvc.ModelBinding.UnsupportedContentTypeFilter (Order: -3000)" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.7258187Z" message="Execution plan of exception filters (in the following order): None" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.7280338Z" message="Execution plan of result filters (in the following order): Microsoft.AspNetCore.Mvc.ViewFeatures.Filters.SaveTempDataFilter" />
+    <message level="Trace" time-stamp="2022-08-13T20:10:59.7311008Z" message="Resource Filter: Before executing OnResourceExecuting on filter Microsoft.AspNetCore.Mvc.ViewFeatures.Filters.SaveTempDataFilter." />
+    <message level="Trace" time-stamp="2022-08-13T20:10:59.7343413Z" message="Resource Filter: After executing OnResourceExecuting on filter Microsoft.AspNetCore.Mvc.ViewFeatures.Filters.SaveTempDataFilter." />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.7392284Z" message="Executing controller factory for controller ElmahCore.DemoCore3.Controllers.HomeController (ElmahCore.DemoCore3)" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.7423478Z" message="Executed controller factory for controller ElmahCore.DemoCore3.Controllers.HomeController (ElmahCore.DemoCore3)" />
+    <message level="Trace" time-stamp="2022-08-13T20:10:59.7448959Z" message="Action Filter: Before executing OnActionExecutionAsync on filter Microsoft.AspNetCore.Mvc.Filters.ControllerActionFilter." />
+    <message level="Trace" time-stamp="2022-08-13T20:10:59.7486988Z" message="Action Filter: Before executing OnActionExecuting on filter Microsoft.AspNetCore.Mvc.ModelBinding.UnsupportedContentTypeFilter." />
+    <message level="Trace" time-stamp="2022-08-13T20:10:59.7520890Z" message="Action Filter: After executing OnActionExecuting on filter Microsoft.AspNetCore.Mvc.ModelBinding.UnsupportedContentTypeFilter." />
+    <message level="Information" time-stamp="2022-08-13T20:10:59.7605759Z" message="Executing action method ElmahCore.DemoCore3.Controllers.HomeController.Index (ElmahCore.DemoCore3) - Validation state: Valid" />
+    <message level="Trace" time-stamp="2022-08-13T20:10:59.8487121Z" message="Test" />
+    <message level="Debug" time-stamp="2022-08-13T20:10:59.8577194Z" message="Test" />
+    <message level="Error" time-stamp="2022-08-13T20:10:59.8797160Z" message="Test" />
+    <message level="Information" time-stamp="2022-08-13T20:10:59.8817254Z" message="Test" />
+    <message level="Warning" time-stamp="2022-08-13T20:10:59.8851712Z" message="Test" />
+    <message level="Critical" exception="System.InvalidOperationException: Test" time-stamp="2022-08-13T20:10:59.8880246Z" message="Test" />
+  </messageLog>
+</error>

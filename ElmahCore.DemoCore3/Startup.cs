@@ -1,5 +1,4 @@
-using ElmahCore.Mvc;
-using ElmahCore.Sql;
+﻿using ElmahCore.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -28,20 +27,9 @@ namespace ElmahCore.DemoCore3
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            //services.AddElmah<XmlFileErrorLog>(options =>
-            services.AddElmah<SqlErrorLog>(options =>
-                //services.AddElmah(options =>
+            services.AddElmah<XmlFileErrorLog>(options =>
             {
-                //options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
-                options.Path = @"elmah";
-                options.ConnectionString = "Server=.;Database=elmahtest;Trusted_Connection=True;";
-                options.LogPath = "~/errors.xml";
-                //options.SourcePaths = new []
-                //{
-                //    @"D:\tmp\ElmahCore.DemoCore3",
-                //    @"D:\tmp\ElmahCore.Mvc",
-                //    @"D:\tmp\ElmahCore"
-                //};
+                options.LogPath = "~/log"; // OR options.LogPath = "с:\errors";
             });
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
@@ -75,7 +63,7 @@ namespace ElmahCore.DemoCore3
             app.UseCookiePolicy();
 
             app.UseElmah();
-
+            app.UseElmahExceptionPage();
             app.UseRouting();
             app.UseAuthorization();
             app.UseEndpoints(routes =>
