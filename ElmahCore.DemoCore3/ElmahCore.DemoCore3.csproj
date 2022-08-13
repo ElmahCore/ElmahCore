@@ -13,7 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ElmahCore.MsSql\ElmahCore.Sql.csproj" />
     <ProjectReference Include="..\ElmahCore.Mvc\ElmahCore.Mvc.csproj" />
-    <ProjectReference Include="..\ElmahCore\ElmahCore.csproj" />
   </ItemGroup>
 
 </Project>
