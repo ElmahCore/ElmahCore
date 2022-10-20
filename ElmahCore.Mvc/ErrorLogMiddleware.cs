@@ -38,7 +38,7 @@ namespace ElmahCore.Mvc
         };
 
         private readonly Func<HttpContext, bool> _checkPermissionAction = context => true;
-        private readonly string _elmahRoot = @"/elmah";
+        private readonly string _elmahRoot = @"~/elmah";
         private readonly ErrorLog _errorLog;
         private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
         private readonly ILogger _logger;
@@ -91,7 +91,7 @@ namespace ElmahCore.Mvc
                 if (!string.IsNullOrEmpty(options.Path))
                 {
                     _elmahRoot = elmahOptions.Value.Path.ToLower();
-                    if (!_elmahRoot.StartsWith("/")) _elmahRoot = "/" + _elmahRoot;
+                    if (!_elmahRoot.StartsWith("/") && !_elmahRoot.StartsWith("~/")) _elmahRoot = "/" + _elmahRoot;
                     if (_elmahRoot.EndsWith("/")) _elmahRoot = _elmahRoot.Substring(0, _elmahRoot.Length - 1);
                 }
 
@@ -140,13 +140,17 @@ namespace ElmahCore.Mvc
         public async Task InvokeAsync(HttpContext context)
         {
             string body = null;
+            var elmahRoot = _elmahRoot;
             try
             {
+                if (elmahRoot.StartsWith("~/"))
+                    elmahRoot = context.Request.PathBase + elmahRoot.Substring(1);
+
                 context.Features.Set(new ElmahLogFeature());
 
-                var sourcePath = context.Request.Path.Value;
-                if (sourcePath.Equals(_elmahRoot, StringComparison.InvariantCultureIgnoreCase)
-                    || sourcePath.StartsWith(_elmahRoot + "/", StringComparison.InvariantCultureIgnoreCase))
+                var sourcePath = context.Request.PathBase + context.Request.Path.Value;
+                if (sourcePath.Equals(elmahRoot, StringComparison.InvariantCultureIgnoreCase)
+                    || sourcePath.StartsWith(elmahRoot + "/", StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (!_checkPermissionAction(context))
                     {
@@ -154,7 +158,7 @@ namespace ElmahCore.Mvc
                         return;
                     }
 
-                    var path = sourcePath.Substring(_elmahRoot.Length, sourcePath.Length - _elmahRoot.Length);
+                    var path = sourcePath.Substring(elmahRoot.Length, sourcePath.Length - elmahRoot.Length);
                     if (path.StartsWith("/")) path = path.Substring(1);
                     if (path.Contains('?')) path = path.Substring(0, path.IndexOf('?'));
                     await ProcessElmahRequest(context, path);
@@ -181,7 +185,7 @@ namespace ElmahCore.Mvc
             catch (Exception exception)
             {
                 var id = await LogException(exception, context, _onError, body);
-                var location = $"{_elmahRoot}/detail/{id}";
+                var location = $"{elmahRoot}/detail/{id}";
 
                 context.Features.Set<IElmahFeature>(new ElmahFeature(id, location));
 
@@ -210,6 +214,10 @@ namespace ElmahCore.Mvc
         {
             try
             {
+                var elmahRoot = (_elmahRoot.StartsWith("~/"))
+                    ? context.Request.PathBase + _elmahRoot.Substring(1)
+                    : _elmahRoot;
+
                 if (resource.StartsWith("api/"))
                 {
                     await ErrorApiHandler.ProcessRequest(context, _errorLog, resource);
@@ -237,10 +245,10 @@ namespace ElmahCore.Mvc
                         await ErrorJsonHandler.ProcessRequest(context, _errorLog);
                         break;
                     case "rss":
-                        await ErrorRssHandler.ProcessRequest(context, _errorLog, _elmahRoot);
+                        await ErrorRssHandler.ProcessRequest(context, _errorLog, elmahRoot);
                         break;
                     case "digestrss":
-                        await ErrorDigestRssHandler.ProcessRequest(context, _errorLog, _elmahRoot);
+                        await ErrorDigestRssHandler.ProcessRequest(context, _errorLog, elmahRoot);
                         return;
                     case "download":
                         await ErrorLogDownloadHandler.ProcessRequestAsync(_errorLog, context);
@@ -248,7 +256,7 @@ namespace ElmahCore.Mvc
                     case "test":
                         throw new TestException();
                     default:
-                        await ErrorResourceHandler.ProcessRequest(context, resource, _elmahRoot);
+                        await ErrorResourceHandler.ProcessRequest(context, resource, elmahRoot);
                         break;
                 }
             }

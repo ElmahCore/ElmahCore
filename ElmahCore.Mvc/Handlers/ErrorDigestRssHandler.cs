@@ -30,7 +30,7 @@ namespace ElmahCore.Mvc.Handlers
 
             var title = $@"Daily digest of errors in {log.ApplicationName} on {Environment.MachineName}";
 
-            var link = $"{context.Request.Scheme}://{context.Request.Host}{elmahRoot}";
+            var link = $"{context.Request.Scheme}://{context.Request.PathBase.ToString().TrimEnd('/')}{elmahRoot}";
             var baseUrl = new Uri(link.TrimEnd('/') + "/");
 
             var items = GetItems(log, baseUrl, 30, 30).Take(30);
