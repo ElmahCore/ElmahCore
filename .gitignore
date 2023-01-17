@@ -29,3 +29,5 @@ ElmahCore.MySql/obj/**/*
 /ElmahCore.DemoCore6/wwwroot/log/*
 **/bin/**
 **/obj/**
+**/bin/*
+**/obj/*
