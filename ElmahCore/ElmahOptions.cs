@@ -59,6 +59,12 @@ namespace ElmahCore
         public string SqlServerDatabaseSchemaName { get; set; }
 
         /// <summary>
+        /// Indicate if the CreateTables check should be run when initializing the logger.
+        /// Defaults to true
+        /// </summary>
+        public bool CreateTablesIfNotExist { get; set; } = true;
+
+        /// <summary>
         ///     Permission Check callback
         /// </summary>
         public Func<HttpContext, bool> OnPermissionCheck { get; set; } = context => true;

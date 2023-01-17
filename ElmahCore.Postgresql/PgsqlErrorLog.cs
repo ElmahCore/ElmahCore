@@ -18,7 +18,7 @@ namespace ElmahCore.Postgresql
         ///     Initializes a new instance of the <see cref="PgsqlErrorLog" /> class
         ///     using a dictionary of configured settings.
         /// </summary>
-        public PgsqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString)
+        public PgsqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString, option.Value.CreateTablesIfNotExist)
         {
         }
 
@@ -26,14 +26,15 @@ namespace ElmahCore.Postgresql
         ///     Initializes a new instance of the <see cref="PgsqlErrorLog" /> class
         ///     to use a specific connection string for connecting to the database.
         /// </summary>
-        public PgsqlErrorLog(string connectionString)
+        public PgsqlErrorLog(string connectionString, bool createTablesIfNotExist)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException("connectionString");
 
             ConnectionString = connectionString;
 
-            CreateTableIfNotExists();
+            if (createTablesIfNotExist)
+                CreateTableIfNotExists();
         }
 
         /// <summary>
