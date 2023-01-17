@@ -207,7 +207,7 @@ namespace ElmahCore.Mvc
         [XmlElement("Url")]
         public string Url
         {
-            get => _error.ServerVariables["Path"];
+            get => _error.ServerVariables["PathBase"] + _error.ServerVariables["Path"];
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
