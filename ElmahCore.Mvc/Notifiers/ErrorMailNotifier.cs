@@ -23,8 +23,6 @@
 
 #endregion
 
-//[assembly: Elmah.Scc("$Id: ErrorMailModule.cs 923 2011-12-23 22:02:10Z azizatif $")]
-
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -58,8 +56,6 @@ namespace ElmahCore.Mvc.Notifiers
             //
             // Extract the settings.
             //
-
-
             MailRecipient = options.MailRecipient;
             MailSender = options.MailSender;
             MailCopyRecipient = options.MailCopyRecipient;
@@ -73,7 +69,6 @@ namespace ElmahCore.Mvc.Notifiers
             NoYsod = !options.SendYsod;
             UseSsl = options.UseSsl;
         }
-
 
         /// <summary>
         ///     Gets the e-mail address of the sender.
@@ -92,7 +87,6 @@ namespace ElmahCore.Mvc.Notifiers
         ///     When using System.Net.Mail components under .NET Framework 2.0
         ///     or later, multiple recipients must be comma-delimited.
         /// </remarks>
-
         protected virtual string MailRecipient { get; }
 
         /// <summary>
@@ -106,7 +100,6 @@ namespace ElmahCore.Mvc.Notifiers
         ///     When using System.Net.Mail components under .NET Framework 2.0
         ///     or later, multiple recipients must be comma-delimited.
         /// </remarks>
-
         protected virtual string MailCopyRecipient { get; }
 
         /// <summary>
@@ -118,7 +111,6 @@ namespace ElmahCore.Mvc.Notifiers
         ///     and {1} <see cref="Error.Type" /> where the error type should
         ///     be insert.
         /// </remarks>
-
         protected virtual string MailSubjectFormat { get; }
 
         /// <summary>
@@ -130,26 +122,22 @@ namespace ElmahCore.Mvc.Notifiers
         /// <summary>
         ///     Gets the SMTP server host name used when sending the mail.
         /// </summary>
-
         protected string SmtpServer { get; }
 
         /// <summary>
         ///     Gets the SMTP port used when sending the mail.
         /// </summary>
-
         protected int SmtpPort { get; }
 
         /// <summary>
         ///     Gets the user name to use if the SMTP server requires authentication.
         /// </summary>
-
         protected string AuthUserName { get; }
 
         /// <summary>
         ///     Gets the clear-text password to use if the SMTP server requires
         ///     authentication.
         /// </summary>
-
         protected string AuthPassword { get; }
 
         /// <summary>
@@ -157,16 +145,13 @@ namespace ElmahCore.Mvc.Notifiers
         ///     is attached to the e-mail or not. If <c>true</c>, the YSOD is
         ///     not attached.
         /// </summary>
-
         protected bool NoYsod { get; }
 
         /// <summary>
         ///     Determines if SSL will be used to encrypt communication with the
         ///     mail server.
         /// </summary>
-
         protected bool UseSsl { get; }
-
 
         public void Notify(Error error)
         {
@@ -177,7 +162,6 @@ namespace ElmahCore.Mvc.Notifiers
         }
 
         public string Name { get; }
-
 
         /// <summary>
         ///     Schedules the error to be e-mailed asynchronously.
@@ -209,7 +193,6 @@ namespace ElmahCore.Mvc.Notifiers
                 ReportError((Error) state);
             }
 
-            //
             // Catch and trace COM/SmtpException here because this
             // method will be called on a thread pool thread and
             // can either fail silently in 1.x or with a big band in
@@ -219,7 +202,6 @@ namespace ElmahCore.Mvc.Notifiers
             //     Unhandled exceptions cause ASP.NET-based applications 
             //     to unexpectedly quit in the .NET Framework 2.0
             //     http://support.microsoft.com/kb/911816
-            //
 
             catch (SmtpException e)
             {
@@ -249,9 +231,7 @@ namespace ElmahCore.Mvc.Notifiers
             if (recipient.Length == 0)
                 return;
 
-            //
             // Create the mail, setting up the sender and recipient and priority.
-            //
 
             var mail = new MailMessage();
             mail.Priority = MailPriority;
@@ -266,17 +246,13 @@ namespace ElmahCore.Mvc.Notifiers
                 foreach (var r in recipients) mail.CC.Add(r);
             }
 
-            //
             // Format the mail subject.
-            // 
 
             var subjectFormat = MailSubjectFormat ?? "Error ({1}): {0}";
             mail.Subject = string.Format(subjectFormat, error.Message, error.Type).Replace('\r', ' ')
                 .Replace('\n', ' ');
 
-            //
             // Format the mail body.
-            //
 
             var formatter = CreateErrorFormatter();
 
@@ -301,13 +277,10 @@ namespace ElmahCore.Mvc.Notifiers
                 }
             }
 
-
             try
             {
-                //
                 // If an HTML message was supplied by the web host then attach 
                 // it to the mail if not explicitly told not to do so.
-                //
 
                 if (!NoYsod && error.WebHostHtmlMessage.Length > 0)
                 {
@@ -317,10 +290,8 @@ namespace ElmahCore.Mvc.Notifiers
                         mail.Attachments.Add(ysodAttachment);
                 }
 
-                //
                 // Send off the mail with some chance to pre- or post-process
                 // using event.
-                //
 
                 SendMail(mail);
             }
