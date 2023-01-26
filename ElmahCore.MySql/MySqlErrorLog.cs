@@ -101,7 +101,8 @@ namespace ElmahCore.MySql
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList)
         {
             if (errorIndex < 0) throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);

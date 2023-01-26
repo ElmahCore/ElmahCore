@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -153,7 +154,8 @@ namespace ElmahCore
         ///     Returns a page of errors from the application memory in
         ///     descending order of logged time.
         /// </summary>
-        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList)
         {
             if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
@@ -176,7 +178,17 @@ namespace ElmahCore
                 if (_entries == null)
                     return 0;
 
+                var sourceEntries = (KeyedCollection<string, ErrorLogEntry>)_entries;
                 totalCount = _entries.Count;
+                
+                if (filters.Count > 0 || !string.IsNullOrEmpty(searchText))
+                {
+                    var items = from e in _entries
+                        where ErrorLogFilterHelper.IsMatched(e, searchText, filters)
+                        select e;
+                    sourceEntries = new EntryCollection(items.ToList());
+                    totalCount = sourceEntries.Count;
+                }
 
                 var startIndex = errorIndex;
                 var endIndex = Math.Min(startIndex + pageSize, totalCount);
@@ -190,7 +202,7 @@ namespace ElmahCore
                     var targetIndex = 0;
 
                     while (sourceIndex > startIndex)
-                        selectedEntries[targetIndex++] = _entries[--sourceIndex];
+                        selectedEntries[targetIndex++] = sourceEntries[--sourceIndex];
                 }
             }
             finally
@@ -216,6 +228,14 @@ namespace ElmahCore
         private sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
         {
             private readonly int _size;
+
+            public EntryCollection(ICollection<ErrorLogEntry> items) : this(items.Count)
+            {
+                foreach (var item in items)
+                {
+                    Add(item);
+                }
+            }
 
             public EntryCollection(int size)
             {

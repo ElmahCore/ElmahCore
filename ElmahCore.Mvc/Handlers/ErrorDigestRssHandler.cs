@@ -107,7 +107,7 @@ namespace ElmahCore.Mvc.Handlers
             var entries = new List<ErrorLogEntry>(pageSize);
             for (var pageIndex = 0;; pageIndex++)
             {
-                log.GetErrors(pageIndex, pageSize, entries);
+                log.GetErrors(null, new List<ErrorLogFilter>(), pageIndex, pageSize, entries);
                 if (!entries.Any())
                     break;
                 foreach (var entry in entries)

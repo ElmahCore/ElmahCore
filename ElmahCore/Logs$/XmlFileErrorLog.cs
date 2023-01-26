@@ -103,7 +103,8 @@ namespace ElmahCore
         ///     Returns a page of errors from the folder in descending order
         ///     of logged time as defined by the sortable file names.
         /// </summary>
-        public override int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList)
         {
             if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
             if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
@@ -125,14 +126,31 @@ namespace ElmahCore
 
             if (errorEntryList == null) return files.Length; // Return total
 
-            var entries = files.Skip(errorIndex)
-                .Take(pageSize)
-                .Select(LoadErrorLogEntry);
+            int totalCount;
+            IEnumerable<ErrorLogEntry> entries;
+            if (filters.Count == 0 && string.IsNullOrEmpty(searchText))
+            {
+                entries = files.Skip(errorIndex)
+                    .Take(pageSize)
+                    .Select(LoadErrorLogEntry);
+                totalCount = files.Length;
+            }
+            else
+            {
+                var fEntries = files
+                    .Select(LoadErrorLogEntry)
+                    .Where(e => ErrorLogFilterHelper.IsMatched(e, searchText, filters)).ToList();
+                totalCount = fEntries.Count;
+                
+                entries = fEntries
+                    .Skip(errorIndex)
+                    .Take(pageSize);
+            }
 
             foreach (var entry in entries)
                 errorEntryList.Add(entry);
 
-            return files.Length; // Return total
+            return totalCount; // Return total
         }
 
         private ErrorLogEntry LoadErrorLogEntry(string path)

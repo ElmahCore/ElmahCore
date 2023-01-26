@@ -166,3 +166,20 @@ JavaScript filters not yet impemented :(
 Add notifiers to errorFilter node if you do not want to send notifications
 Filtered errors will be logged, but will not be sent.
 
+## Search And Filters
+
+Since version 2.2.0 tou can use full-text search and multiple filter.
+
+Full-text search work on analyzed text fields.
+
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-filters-1.png)
+
+Filters are available through either the **Add filter** button.
+
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-filters-2.png)
+
+Or you can use **filter icon** to the right of the error field.
+
+![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-filters-3.png)
+
+Currently supports only Memory and XmlFile error logs.

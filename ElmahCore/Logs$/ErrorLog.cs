@@ -142,7 +142,8 @@ namespace ElmahCore
         ///     Retrieves a page of application errors from the log in
         ///     descending order of logged time.
         /// </summary>
-        public abstract int GetErrors(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList);
+        public abstract int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList);
 
 
         /// <summary>
@@ -150,19 +151,19 @@ namespace ElmahCore
         ///     does the same as <see cref="GetErrors" />. An additional
         ///     parameter specifies a <see cref="CancellationToken" /> to use.
         /// </summary>
-        public Task<int> GetErrorsAsync(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public Task<int> GetErrorsAsync(string searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
-            return GetErrorsAsync(errorIndex, pageSize, errorEntryList, CancellationToken.None);
+            return GetErrorsAsync(searchText, errorLogFilters, errorIndex, pageSize, errorEntryList, CancellationToken.None);
         }
 
         /// <summary>
         ///     When overridden in a subclass, starts a task that asynchronously
         ///     does the same as <see cref="GetErrors" />.
         /// </summary>
-        public virtual Task<int> GetErrorsAsync(int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList,
+        public virtual Task<int> GetErrorsAsync(string searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(GetErrors(errorIndex, pageSize, errorEntryList));
+            return Task.FromResult(GetErrors(searchText, errorLogFilters, errorIndex, pageSize, errorEntryList));
         }
 
 
@@ -170,10 +171,10 @@ namespace ElmahCore
         ///     When overridden in a subclass, begins an asynchronous version
         ///     of <see cref="GetErrors" />.
         /// </summary>
-        public virtual IAsyncResult BeginGetErrors(int pageIndex, int pageSize,
+        public virtual IAsyncResult BeginGetErrors(string searchText, List<ErrorLogFilter> errorLogFilters, int pageIndex, int pageSize,
             ICollection<ErrorLogEntry> errorEntryList, AsyncCallback asyncCallback, object asyncState)
         {
-            return GetErrorsAsync(pageIndex, pageSize, errorEntryList, CancellationToken.None)
+            return GetErrorsAsync(searchText, errorLogFilters, pageIndex, pageSize, errorEntryList, CancellationToken.None)
                 .Apmize(asyncCallback, asyncState);
         }
 
@@ -203,13 +204,13 @@ namespace ElmahCore
             }
         }
 
-        public async Task<int> GetNewErrorsAsync(string id, List<ErrorLogEntry> entries)
+        public async Task<int> GetNewErrorsAsync(string searchText, List<ErrorLogFilter> errorLogFilters, string id, List<ErrorLogEntry> entries)
         {
             int cnt = 0, count, page = 0;
             do
             {
                 var errors = new List<ErrorLogEntry>();
-                count = await GetErrorsAsync(page, 10, errors);
+                count = await GetErrorsAsync(searchText, errorLogFilters, page, 10, errors);
                 foreach (var el in errors)
                 {
                     if (el.Id == id) return cnt;

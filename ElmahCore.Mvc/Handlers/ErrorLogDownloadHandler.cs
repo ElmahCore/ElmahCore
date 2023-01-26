@@ -63,7 +63,7 @@ namespace ElmahCore.Mvc.Handlers
 
             for (var pageIndex = 0;; pageIndex++)
             {
-                var total = await log.GetErrorsAsync(pageIndex, PageSize, errorEntryList);
+                var total = await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), pageIndex, PageSize, errorEntryList);
                 var count = errorEntryList.Count;
 
                 if (maxDownloadCount > 0)

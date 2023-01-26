@@ -114,7 +114,7 @@ namespace ElmahCore.Mvc
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
-
+        
         [XmlElement("Time")]
         public DateTime Time
         {
