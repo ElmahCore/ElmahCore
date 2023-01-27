@@ -125,32 +125,31 @@ namespace ElmahCore.Mvc
                 },
                 (t, m) => new
                 {
-                    Type = new {t.Index, t.End, Html = "<span class='st-type'>" + t.Html + "</span>"},
-                    Method = new {m.Index, m.End, Html = "<span class='st-method'>" + m.Html + "</span>"}
+                    Type = new {t.Index, t.End, Html = $"<span class='st-type'>{t.Html}</span>"},
+                    Method = new {m.Index, m.End, Html = $"<span class='st-method'>{m.Html}</span>"}
                 },
                 (t, n) => new
                 {
-                    Type = new {t.Index, t.End, Html = "<span class='st-param-type'>" + t.Html + "</span>"},
-                    Name = new {n.Index, n.End, Html = "<span class='st-param-name'>" + n.Html + "</span>"}
+                    Type = new {t.Index, t.End, Html = $"<span class='st-param-type'>{t.Html}</span>"},
+                    Name = new {n.Index, n.End, Html = $"<span class='st-param-name'>{n.Html}</span>"}
                 },
                 (p, ps) => new {List = p, Parameters = ps.ToArray()},
-                (f, l, m, t) =>
+                (f,l) =>
+                
                 {
                     if (int.TryParse(l.Html, out var line))
                         list.Add(new SourceInfo
                         {
                             Source = f.Html,
                             Line = line,
-                            Method = m.Html,
-                            Type = t.Html
                         });
                     return new
                     {
                         File = f.Html.Length > 0
-                            ? new {f.Index, f.End, Html = "<span class='st-file'>" + f.Html + "</span>"}
+                            ? new {f.Index, f.End, Html = $"<span class='st-file'>{f.Html}</span>"}
                             : null,
                         Line = l.Html.Length > 0
-                            ? new {l.Index, l.End, Html = "<span class='st-line'>" + l.Html + "</span>"}
+                            ? new {l.Index, l.End, Html = $"<span class='st-line'>{l.Html}</span>"}
                             : null
                     };
                 },
@@ -194,7 +193,7 @@ namespace ElmahCore.Mvc
                 where m.Length > 0
                 select m;
 
-            return string.Join(String.Empty, markups);
+            return string.Join(string.Empty, markups);
         }
     }
 }
