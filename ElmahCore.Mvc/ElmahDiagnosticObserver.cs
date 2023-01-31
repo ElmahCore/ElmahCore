@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ElmahCore.Mvc
@@ -53,14 +53,13 @@ namespace ElmahCore.Mvc
 
         public void OnNext(KeyValuePair<string, object> value)
         {
-            if (value.Value == null || value.Key != "System.Data.SqlClient.WriteCommandBefore" &&
-                value.Key != "System.Data.SqlClient.WriteCommandAfter") return;
+            if (value.Value == null || value.Key != "Microsoft.Data.SqlClient.WriteCommandBefore" &&
+                value.Key != "Microsoft.Data.SqlClient.WriteCommandAfter") return;
 
             ElmahLogFeature sqlLog;
             try
             {
                 sqlLog = _provider.GetService<IHttpContextAccessor>()?.HttpContext?.Features.Get<ElmahLogFeature>();
-	
             }
             catch (ObjectDisposedException)
             {
@@ -72,10 +71,10 @@ namespace ElmahCore.Mvc
 
             switch (value.Key)
             {
-                case "System.Data.SqlClient.WriteCommandAfter":
+                case "Microsoft.Data.SqlClient.WriteCommandAfter":
                     sqlLog.SetSqlDuration(id);
                     break;
-                case "System.Data.SqlClient.WriteCommandBefore":
+                case "Microsoft.Data.SqlClient.WriteCommandBefore":
                 {
                     var cmd = GetValueFromAnonymousType<SqlCommand>(value.Value, "Command");
 
