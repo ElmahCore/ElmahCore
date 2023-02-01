@@ -11,7 +11,7 @@ jobs:
         options:
           - framework: netstandard2.0
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: DotNetBuild
         shell: pwsh
         run: ./ci-build.ps1 "${{matrix.options.framework}}"
