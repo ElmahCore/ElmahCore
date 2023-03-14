@@ -35,12 +35,12 @@ namespace ElmahCore.MySql
                 Host 		VARCHAR(50) NOT NULL,
                 Type		VARCHAR(100) NOT NULL,
                 Source		VARCHAR(60)  NOT NULL,
-                Message		VARCHAR(500) NOT NULL,
+                Message		TEXT NOT NULL,
                 User		VARCHAR(50)  NOT NULL,
                 StatusCode	INT NOT NULL,
                 TimeUtc		TIMESTAMP NOT NULL,
                 Sequence	INT NOT NULL AUTO_INCREMENT,
-                AllXml		TEXT NOT NULL,
+                AllXml		MEDIUMTEXT NOT NULL,
                 KEY(Sequence)
             );
 
