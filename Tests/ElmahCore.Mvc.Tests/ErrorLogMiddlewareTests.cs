@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -27,14 +28,14 @@ namespace ElmahCore.Mvc.Tests
         [Fact]
         public void WhenInitMiddlewareSetsStaticExtension()
         {
-            var _ = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options);
+            var _ = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options, null);
             ElmahExtensions.LogMiddleware.Should().NotBeNull();
         }
 
         [Fact]
         public void RiseErrorOkWhenMiddlewareInitialized()
         {
-            var _ = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options);
+            var _ = new ErrorLogMiddleware(_requestDelegate, _errorLog, _loggerFactory, _options, null);
             var httpContext = new DefaultHttpContext();
             Func<Task> act = async () => await ElmahExtensions.RaiseError(httpContext, new Exception());
             act.Should().NotThrowAsync();

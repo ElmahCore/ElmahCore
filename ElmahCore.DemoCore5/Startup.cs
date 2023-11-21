@@ -40,11 +40,13 @@ namespace ElmahCore.DemoCore5
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services
+                .AddTransient<IErrorNotifier, MyNotifier>()
+                .AddTransient<IErrorNotifier, MyNotifierWithId>();
+            
             services.AddElmah<XmlFileErrorLog>(options =>
             {
                 options.LogPath = "~/log";
-                options.Notifiers.Add(new MyNotifier());
-                options.Notifiers.Add(new MyNotifierWithId());
                 options.Filters.Add(new CmsErrorLogFilter());
             });
 
@@ -91,7 +93,7 @@ namespace ElmahCore.DemoCore5
     {
         public void Notify(Error error)
         {
-            Debug.WriteLine(error.Message);
+            Debug.WriteLine($"{error.Message} from {nameof(MyNotifier)}");
         }
 
         public string Name => "my";
@@ -105,7 +107,7 @@ namespace ElmahCore.DemoCore5
 
         public void Notify(string id, Error error)
         {
-            Debug.WriteLine(error.Message);
+            Debug.WriteLine($"{error.Message} from {nameof(MyNotifierWithId)}");
         }
 
         public string Name => "myWithId";

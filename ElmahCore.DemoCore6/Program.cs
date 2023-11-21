@@ -6,10 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddTransient<IErrorNotifier, MyNotifier>();
 builder.Services.AddElmah<XmlFileErrorLog>(options =>
 {
     options.LogPath = "~/log";
-    options.Notifiers.Add(new MyNotifier());
     options.Filters.Add(new CmsErrorLogFilter());
 });
 
