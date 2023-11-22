@@ -32,11 +32,6 @@ namespace ElmahCore
         public ICollection<IErrorFilter> Filters { get; set; } = new List<IErrorFilter>();
 
         /// <summary>
-        ///     Custom notifiers
-        /// </summary>
-        public ICollection<IErrorNotifier> Notifiers { get; set; } = new List<IErrorNotifier>();
-
-        /// <summary>
         ///     Error log
         /// </summary>
         public ErrorLog EventLog { get; set; }

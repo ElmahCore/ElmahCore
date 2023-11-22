@@ -10,6 +10,7 @@ using ElmahCore.Assertions;
 using ElmahCore.Mvc.Handlers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -47,8 +48,12 @@ namespace ElmahCore.Mvc
         private readonly IEnumerable<IErrorNotifier> _notifiers;
         private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
-        public ErrorLogMiddleware(RequestDelegate next, ErrorLog errorLog, ILoggerFactory loggerFactory,
-            IOptions<ElmahOptions> elmahOptions)
+        public ErrorLogMiddleware(
+            RequestDelegate next,
+            ErrorLog errorLog,
+            ILoggerFactory loggerFactory,
+            IOptions<ElmahOptions> elmahOptions,
+            IEnumerable<IErrorNotifier> notifiers)
         {
             ElmahExtensions.LogMiddleware = this;
             _next = next;
@@ -66,8 +71,8 @@ namespace ElmahCore.Mvc
             _onError = options.Error;
 
             //Notifiers
-            if (options.Notifiers != null)
-                _notifiers = elmahOptions.Value.Notifiers.ToList();
+            if (notifiers != null && notifiers.Any())
+                _notifiers = notifiers.ToList();
 
             //Filters
             _filters = elmahOptions.Value?.Filters.ToList();
