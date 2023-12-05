@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Options;
 
@@ -102,6 +104,28 @@ namespace ElmahCore.Sql
             }
         }
 
+        public override async Task<string> LogAsync(Error error, CancellationToken cancellationToken)
+        {
+            if (error == null)
+                throw new ArgumentNullException(nameof(error));
+
+            var id = Guid.NewGuid();
+
+            var errorXml = ErrorXml.EncodeString(error);
+
+            using (var connection = new SqlConnection(ConnectionString))
+            using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
+                error.Message, error.User, error.StatusCode, error.Time, errorXml,
+                DatabaseSchemaName, DatabaseTableName))
+            {
+                command.Connection = connection;
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+                await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            return id.ToString();
+        }
+
         public override ErrorLogEntry GetError(string id)
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
@@ -127,6 +151,40 @@ namespace ElmahCore.Sql
                 command.Connection = connection;
                 connection.Open();
                 errorXml = (string) command.ExecuteScalar();
+            }
+
+            if (errorXml == null)
+                return null;
+
+            var error = ErrorXml.DecodeString(errorXml);
+            return new ErrorLogEntry(this, id, error);
+        }
+
+        public override async Task<ErrorLogEntry> GetErrorAsync(string id, CancellationToken cancellationToken)
+        {
+            if (id == null) throw new ArgumentNullException(nameof(id));
+            if (id.Length == 0) throw new ArgumentException(null, nameof(id));
+
+            Guid errorGuid;
+
+            try
+            {
+                errorGuid = new Guid(id);
+            }
+            catch (FormatException e)
+            {
+                throw new ArgumentException(e.Message, nameof(id), e);
+            }
+
+            string errorXml;
+
+            using (var connection = new SqlConnection(ConnectionString))
+            using (var command = Commands.GetErrorXml(ApplicationName, errorGuid,
+                DatabaseSchemaName, DatabaseTableName))
+            {
+                command.Connection = connection;
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+                errorXml = (string)await command.ExecuteScalarAsync().ConfigureAwait(false);
             }
 
             if (errorXml == null)
@@ -168,6 +226,43 @@ namespace ElmahCore.Sql
                 {
                     command.Connection = connection;
                     return int.Parse(command.ExecuteScalar().ToString());
+                }
+            }
+        }
+
+        public override async Task<int> GetErrorsAsync(string searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, 
+            ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
+        {
+            if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
+            if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
+
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+                using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize,
+                DatabaseSchemaName, DatabaseTableName))
+                {
+                    command.Connection = connection;
+
+                    using (var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
+                    {
+                        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+                        {
+                            var id = reader.GetGuid(0);
+                            var xml = reader.GetString(1);
+                            var error = ErrorXml.DecodeString(xml);
+                            errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
+                        }
+                    }
+                }
+
+                using (var command = Commands.GetErrorsXmlTotal(ApplicationName,
+                DatabaseSchemaName, DatabaseTableName))
+                {
+                    command.Connection = connection;
+                    var result = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+                    return int.Parse(result.ToString());
                 }
             }
         }
