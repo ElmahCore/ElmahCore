@@ -11,7 +11,7 @@ namespace ElmahCore.DemoCore6.Pages
             _logger = logger;
         }
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
             _logger.LogTrace("Test");
             _logger.LogDebug("Test");
@@ -20,7 +20,7 @@ namespace ElmahCore.DemoCore6.Pages
             _logger.LogWarning("Test");
             _logger.LogCritical(new InvalidOperationException("Test"), "Test");
 
-            ElmahExtensions.RaiseError(new Exception("test2"));
+            await this.HttpContext.RaiseError(new Exception("test2"));
 
             var r = 0;
             // ReSharper disable once UnusedVariable

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using ElmahCore.DemoCore3.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,9 +16,9 @@ namespace ElmahCore.DemoCore3.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            ElmahExtensions.RaiseError(new InvalidOperationException("This is the Test Exception from code."));
+            await this.HttpContext.RaiseError(new InvalidOperationException("This is the Test Exception from code."));
 
             _logger.LogTrace("Test");
             _logger.LogDebug("Test");
@@ -26,7 +27,7 @@ namespace ElmahCore.DemoCore3.Controllers
             _logger.LogWarning("Test");
             _logger.LogCritical(new InvalidOperationException("Test"), "Test");
 
-            ElmahExtensions.RaiseError(new NullReferenceException());
+            await this.HttpContext.RaiseError(new NullReferenceException());
 
             if (DateTime.Now.Millisecond < 500)
             {

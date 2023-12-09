@@ -1,65 +1,27 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using ElmahCore.Mvc;
-using ElmahCore.Mvc.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 namespace ElmahCore
 {
     public static class ElmahExtensions
     {
-        internal static ErrorLogMiddleware LogMiddleware;
-
-        private static void GuardForNullMiddleware()
-        {
-            if (LogMiddleware == null)
-                throw new MiddlewareNotInitializedException("Elmah Middleware Not initialized");
-        }
-
-        [Obsolete("Prefer RaiseError")]
-        public static Task RiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
-        {
-            return RaiseError(ctx, ex, onError);
-        }
-
         public static Task RaiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
         {
-            GuardForNullMiddleware();
-            return LogMiddleware.LogException(ex, ctx, onError);
-        }
-
-        [Obsolete("Prefer RaiseError")]
-        public static Task RiseError(this HttpContext ctx, Exception ex)
-        {
-            return RaiseError(ctx, ex);
+            var raiser = ctx.RequestServices.GetRequiredService<IElmahExceptionLogger>();
+            return raiser.LogExceptionAsync(ctx, ex, onError);
         }
 
         public static Task RaiseError(this HttpContext ctx, Exception ex)
         {
-            GuardForNullMiddleware();
-            return LogMiddleware.LogException(ex, ctx, (context, error) => Task.CompletedTask);
-        }
-
-        [Obsolete("Prefer RaiseError")]
-        public static void RiseError(Exception ex)
-        {
-            RaiseError(ex);
-        }
-
-        public static void RaiseError(Exception ex, Func<HttpContext, Error, Task> onError)
-        {
-            LogMiddleware?.LogException(ex, InternalHttpContext.Current ?? new DefaultHttpContext(),
-                onError);
-        }
-
-        public static void RaiseError(Exception ex)
-        {
-            RaiseError(ex, (context, error) => Task.CompletedTask);
+            return ctx.RaiseError(ex, (context, error) => Task.CompletedTask);
         }
 
         public static void LogParams(this object source,
+            HttpContext ctx,
             (string name, object value) param1 = default,
             (string name, object value) param2 = default,
             (string name, object value) param3 = default,
@@ -76,14 +38,13 @@ namespace ElmahCore
         {
             try
             {
-                var feature = InternalHttpContext.Current.Features.Get<ElmahLogFeature>();
+                var feature = ctx.Features.Get<ElmahLogFeature>();
                 if (feature == null) return;
 
-                var list = new[] {param1, param2, param3, param4, param5, param6, param7, param8, param9, param10};
+                var list = new[] { param1, param2, param3, param4, param5, param6, param7, param8, param9, param10 };
 
                 var typeName = source.GetType().ToString();
                 feature.LogParameters(list, typeName, memberName, file, line);
-
             }
             catch
             {
