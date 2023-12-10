@@ -1,16 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ElmahCore.Mvc.Handlers;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-[assembly: InternalsVisibleTo("ElmahCore.Mvc.Tests")]
 namespace ElmahCore.Mvc
 {
     internal sealed class ErrorLogMiddleware
@@ -90,7 +87,7 @@ namespace ElmahCore.Mvc
                 if (elmahRoot.StartsWith("~/"))
                     elmahRoot = context.Request.PathBase + elmahRoot.Substring(1);
 
-                context.Features.Set(new ElmahLogFeature());
+                context.Features.Set<IElmahLogFeature>(new ElmahLogFeature());
 
                 var sourcePath = context.Request.PathBase + context.Request.Path.Value;
                 if (sourcePath.Equals(elmahRoot, StringComparison.InvariantCultureIgnoreCase)
@@ -116,7 +113,6 @@ namespace ElmahCore.Mvc
                     body = await GetBody(context.Request);
 
                 await _next(context);
-
 
                 if (context.Response.HasStarted
                     || context.Response.StatusCode < 400

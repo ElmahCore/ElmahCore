@@ -38,7 +38,7 @@ namespace ElmahCore
         {
             try
             {
-                var feature = ctx.Features.Get<ElmahLogFeature>();
+                var feature = ctx.Features.Get<IElmahLogFeature>();
                 if (feature == null) return;
 
                 var list = new[] { param1, param2, param3, param4, param5, param6, param7, param8, param9, param10 };

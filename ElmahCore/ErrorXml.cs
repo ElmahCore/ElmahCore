@@ -454,7 +454,7 @@ namespace ElmahCore
             reader.ReadEndElement();
         }
 
-        private static void UpcodeToLog(XmlReader reader, List<ElmahLogMessageEntry> log)
+        private static void UpcodeToLog(XmlReader reader, ICollection<ElmahLogMessageEntry> log)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (log == null) throw new ArgumentNullException(nameof(log));
@@ -490,7 +490,7 @@ namespace ElmahCore
             reader.ReadEndElement();
         }
 
-        private static void UpcodeToParams(XmlReader reader, List<ElmahLogParamEntry> log)
+        private static void UpcodeToParams(XmlReader reader, ICollection<ElmahLogParamEntry> log)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (log == null) throw new ArgumentNullException(nameof(log));
@@ -551,15 +551,13 @@ namespace ElmahCore
                 : XmlConvert.ToDateTime(text, XmlDateTimeSerializationMode.Local);
         }
         
-        private static void UpcodeToSqlLog(XmlReader reader, List<ElmahLogSqlEntry> log)
+        private static void UpcodeToSqlLog(XmlReader reader, ICollection<ElmahLogSqlEntry> log)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (log == null) throw new ArgumentNullException(nameof(log));
 
             Debug.Assert(!reader.IsEmptyElement);
             reader.Read();
-
-
 
             while (reader.NodeType != XmlNodeType.EndElement)
             {

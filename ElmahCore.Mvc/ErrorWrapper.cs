@@ -251,14 +251,14 @@ namespace ElmahCore.Mvc
         [XmlIgnore]
         public List<ElmahLogSqlEntry> SqlLog
         {
-            get => _error.SqlLog;
+            get => _error.SqlLog.ToList();
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
         [XmlIgnore]
         public List<ElmahLogParamEntry> Params
         {
-            get => _error.Params;
+            get => _error.Params.ToList();
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }

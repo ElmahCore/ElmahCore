@@ -4,16 +4,12 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text.Json;
 using System.Xml;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
-
-[assembly: InternalsVisibleTo("ElmahCore.Mvc")]
-
 
 namespace ElmahCore
 {
@@ -121,11 +117,14 @@ namespace ElmahCore
                 }
 
                 _cookies = CopyCollection(request.Cookies);
-                MessageLog = context.Features.Get<ElmahLogFeature>()?.Log ?? new List<ElmahLogMessageEntry>();
-                SqlLog = context.Features.Get<ElmahLogFeature>()?.LogSql ?? new List<ElmahLogSqlEntry>();
-                var paramList = context.Features.Get<ElmahLogFeature>()?.Params;
+                var feature = context.Features.Get<IElmahLogFeature>();
+                MessageLog = feature?.Log?.ToList() ?? new List<ElmahLogMessageEntry>();
+                SqlLog = feature?.LogSql?.ToList() ?? new List<ElmahLogSqlEntry>();
+                var paramList = feature?.Params;
                 if (paramList != null)
+                {
                     foreach (var param in paramList)
+                    {
                         if (param.Params.Any())
                         {
                             Params.Add(new ElmahLogParamEntry(
@@ -136,13 +135,17 @@ namespace ElmahCore
                                 param.File,
                                 param.Line));
                         }
+                    }
+                }
             }
 
             var callerInfo = e?.TryGetCallerInfo() ?? CallerInfo.Empty;
             if (!callerInfo.IsEmpty)
+            {
                 _detail = "# caller: " + callerInfo
                                        + Environment.NewLine
                                        + _detail;
+            }
         }
 
         private KeyValuePair<string,string>[] GetStringParams((string name, object value)[] paramParams) =>
@@ -168,10 +171,11 @@ namespace ElmahCore
             }
         }
 
-        public List<ElmahLogMessageEntry> MessageLog { get; } = new List<ElmahLogMessageEntry>();
+        public ICollection<ElmahLogMessageEntry> MessageLog { get; } = new List<ElmahLogMessageEntry>();
 
-        public List<ElmahLogSqlEntry> SqlLog { get; } = new List<ElmahLogSqlEntry>();
-        public List<ElmahLogParamEntry> Params { get; } = new List<ElmahLogParamEntry>();
+        public ICollection<ElmahLogSqlEntry> SqlLog { get; } = new List<ElmahLogSqlEntry>();
+
+        public ICollection<ElmahLogParamEntry> Params { get; } = new List<ElmahLogParamEntry>();
 
         /// <summary>
         ///     Gets the <see cref="Exception" /> instance used to initialize this
@@ -188,7 +192,6 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets the name of application in which this error occurred.
         /// </summary>
-
         public string ApplicationName
         {
             get => _applicationName ?? string.Empty;
@@ -198,7 +201,6 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets name of host machine where this error occurred.
         /// </summary>
-
         public string HostName
         {
             get => _hostName ?? Environment.GetEnvironmentVariable("COMPUTERNAME") ??
@@ -209,7 +211,6 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets the type, class or category of the error.
         /// </summary>
-
         public string Type
         {
             get => _typeName ?? string.Empty;
@@ -230,7 +231,6 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets the source that is the cause of the error.
         /// </summary>
-
         public string Source
         {
             get => _source ?? string.Empty;
@@ -240,7 +240,6 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets a brief text describing the error.
         /// </summary>
-
         public string Message
         {
             get => _message ?? string.Empty;
@@ -251,7 +250,6 @@ namespace ElmahCore
         ///     Gets or sets a detailed text describing the error, such as a
         ///     stack trace.
         /// </summary>
-
         public string Detail
         {
             get => _detail ?? string.Empty;
@@ -262,7 +260,6 @@ namespace ElmahCore
         ///     Gets or sets the user logged into the application at the time
         ///     of the error.
         /// </summary>
-
         public string User
         {
             get => _user ?? Environment.GetEnvironmentVariable("USERDOMAIN") ??
@@ -275,7 +272,6 @@ namespace ElmahCore
         ///     Gets or sets the date and time (in local time) at which the
         ///     error occurred.
         /// </summary>
-
         public DateTime Time { get; set; }
 
         /// <summary>
@@ -286,14 +282,12 @@ namespace ElmahCore
         ///     For cases where this value cannot always be reliably determined,
         ///     the value may be reported as zero.
         /// </remarks>
-
         public int StatusCode { get; set; }
 
         /// <summary>
         ///     Gets or sets the HTML message generated by the web host (ASP.NET)
         ///     for the given error.
         /// </summary>
-
         public string WebHostHtmlMessage
         {
             get => _webHostHtmlMessage ?? string.Empty;
@@ -304,28 +298,24 @@ namespace ElmahCore
         ///     Gets a collection representing the Web server variables
         ///     captured as part of diagnostic data for the error.
         /// </summary>
-
         public NameValueCollection ServerVariables => FaultIn(ref _serverVariables);
 
         /// <summary>
         ///     Gets a collection representing the Web query string variables
         ///     captured as part of diagnostic data for the error.
         /// </summary>
-
         public NameValueCollection QueryString => FaultIn(ref _queryString);
 
         /// <summary>
         ///     Gets a collection representing the form variables captured as
         ///     part of diagnostic data for the error.
         /// </summary>
-
         public NameValueCollection Form => FaultIn(ref _form);
 
         /// <summary>
         ///     Gets a collection representing the client cookies
         ///     captured as part of diagnostic data for the error.
         /// </summary>
-
         public NameValueCollection Cookies => FaultIn(ref _cookies);
 
         /// <summary>
@@ -336,13 +326,11 @@ namespace ElmahCore
             //
             // Make a base shallow copy of all the members.
             //
-
             var copy = (Error) MemberwiseClone();
 
             //
             // Now make a deep copy of items that are mutable.
             //
-
             copy._serverVariables = CopyCollection(_serverVariables);
             copy._queryString = CopyCollection(_queryString);
             copy._form = CopyCollection(_form);
