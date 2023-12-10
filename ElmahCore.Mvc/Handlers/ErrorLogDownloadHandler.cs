@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.AspNetCore.Http;
 
 namespace ElmahCore.Mvc.Handlers
@@ -49,15 +53,10 @@ namespace ElmahCore.Mvc.Handlers
                 (format, maxDownloadCount) => ProcessRequestAsync(errorLog, context, format, maxDownloadCount));
         }
 
-        private static async Task ProcessRequestAsync(ErrorLog log, HttpContext context, Format format,
-            int maxDownloadCount)
+        private static async Task ProcessRequestAsync(ErrorLog log, HttpContext context, Format format, int maxDownloadCount)
         {
-            var response = context.Response;
-            var output = response;
-
-            foreach (var text in format.Header())
-                await output.WriteAsync(text);
-
+            await format.Header();
+            
             var errorEntryList = new List<ErrorLogEntry>(PageSize);
             var downloadCount = 0;
 
@@ -70,34 +69,35 @@ namespace ElmahCore.Mvc.Handlers
                 {
                     var remaining = maxDownloadCount - (downloadCount + count);
                     if (remaining < 0)
+                    {
                         count += remaining;
+                    }
                 }
 
-                foreach (var entry in format.Entries(errorEntryList, 0, count, total))
-                    await response.WriteAsync(entry);
-
+                format.Entries(errorEntryList, 0, count, total);
+            
                 downloadCount += count;
 
-                await response.Body.FlushAsync();
+                await format.FlushAsync();
 
                 //
                 // Done if either the end of the list (no more errors found) or
                 // the requested limit has been reached.
                 //
-
                 if (count == 0 || downloadCount == maxDownloadCount)
                 {
                     if (count > 0)
-                        foreach (var entry in format.Entries(new ErrorLogEntry[0], total)) // Terminator
-                            await response.WriteAsync(entry);
+                    {
+                        format.Entries(new ErrorLogEntry[0], total); // Terminator
+                        await format.FlushAsync();
+                    }
+
                     break;
                 }
-
 
                 //
                 // Fetch next page of results.
                 //
-
                 errorEntryList.Clear();
             }
         }
@@ -105,68 +105,77 @@ namespace ElmahCore.Mvc.Handlers
         private static Format GetFormat(HttpContext context, string format)
         {
             Debug.Assert(context != null);
+            var buffer = new FileBufferingWriteStream();
             switch (format)
             {
-                case "jsonp": return new JsonPaddingFormat(context);
-                case "html-jsonp": return new JsonPaddingFormat(context, /* wrapped */ true);
+                case "jsonp": return new JsonPaddingFormat(context, buffer);
+                case "html-jsonp": return new JsonPaddingFormat(context, buffer, /* wrapped */ true);
                 default:
-                    return new CsvFormat(context);
+                    return new CsvFormat(context, buffer);
             }
         }
 
         private abstract class Format
         {
-            protected Format(HttpContext context)
+            protected Format(HttpContext context, FileBufferingWriteStream stream)
             {
                 Debug.Assert(context != null);
                 Context = context;
+                OutputStream = stream;
             }
 
             protected HttpContext Context { get; }
 
-            public virtual IEnumerable<string> Header()
+            protected FileBufferingWriteStream OutputStream { get; }
+
+            public abstract Task Header();
+
+            public void Entries(IList<ErrorLogEntry> entries, int total)
             {
-                yield break;
+                Entries(entries, 0, entries.Count, total);
             }
 
-            public IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int total)
-            {
-                return Entries(entries, 0, entries.Count, total);
-            }
+            public abstract void Entries(IList<ErrorLogEntry> entries, int index, int count, int total);
 
-            public abstract IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total);
+            public Task FlushAsync()
+            {
+                return this.OutputStream.DrainBufferAsync(this.Context.Response.Body);
+            }
         }
 
         private sealed class CsvFormat : Format
         {
-            public CsvFormat(HttpContext context) :
-                base(context)
+            public CsvFormat(HttpContext context, FileBufferingWriteStream stream) :
+                base(context, stream)
             {
             }
 
-            public override IEnumerable<string> Header()
+            public override async Task Header()
             {
                 var response = Context.Response;
                 response.Headers.Add("Content-Type", "text/csv; header=present");
                 response.Headers.Add("Content-Disposition", "attachment; filename=errorlog.csv");
-                yield return
-                    "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n";
+
+                await this.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(
+                    "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n"));
             }
 
-            public override IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
                 Debug.Assert(index + count <= entries.Count);
 
                 if (count == 0)
-                    yield break;
+                {
+                    return;
+                }
 
                 //
                 // Setup to emit CSV records.
                 //
 
-                var writer = new StringWriter {NewLine = "\r\n"};
+                var writer = new StreamWriter(this.OutputStream) { NewLine = "\r\n" };
                 var csv = new CsvWriter(writer);
 
                 var culture = CultureInfo.InvariantCulture;
@@ -198,8 +207,6 @@ namespace ElmahCore.Mvc.Handlers
                         .Field($"{requestUrl}detail{query}")
                         .Record();
                 }
-
-                yield return writer.ToString();
             }
         }
 
@@ -218,27 +225,31 @@ namespace ElmahCore.Mvc.Handlers
 
             private string _callback;
 
-            public JsonPaddingFormat(HttpContext context) :
-                this(context, false)
+            public JsonPaddingFormat(HttpContext context, FileBufferingWriteStream stream) :
+                this(context, stream, false)
             {
             }
 
-            public JsonPaddingFormat(HttpContext context, bool wrapped) :
-                base(context)
+            public JsonPaddingFormat(HttpContext context, FileBufferingWriteStream stream, bool wrapped) :
+                base(context, stream)
             {
                 _wrapped = wrapped;
             }
 
-            public override IEnumerable<string> Header()
+            public override async Task Header()
             {
                 var callback = Context.Request.Query["callback"].FirstOrDefault()
                                ?? string.Empty;
 
                 if (callback.Length == 0)
+                {
                     throw new Exception("The JSONP callback parameter is missing.");
+                }
 
                 if (!CallbackExpression.IsMatch(callback))
+                {
                     throw new Exception("The JSONP callback parameter is not in an acceptable format.");
+                }
 
                 _callback = callback;
 
@@ -253,25 +264,28 @@ namespace ElmahCore.Mvc.Handlers
                 {
                     response.Headers.Add("Content-Type", "text/html");
 
-                    yield return
-                        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
-                    yield return @"
+                    await this.OutputStream.WriteAsync(
+                        Encoding.UTF8.GetBytes(
+                        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"));
+
+                    await this.OutputStream.WriteAsync(
+                        Encoding.UTF8.GetBytes(@"
                     <html xmlns='http://www.w3.org/1999/xhtml'>
                     <head>
                         <title>Error AddMessage in HTML-Wrapped JSONP Format</title>
                     </head>
                     <body>
-                        <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>";
+                        <p>This page is primarily designed to be used in an IFRAME of a parent HTML document.</p>"));
                 }
             }
 
-            public override IEnumerable<string> Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
                 Debug.Assert(index + count <= entries.Count);
 
-                var writer = new StringWriter {NewLine = "\n"};
+                var writer = new StreamWriter(this.OutputStream) { NewLine = "\n" };
 
                 if (_wrapped)
                 {
@@ -282,44 +296,57 @@ namespace ElmahCore.Mvc.Handlers
                 writer.Write(_callback);
                 writer.Write('(');
 
-                var json = new JsonTextWriter(writer);
-                json.Object()
-                    .Member("total").Number(total)
-                    .Member("errors").Array();
+                var json = new Utf8JsonWriter(this.OutputStream);
+                json.WriteStartObject();
+                json.WriteNumber("total", total);
+                json.WriteStartArray("errors");
+
+                //var json = new JsonTextWriter(writer);
+                //json.Object()
+                //    .Member("total").Number(total)
+                //    .Member("errors").Array();
 
                 var requestUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
 
                 for (var i = index; i < count; i++)
                 {
                     var entry = entries[i];
-                    writer.WriteLine();
-                    if (i == 0) writer.Write(' ');
-                    writer.Write("  ");
+                    //writer.WriteLine();
+                    //if (i == 0) writer.Write(' ');
+                    //writer.Write("  ");
 
                     var urlTemplate = $"{requestUrl}?id=" + Uri.EscapeDataString(entry.Id);
 
-                    json.Object();
-                    ErrorJson.EncodeMembers(entry.Error, json);
-                    json.Member("hrefs")
-                        .Array()
-                        .Object()
-                        .Member("type").String("text/html")
-                        .Member("href").String(string.Format(urlTemplate, "detail")).Pop()
-                        .Object()
-                        .Member("type").String("application/json")
-                        .Member("href").String(string.Format(urlTemplate, "json")).Pop()
-                        .Object()
-                        .Member("type").String("application/xml")
-                        .Member("href").String(string.Format(urlTemplate, "xml")).Pop()
-                        .Pop()
-                        .Pop();
+                    json.WriteStartObject();
+                    EncodeMembers(entry.Error, json);
+                    json.WriteStartArray("hrefs");
+
+                    json.WriteStartObject();
+                    json.WriteString("type", "text/html");
+                    json.WriteString("href", string.Format(urlTemplate, "detail"));
+                    json.WriteEndObject();
+
+                    json.WriteStartObject();
+                    json.WriteString("type", "application/json");
+                    json.WriteString("href", string.Format(urlTemplate, "json"));
+                    json.WriteEndObject();
+
+                    json.WriteStartObject();
+                    json.WriteString("type", "application/xml");
+                    json.WriteString("href", string.Format(urlTemplate, "xml"));
+                    json.WriteEndObject();
+
+                    json.WriteEndArray();
+                    json.WriteEndObject();
                 }
 
-                json.Pop();
-                json.Pop();
-
+                json.WriteEndArray();
+                json.WriteEndObject();
+                
                 if (count > 0)
+                {
                     writer.WriteLine();
+                }
 
                 writer.WriteLine(");");
 
@@ -329,10 +356,131 @@ namespace ElmahCore.Mvc.Handlers
                     writer.WriteLine("</script>");
 
                     if (count == 0)
+                    {
                         writer.WriteLine(@"</body></html>");
+                    }
+                }
+            }
+
+            private static void EncodeMembers(Error error, Utf8JsonWriter writer)
+            {
+                Member(writer, "application", error.ApplicationName);
+                Member(writer, "host", error.HostName);
+                Member(writer, "type", error.Type);
+                Member(writer, "message", error.Message);
+                Member(writer, "source", error.Source);
+                Member(writer, "detail", error.Detail);
+                Member(writer, "user", error.User);
+                Member(writer, "time", error.Time, DateTime.MinValue);
+                Member(writer, "statusCode", error.StatusCode, 0);
+                Member(writer, "webHostHtmlMessage", error.WebHostHtmlMessage);
+                Member(writer, "serverVariables", error.ServerVariables);
+                Member(writer, "queryString", error.QueryString);
+                Member(writer, "form", error.Form);
+                Member(writer, "cookies", error.Cookies);
+            }
+
+            private static void Member(Utf8JsonWriter writer, string name, string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    return;
                 }
 
-                yield return writer.ToString();
+                writer.WriteString(name, value);
+            }
+
+            private static void Member(Utf8JsonWriter writer, string name, DateTime value, DateTime defaultValue)
+            {
+                if (value == defaultValue)
+                {
+                    return;
+                }
+
+                writer.WriteString(name, XmlConvert.ToString(value, XmlDateTimeSerializationMode.Utc));
+            }
+
+            private static void Member(Utf8JsonWriter writer, string name, int value, int defaultValue)
+            {
+                if (value == defaultValue)
+                {
+                    return;
+                }
+
+                writer.WriteNumber(name, value);
+            }
+
+            private static void Member(Utf8JsonWriter writer, string name, NameValueCollection collection)
+            {
+                Debug.Assert(writer != null);
+
+                //
+                // Bail out early if the collection is null or empty.
+                //
+                if (collection == null || collection.Count == 0)
+                {
+                    return;
+                }
+
+                //
+                // For each key, we get all associated values and loop through
+                // twice. The first time round, we count strings that are 
+                // neither null nor empty. If none are found then the key is 
+                // skipped. Otherwise, second time round, we encode
+                // strings that are neither null nor empty. If only such string
+                // exists for a key then it is written directly, otherwise
+                // multiple strings are naturally wrapped in an array.
+                //
+                var items = from i in Enumerable.Range(0, collection.Count)
+                            let values = collection.GetValues(i)
+                            where values != null && values.Length > 0
+                            let some = // Neither null nor empty
+                                from v in values
+                                where !string.IsNullOrEmpty(v)
+                                select v
+                            let nom = some.Take(2).Count()
+                            where nom > 0
+                            select new
+                            {
+                                Key = collection.GetKey(i),
+                                IsArray = nom > 1,
+                                Values = some
+                            };
+
+                var list = items.ToList();
+                if (!list.Any())
+                {
+                    return;
+                }
+
+                //
+                // There is at least one value so now we emit the key.
+                // Before doing that, we check if the collection member
+                // was ever started. If not, this would be a good time.
+                //
+                writer.WriteStartObject(name);
+
+                foreach (var item in items)
+                {
+                    writer.WritePropertyName(item.Key ?? string.Empty);
+
+                    if (item.IsArray)
+                    {
+                        writer.WriteStartArray(); // Wrap multiples in an array
+                    }
+
+                    foreach (var value in item.Values)
+                    {
+                        writer.WriteStringValue(value);
+                    }
+
+                    if (item.IsArray)
+                    {
+                        writer.WriteEndArray(); // Close multiples array
+                    }
+                }
+
+                writer.WriteEndObject();
             }
         }
 
@@ -360,13 +508,14 @@ namespace ElmahCore.Mvc.Handlers
             public CsvWriter Field(string value)
             {
                 if (_column > 0)
+                {
                     _writer.Write(',');
+                }
 
                 // 
                 // Fields containing line breaks (CRLF), double quotes, and commas 
                 // need to be enclosed in double-quotes. 
                 //
-
                 var index = value.IndexOfAny(Reserved);
 
                 if (index < 0)
