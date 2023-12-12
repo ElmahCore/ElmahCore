@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq.Expressions;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 
 namespace ElmahCore.Sql

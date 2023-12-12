@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ElmahCore.Mvc
