@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable MemberCanBeProtected.Global
-
 namespace ElmahCore.Mvc.Logger
 {
     public class ElmahLogger : ILogger

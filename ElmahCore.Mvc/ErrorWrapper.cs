@@ -131,7 +131,7 @@ namespace ElmahCore.Mvc
             set { }
         }
 
-        [XmlIgnore] public string HtmlMessage { get; set; }
+        [XmlIgnore] public string? HtmlMessage { get; set; }
 
         public bool IsMobile
         {

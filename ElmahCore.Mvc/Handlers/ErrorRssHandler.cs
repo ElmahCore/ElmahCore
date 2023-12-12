@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ElmahCore.Mvc.Xml;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace ElmahCore.Mvc.Handlers
 {
@@ -11,36 +14,34 @@ namespace ElmahCore.Mvc.Handlers
     ///     Renders a XML using the RSS 0.91 vocabulary that displays, at most,
     ///     the 15 most recent errors recorded in the error log.
     /// </summary>
-    internal static class ErrorRssHandler
+    internal static partial class Endpoints
     {
-        public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog, string elmahRoot)
+        public static IEndpointConventionBuilder MapRss(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            const int pageSize = 15;
-            var entries = new List<ErrorLogEntry>(pageSize);
-            var log = errorLog;
-            await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), 0, pageSize, entries);
+            return builder.MapGet($"{prefix}/rss", async ([FromServices] ErrorLog errorLog, HttpContext context) =>
+            {
+                const int pageSize = 15;
+                var entries = new List<ErrorLogEntry>(pageSize);
+                var log = errorLog;
+                await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), 0, pageSize, entries);
 
-            var response = context.Response;
-            response.ContentType = "application/xml";
+                var title = $@"Error log of {log.ApplicationName} on {Environment.MachineName}";
 
-            var title = $@"Error log of {log.ApplicationName} on {Environment.MachineName}";
+                var link = context.GetElmahAbsoluteRoot();
+                var baseUrl = new Uri(link.TrimEnd('/') + "/");
 
+                var items =
+                    from entry in entries
+                    let error = entry.Error
+                    select RssXml.Item(
+                        error.Message,
+                        "An error of type " + error.Type + " occurred. " + error.Message,
+                        error.Time,
+                        baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
 
-            var link = $"{context.Request.Scheme}://{context.Request.PathBase.ToString().TrimEnd('/')}{elmahRoot}";
-            var baseUrl = new Uri(link.TrimEnd('/') + "/");
-
-            var items =
-                from entry in entries
-                let error = entry.Error
-                select RssXml.Item(
-                    error.Message,
-                    "An error of type " + error.Type + " occurred. " + error.Message,
-                    error.Time,
-                    baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
-
-            var rss = RssXml.Rss(title, link, "AddMessage of recent errors", items);
-
-            await response.WriteAsync(XmlText.StripIllegalXmlCharacters(rss.ToString()));
+                var rss = RssXml.Rss(title, link, "AddMessage of recent errors", items);
+                return Results.Content(XmlText.StripIllegalXmlCharacters(rss.ToString()), "application/xml");
+            });
         }
     }
 }

@@ -1,48 +1,63 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace ElmahCore.Mvc.Handlers
 {
-    internal static class MsdnHandler
+    internal static partial class Endpoints
     {
-        private static readonly Dictionary<string, string> Cache = new Dictionary<string, string>();
+        private static readonly MemoryCache Cache = new(Options.Create(new MemoryCacheOptions()));
 
-        public static async Task ProcessRequestException(HttpContext context, string path)
+        public static IEndpointConventionBuilder MapMsdn(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            context.Response.ContentType = "application/json";
-            string json = null;
-            lock (Cache)
+            return builder.MapMethods($"{prefix}/exception/{{*path}}", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromRoute] string path) =>
             {
-                if (Cache.ContainsKey(path)) json = Cache[path];
-            }
+                string json = await Cache.GetOrCreateAsync(path, LoadAndCacheMsdnEntryAsync);
+                return Results.Content(json, "application/json");
+            });
+        }
 
-            if (json != null)
+        public static IEndpointConventionBuilder MapMsdnStatus(this IEndpointRouteBuilder builder, string prefix = "")
+        {
+            return builder.MapMethods($"{prefix}/status/{{status}}", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromRoute] int status) =>
             {
-                await context.Response.WriteAsync(json);
-                return;
-            }
+                string json = await Cache.GetOrCreateAsync($"status-{status}", LoadAndCacheStatusAsync);
+                return Results.Content(json, "application/json");
+            });
+        }
 
-            var url = "https://docs.microsoft.com/en-us/dotnet/api/" + path;
+        private static async Task<string> LoadAndCacheMsdnEntryAsync(ICacheEntry entry)
+        {
+            var url = "https://docs.microsoft.com/en-us/dotnet/api/" + entry.Key;
             var web = new HtmlWeb();
             var doc = await web.LoadFromWebAsync(url);
             var nodes = doc.DocumentNode.SelectNodes("//div[@class='summaryHolder']/div[@class='summary clearFix']");
             if (nodes == null)
             {
-                await context.Response.WriteAsync("{}");
-                return;
+                return "{}";
             }
 
             var links = doc.DocumentNode.SelectNodes("//div[@class='summaryHolder']/div[@class='summary clearFix']//a");
 
             if (links != null)
+            {
                 foreach (var link in links)
                 {
                     var href = link.Attributes["href"].Value;
-                    if (href == null || href.StartsWith("http")) continue;
+                    if (href == null || href.StartsWith("http"))
+                    {
+                        continue;
+                    }
 
                     link.SetAttributeValue("href",
                         href.StartsWith("/")
@@ -50,64 +65,35 @@ namespace ElmahCore.Mvc.Handlers
                             : $"https://docs.microsoft.com/en-us/dotnet/api/{href}");
 
                     if (!link.Attributes.Contains("target"))
+                    {
                         link.SetAttributeValue("target", "_blank");
+                    }
                 }
+            }
 
             var html = nodes.FirstOrDefault()?.InnerHtml;
 
             if (string.IsNullOrEmpty(html))
             {
-                await context.Response.WriteAsync("{}");
-                return;
+                return "{}";
             }
 
-            json = JsonSerializer.Serialize(new MsdnInfo
+            return JsonSerializer.Serialize(new MsdnInfo
             {
                 Path = url,
                 Html = html
-            }, new JsonSerializerOptions
-            {
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                MaxDepth = 0
-            });
-            lock (Cache)
-            {
-                if (!Cache.ContainsKey(path)) Cache.Add(path, json);
-            }
-
-            await context.Response.WriteAsync(json);
+            }, DefaultJsonSerializerOptions.ApiSerializerOptions);
         }
 
-        public static async Task ProcessRequestStatus(HttpContext context, string statusStr)
+        private static async Task<string> LoadAndCacheStatusAsync(ICacheEntry entry)
         {
-            context.Response.ContentType = "application/json";
-            if (!int.TryParse(statusStr, out var status))
-            {
-                await context.Response.WriteAsync("{}");
-                return;
-            }
-
-            string json = null;
-            lock (Cache)
-            {
-                if (Cache.ContainsKey("status-" + statusStr)) json = Cache["status-" + statusStr];
-            }
-
-            if (json != null)
-            {
-                await context.Response.WriteAsync(json);
-                return;
-            }
-
-            var url = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/" + status;
+            var url = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/" + ((string)entry.Key)[6..];
             var web = new HtmlWeb();
             var doc = await web.LoadFromWebAsync(url);
             var nodes = doc.DocumentNode.SelectNodes("//article[@class='article']/div");
             if (nodes == null)
             {
-                await context.Response.WriteAsync("{}");
-                return;
+                return "{}";
             }
 
             var links = doc.DocumentNode.SelectNodes("//article[@class='article']/div//a");
@@ -116,10 +102,15 @@ namespace ElmahCore.Mvc.Handlers
                 foreach (var link in links)
                 {
                     if (!link.Attributes.Contains("target"))
+                    {
                         link.SetAttributeValue("target", "_blank");
+                    }
 
                     var href = link.Attributes["href"].Value;
-                    if (href == null || href.StartsWith("http")) continue;
+                    if (href == null || href.StartsWith("http"))
+                    {
+                        continue;
+                    }
 
                     link.SetAttributeValue("href",
                         href.StartsWith("/")
@@ -131,26 +122,14 @@ namespace ElmahCore.Mvc.Handlers
 
             if (string.IsNullOrEmpty(html))
             {
-                await context.Response.WriteAsync("{}");
-                return;
+                return "{}";
             }
 
-            json = JsonSerializer.Serialize(new MsdnInfo
+            return JsonSerializer.Serialize(new MsdnInfo
             {
                 Path = url,
                 Html = html
-            }, new JsonSerializerOptions
-            {
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                MaxDepth = 0
-            });
-            lock (Cache)
-            {
-                if (!Cache.ContainsKey("status-" + statusStr)) Cache.Add("status-" + statusStr, json);
-            }
-
-            await context.Response.WriteAsync(json);
+            }, DefaultJsonSerializerOptions.ApiSerializerOptions);
         }
 
         private class MsdnInfo

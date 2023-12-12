@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using ElmahCore.Mvc.Logger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ElmahCore.Mvc
 {
@@ -32,12 +34,7 @@ namespace ElmahCore.Mvc
 
         public static IServiceCollection AddElmah<T>(this IServiceCollection services) where T : ErrorLog
         {
-            services.AddHttpContextAccessor();
-            services.AddSingleton<IElmahExceptionLogger, ElmahExceptionLogger>();
-            services.AddSingleton<ILoggerProvider>(provider =>
-                new ElmahLoggerProvider(provider.GetService<IHttpContextAccessor>()));
-
-            return services.AddSingleton<ErrorLog, T>();
+            return services.AddElmah<T>(o => { });
         }
 
         public static IServiceCollection SetElmahLogLevel(this IServiceCollection services, LogLevel level)
@@ -58,9 +55,48 @@ namespace ElmahCore.Mvc
 
             if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
-            var builder = services.AddElmah<T>();
-            builder.Configure(setupAction);
-            return builder;
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IElmahExceptionLogger, ElmahExceptionLogger>();
+            services.AddSingleton<ILoggerProvider>(provider =>
+                new ElmahLoggerProvider(provider.GetRequiredService<IHttpContextAccessor>()));
+
+            services.AddSingleton<T>();
+            services.AddSingleton<ErrorLog, T>(provider =>
+            {
+                var log = provider.GetRequiredService<T>();
+                var options = provider.GetRequiredService<IOptions<ElmahOptions>>().Value;
+
+                if (!string.IsNullOrWhiteSpace(options.ApplicationName))
+                {
+                    log.ApplicationName = options.ApplicationName;
+                }
+
+                if (options.SourcePaths?.Any() ?? false)
+                {
+                    log.SourcePaths = options.SourcePaths;
+                }
+
+                return log;
+            });
+
+            services.Configure(setupAction);
+            services.PostConfigure<ElmahOptions>(o =>
+            {
+                string elmahRoot = o.Path;
+                if (elmahRoot[0] == '~')
+                {
+                    elmahRoot = elmahRoot[1..];
+                }
+
+                if (elmahRoot[0] != '/')
+                {
+                    elmahRoot = "/" + elmahRoot;
+                }
+
+                o.Path = elmahRoot.TrimEnd('/');
+            });
+
+            return services;
         }
     }
 }

@@ -1,6 +1,7 @@
 using ElmahCore;
 using ElmahCore.DemoCore6;
 using ElmahCore.Mvc;
+using ElmahCore.Mvc.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,5 +45,6 @@ app.UseAuthorization();
 app.UseElmah();
 
 app.MapRazorPages();
+app.MapElmahEndpoints();
 
 app.Run();

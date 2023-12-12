@@ -10,58 +10,49 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace ElmahCore.Mvc.Handlers
 {
-    internal static class ErrorLogDownloadHandler
+    internal static partial class Endpoints
     {
         private const int PageSize = 100;
 
-        private static T ProcessRequestPrelude<T>(HttpContext context, Func<Format, int, T> resultor)
+        public static IEndpointConventionBuilder MapDownload(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            Debug.Assert(context != null);
-            Debug.Assert(resultor != null);
+            return builder.MapMethods($"{prefix}/download", new[] { HttpMethods.Get, HttpMethods.Post }, async (
+                [FromQuery] string? format,
+                [FromQuery] int? limit,
+                [FromServices] ErrorLog errorLog,
+                HttpContext context) =>
+            {
+                var buffer = new FileBufferingWriteStream();
 
-            var request = context.Request;
-            var query = request.Query;
+                //
+                // Determine the desired output format.
+                //
+                var downloadFormat = GetFormat(format?.ToLowerInvariant() ?? "csv", buffer);
 
-            //
-            // Limit the download by some maximum # of records?
-            //
+                await ProcessRequestAsync(errorLog, context, downloadFormat, limit ?? 0);
 
-            var maxDownloadCount = Math.Max(0, Convert.ToInt32(query["limit"], CultureInfo.InvariantCulture));
+                await buffer.DrainBufferAsync(context.Response.Body);
 
-            //
-            // Determine the desired output format.
-            //
-
-            var format = GetFormat(context, query["format"].ToString().ToLowerInvariant());
-            Debug.Assert(format != null);
-
-            //
-            // Emit format header, initialize and then fetch results.
-            //
-
-            return resultor(format, maxDownloadCount);
-        }
-
-        public static Task ProcessRequestAsync(ErrorLog errorLog, HttpContext context)
-        {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            return ProcessRequestPrelude(context,
-                (format, maxDownloadCount) => ProcessRequestAsync(errorLog, context, format, maxDownloadCount));
+                return Results.Ok();
+            });
         }
 
         private static async Task ProcessRequestAsync(ErrorLog log, HttpContext context, Format format, int maxDownloadCount)
         {
-            await format.Header();
-            
+            await format.WriteHeaderAsync(context.Response);
+
             var errorEntryList = new List<ErrorLogEntry>(PageSize);
             var downloadCount = 0;
 
-            for (var pageIndex = 0;; pageIndex++)
+            for (var pageIndex = 0; ; pageIndex++)
             {
                 var total = await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), pageIndex, PageSize, errorEntryList);
                 var count = errorEntryList.Count;
@@ -75,11 +66,9 @@ namespace ElmahCore.Mvc.Handlers
                     }
                 }
 
-                format.Entries(errorEntryList, 0, count, total);
-            
-                downloadCount += count;
+                await format.WriteEntriesAsync(context, errorEntryList, 0, count, total);
 
-                await format.FlushAsync();
+                downloadCount += count;
 
                 //
                 // Done if either the end of the list (no more errors found) or
@@ -89,8 +78,7 @@ namespace ElmahCore.Mvc.Handlers
                 {
                     if (count > 0)
                     {
-                        format.Entries(new ErrorLogEntry[0], total); // Terminator
-                        await format.FlushAsync();
+                        await format.WriteEntriesAsync(context, new ErrorLogEntry[0], total); // Terminator
                     }
 
                     break;
@@ -103,57 +91,44 @@ namespace ElmahCore.Mvc.Handlers
             }
         }
 
-        private static Format GetFormat(HttpContext context, string format)
+        private static Format GetFormat(string format, Stream stream)
         {
-            Debug.Assert(context != null);
-            var buffer = new FileBufferingWriteStream();
             switch (format)
             {
-                case "jsonp": return new JsonPaddingFormat(context, buffer);
-                case "html-jsonp": return new JsonPaddingFormat(context, buffer, /* wrapped */ true);
+                case "jsonp": return new JsonPaddingFormat(stream);
+                case "html-jsonp": return new JsonPaddingFormat(stream, /* wrapped */ true);
                 default:
-                    return new CsvFormat(context, buffer);
+                    return new CsvFormat(stream);
             }
         }
 
         private abstract class Format
         {
-            protected Format(HttpContext context, FileBufferingWriteStream stream)
+            protected Format(Stream stream)
             {
-                Debug.Assert(context != null);
-                Context = context;
                 OutputStream = stream;
             }
 
-            protected HttpContext Context { get; }
+            protected Stream OutputStream { get; }
 
-            protected FileBufferingWriteStream OutputStream { get; }
+            public abstract Task WriteHeaderAsync(HttpResponse response);
 
-            public abstract Task Header();
-
-            public void Entries(IList<ErrorLogEntry> entries, int total)
+            public Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int total)
             {
-                Entries(entries, 0, entries.Count, total);
+                return WriteEntriesAsync(context, entries, 0, entries.Count, total);
             }
 
-            public abstract void Entries(IList<ErrorLogEntry> entries, int index, int count, int total);
-
-            public Task FlushAsync()
-            {
-                return this.OutputStream.DrainBufferAsync(this.Context.Response.Body);
-            }
+            public abstract Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int index, int count, int total);
         }
 
         private sealed class CsvFormat : Format
         {
-            public CsvFormat(HttpContext context, FileBufferingWriteStream stream) :
-                base(context, stream)
+            public CsvFormat(Stream stream) : base(stream)
             {
             }
 
-            public override async Task Header()
+            public override async Task WriteHeaderAsync(HttpResponse response)
             {
-                var response = Context.Response;
                 response.Headers.Add("Content-Type", "text/csv; header=present");
                 response.Headers.Add("Content-Disposition", "attachment; filename=errorlog.csv");
 
@@ -161,7 +136,7 @@ namespace ElmahCore.Mvc.Handlers
                     "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n"));
             }
 
-            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override async Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
@@ -175,7 +150,6 @@ namespace ElmahCore.Mvc.Handlers
                 //
                 // Setup to emit CSV records.
                 //
-
                 var writer = new StreamWriter(this.OutputStream) { NewLine = "\r\n" };
                 var csv = new CsvWriter(writer);
 
@@ -185,28 +159,27 @@ namespace ElmahCore.Mvc.Handlers
                 //
                 // For each error, emit a CSV record.
                 //
-
                 for (var i = index; i < count; i++)
                 {
                     var entry = entries[i];
                     var error = entry.Error;
                     var time = error.Time.ToUniversalTime();
                     var query = "?id=" + Uri.EscapeDataString(entry.Id);
-                    var requestUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+                    var requestUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}";
 
-                    csv.Field(error.ApplicationName)
-                        .Field(error.HostName)
-                        .Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture))
-                        .Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture))
-                        .Field(error.Type)
-                        .Field(error.Source)
-                        .Field(error.User)
-                        .Field(error.StatusCode.ToString(culture))
-                        .Field(error.Message)
-                        .Field($"{requestUrl}detail{query}")
-                        .Field($"{requestUrl}detail{query}")
-                        .Field($"{requestUrl}detail{query}")
-                        .Record();
+                    await csv.Field(error.ApplicationName);
+                    await csv.Field(error.HostName);
+                    await csv.Field(time.ToString("yyyy-MM-dd HH:mm:ss", culture));
+                    await csv.Field(time.Subtract(epoch).TotalSeconds.ToString("0.0000", culture));
+                    await csv.Field(error.Type);
+                    await csv.Field(error.Source);
+                    await csv.Field(error.User);
+                    await csv.Field(error.StatusCode.ToString(culture));
+                    await csv.Field(error.Message);
+                    await csv.Field($"{requestUrl}detail{query}");
+                    await csv.Field($"{requestUrl}detail{query}");
+                    await csv.Field($"{requestUrl}detail{query}");
+                    await csv.Record();
                 }
             }
         }
@@ -223,23 +196,22 @@ namespace ElmahCore.Mvc.Handlers
                 | RegexOptions.CultureInvariant);
 
             private readonly bool _wrapped;
+            private string _callback = string.Empty;
 
-            private string _callback;
-
-            public JsonPaddingFormat(HttpContext context, FileBufferingWriteStream stream) :
-                this(context, stream, false)
+            public JsonPaddingFormat(Stream stream) :
+                this(stream, false)
             {
             }
 
-            public JsonPaddingFormat(HttpContext context, FileBufferingWriteStream stream, bool wrapped) :
-                base(context, stream)
+            public JsonPaddingFormat(Stream stream, bool wrapped) :
+                base(stream)
             {
                 _wrapped = wrapped;
             }
 
-            public override async Task Header()
+            public override async Task WriteHeaderAsync(HttpResponse response)
             {
-                var callback = Context.Request.Query["callback"].FirstOrDefault()
+                var callback = response.HttpContext.Request.Query["callback"].FirstOrDefault()
                                ?? string.Empty;
 
                 if (callback.Length == 0)
@@ -253,8 +225,6 @@ namespace ElmahCore.Mvc.Handlers
                 }
 
                 _callback = callback;
-
-                var response = Context.Response;
 
                 if (!_wrapped)
                 {
@@ -280,7 +250,7 @@ namespace ElmahCore.Mvc.Handlers
                 }
             }
 
-            public override void Entries(IList<ErrorLogEntry> entries, int index, int count, int total)
+            public override async Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int index, int count, int total)
             {
                 Debug.Assert(entries != null);
                 Debug.Assert(index >= 0);
@@ -290,32 +260,23 @@ namespace ElmahCore.Mvc.Handlers
 
                 if (_wrapped)
                 {
-                    writer.WriteLine("<script type='text/javascript' language='javascript'>");
-                    writer.WriteLine("//<[!CDATA[");
+                    await writer.WriteLineAsync("<script type='text/javascript' language='javascript'>");
+                    await writer.WriteLineAsync("//<[!CDATA[");
                 }
 
-                writer.Write(_callback);
-                writer.Write('(');
+                await writer.WriteAsync(_callback);
+                await writer.WriteAsync('(');
 
                 var json = new Utf8JsonWriter(this.OutputStream);
                 json.WriteStartObject();
                 json.WriteNumber("total", total);
                 json.WriteStartArray("errors");
 
-                //var json = new JsonTextWriter(writer);
-                //json.Object()
-                //    .Member("total").Number(total)
-                //    .Member("errors").Array();
-
-                var requestUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+                var requestUrl = context.GetElmahAbsoluteRoot();
 
                 for (var i = index; i < count; i++)
                 {
                     var entry = entries[i];
-                    //writer.WriteLine();
-                    //if (i == 0) writer.Write(' ');
-                    //writer.Write("  ");
-
                     var urlTemplate = $"{requestUrl}?id=" + Uri.EscapeDataString(entry.Id);
 
                     json.WriteStartObject();
@@ -343,22 +304,23 @@ namespace ElmahCore.Mvc.Handlers
 
                 json.WriteEndArray();
                 json.WriteEndObject();
-                
+                await json.FlushAsync();
+
                 if (count > 0)
                 {
-                    writer.WriteLine();
+                    await writer.WriteLineAsync();
                 }
 
-                writer.WriteLine(");");
+                await writer.WriteLineAsync(");");
 
                 if (_wrapped)
                 {
-                    writer.WriteLine("//]]>");
-                    writer.WriteLine("</script>");
+                    await writer.WriteLineAsync("//]]>");
+                    await writer.WriteLineAsync("</script>");
 
                     if (count == 0)
                     {
-                        writer.WriteLine(@"</body></html>");
+                        await writer.WriteLineAsync(@"</body></html>");
                     }
                 }
             }
@@ -432,7 +394,7 @@ namespace ElmahCore.Mvc.Handlers
                 // exists for a key then it is written directly, otherwise
                 // multiple strings are naturally wrapped in an array.
                 //
-                var items = from i in Enumerable.Range(0, collection.Count)
+                var items = (from i in Enumerable.Range(0, collection.Count)
                             let values = collection.GetValues(i)
                             where values != null && values.Length > 0
                             let some = // Neither null nor empty
@@ -446,10 +408,9 @@ namespace ElmahCore.Mvc.Handlers
                                 Key = collection.GetKey(i),
                                 IsArray = nom > 1,
                                 Values = some
-                            };
+                            }).ToList();
 
-                var list = items.ToList();
-                if (!list.Any())
+                if (!items.Any())
                 {
                     return;
                 }
@@ -487,7 +448,7 @@ namespace ElmahCore.Mvc.Handlers
 
         private sealed class CsvWriter
         {
-            private static readonly char[] Reserved = {'\"', ',', '\r', '\n'};
+            private static readonly char[] Reserved = { '\"', ',', '\r', '\n' };
             private readonly TextWriter _writer;
             private int _column;
 
@@ -499,18 +460,17 @@ namespace ElmahCore.Mvc.Handlers
             }
 
             // ReSharper disable once UnusedMethodReturnValue.Local
-            public CsvWriter Record()
+            public Task Record()
             {
-                _writer.WriteLine();
                 _column = 0;
-                return this;
+                return _writer.WriteLineAsync();
             }
 
-            public CsvWriter Field(string value)
+            public async Task Field(string value)
             {
                 if (_column > 0)
                 {
-                    _writer.Write(',');
+                    await _writer.WriteAsync(',');
                 }
 
                 // 
@@ -521,7 +481,7 @@ namespace ElmahCore.Mvc.Handlers
 
                 if (index < 0)
                 {
-                    _writer.Write(value);
+                    await _writer.WriteAsync(value);
                 }
                 else
                 {
@@ -530,15 +490,13 @@ namespace ElmahCore.Mvc.Handlers
                     // double-quote appearing inside a field must be escaped by 
                     // preceding it with another double quote. 
                     //
-
                     const string quote = "\"";
-                    _writer.Write(quote);
-                    _writer.Write(value.Replace(quote, quote + quote));
-                    _writer.Write(quote);
+                    await _writer.WriteAsync(quote);
+                    await _writer.WriteAsync(value.Replace(quote, quote + quote));
+                    await _writer.WriteAsync(quote);
                 }
 
                 _column++;
-                return this;
             }
         }
     }

@@ -46,7 +46,7 @@ namespace ElmahCore
         ///     <see cref="HttpContext" /> instance representing the HTTP
         ///     context during the exception.
         /// </summary>
-        public Error(Exception e, HttpContext context = null, string body = null)
+        public Error(Exception e, HttpContext? context = null, string? body = null)
         {
             var baseException = e?.GetBaseException();
             _message = baseException?.Message;

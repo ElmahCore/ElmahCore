@@ -1,100 +1,100 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ElmahCore.Mvc.Notifiers;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace ElmahCore.Mvc.Handlers
 {
-    internal static class ErrorApiHandler
+    internal static partial class Endpoints
     {
-        public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog, string path)
+        public static IEndpointConventionBuilder MapApiError(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            context.Response.ContentType = "application/json";
-            List<ErrorLogFilter> filters;
-            string searchText;
-            
-            switch (path)
+            return builder.MapMethods($"{prefix}/api/error", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromQuery] string? id, [FromServices] ErrorLog errorLog) =>
             {
-                case "api/error":
-                    var errorId = context.Request.Query["id"].ToString();
-                    if (string.IsNullOrEmpty(errorId)) await context.Response.WriteAsync("{}");
+                if (string.IsNullOrEmpty(id))
+                {
+                    return Results.Content("{}", "application/json");
+                }
 
-                    var error = await GetErrorAsync(errorLog, errorId);
+                var error = await GetErrorAsync(errorLog, id);
+                return Results.Json(error, DefaultJsonSerializerOptions.ApiSerializerOptions);
+            });
+        }
 
-                    var jRes = JsonSerializer.Serialize(error, new JsonSerializerOptions
-                    {
-                        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        MaxDepth = 0
-                    });
-                    await context.Response.WriteAsync(jRes);
-                    break;
+        public static IEndpointConventionBuilder MapApiErrors(this IEndpointRouteBuilder builder, string prefix = "")
+        {
+            return builder.MapMethods($"{prefix}/api/errors", new[] { HttpMethods.Get, HttpMethods.Post }, async (
+                [FromQuery(Name = "i")] int? errorIndex,
+                [FromQuery(Name = "s")] int? pageSize,
+                [FromQuery(Name = "q")] string? searchText,
+                [FromServices] ErrorLog errorLog,
+                HttpRequest request) =>
+            {
+                var filters = await ReadErrorFilters(request);
 
-                case "api/errors":
-                    int.TryParse(context.Request.Query["i"].ToString(), out var errorIndex);
-                    int.TryParse(context.Request.Query["s"].ToString(), out var pageSize);
-                    searchText = context.Request.Query["q"].ToString();
-                    filters = await ReadErrorFilters(context.Request);
+                var entities = await GetErrorsAsync(searchText, errorLog, filters, errorIndex ?? 0, pageSize ?? 0);
+                return Results.Json(entities, DefaultJsonSerializerOptions.ApiSerializerOptions);
+            });
+        }
 
-                    var entities = await GetErrorsAsync(searchText, errorLog, filters, errorIndex, pageSize);
+        public static IEndpointConventionBuilder MapApiNewErrors(this IEndpointRouteBuilder builder, string prefix = "")
+        {
+            return builder.MapMethods($"{prefix}/api/new-errors", new[] { HttpMethods.Post, HttpMethods.Get }, async (
+                [FromQuery] string id,
+                [FromQuery(Name = "q")] string? searchText,
+                [FromServices] ErrorLog errorLog,
+                HttpRequest request) =>
+            {
+                var filters = await ReadErrorFilters(request);
 
-                    var json = JsonSerializer.Serialize(entities, new JsonSerializerOptions
-                    {
-                        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        MaxDepth = 0
-                    });
-                    await context.Response.WriteAsync(json);
-                    break;
-
-                case "api/new-errors":
-                    var id = context.Request.Query["id"].ToString();
-                    searchText = context.Request.Query["q"].ToString();
-                    filters = await ReadErrorFilters(context.Request);
-
-                    var newEntities = await GetNewErrorsAsync(searchText, errorLog, id, filters);
-
-                    var jsonResult = JsonSerializer.Serialize(newEntities, new JsonSerializerOptions
-                    {
-                        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        MaxDepth = 0
-                    });
-                    await context.Response.WriteAsync(jsonResult);
-                    break;
-            }
+                var newEntities = await GetNewErrorsAsync(searchText, errorLog, id, filters);
+                return Results.Json(newEntities, DefaultJsonSerializerOptions.ApiSerializerOptions);
+            });
         }
 
         private static async Task<List<ErrorLogFilter>> ReadErrorFilters(HttpRequest request)
         {
-            if (request.Method != "POST") return new List<ErrorLogFilter>();
-            
+            if (!HttpMethods.IsPost(request.Method))
+            {
+                return new List<ErrorLogFilter>();
+            }
+
             var filters = new List<ErrorLogFilter>();
-            var strings = await JsonSerializer.DeserializeAsync<List<string>>(request.Body);
+            var strings = await JsonSerializer.DeserializeAsync<string[]>(request.Body) ?? Array.Empty<string>();
             foreach (var str in strings)
             {
                 var filter = ErrorLogFilter.Parse(str);
-                if (filter != null) filters.Add(filter);
+                if (filter != null)
+                {
+                    filters.Add(filter);
+                }
             }
 
             return filters;
-
         }
 
-        private static async Task<ErrorLogEntryWrapper> GetErrorAsync(ErrorLog errorLog, string id)
+        private static async Task<ErrorLogEntryWrapper?> GetErrorAsync(ErrorLog errorLog, string id)
         {
             var error = await errorLog.GetErrorAsync(id);
             return error == null ? null : new ErrorLogEntryWrapper(error);
         }
 
-        private static async Task<ErrorsList> GetErrorsAsync(string searchText, ErrorLog errorLog, List<ErrorLogFilter> errorFilters,
+        private static async Task<ErrorsList> GetErrorsAsync(string? searchText, ErrorLog errorLog, List<ErrorLogFilter> errorFilters,
             int errorIndex, int pageSize)
         {
-            if (errorIndex < 0) errorIndex = 0;
-            if (pageSize <= 0) pageSize = 10;
-            if (pageSize > 100) pageSize = 100;
+            errorIndex = Math.Max(0, errorIndex);
+            pageSize = pageSize switch
+            {
+                < 0 => 0,
+                > 100 => 100,
+                _ => pageSize
+            };
 
             var entries = new List<ErrorLogEntry>(pageSize);
             var totalCount = await errorLog.GetErrorsAsync(searchText, errorFilters, errorIndex, pageSize, entries);
@@ -105,10 +105,14 @@ namespace ElmahCore.Mvc.Handlers
             };
         }
 
-        private static async Task<ErrorsList> GetNewErrorsAsync(string searchText, ErrorLog errorLog, string id,
+        private static async Task<ErrorsList> GetNewErrorsAsync(string? searchText, ErrorLog errorLog, string id,
             List<ErrorLogFilter> errorFilters)
         {
-            if (string.IsNullOrEmpty(id)) return await GetErrorsAsync(searchText, errorLog, errorFilters, 0, 50);
+            if (string.IsNullOrEmpty(id))
+            {
+                return await GetErrorsAsync(searchText, errorLog, errorFilters, 0, 50);
+            }
+
             var entries = new List<ErrorLogEntry>();
             var totalCount = await errorLog.GetNewErrorsAsync(searchText, errorFilters, id, entries);
             return new ErrorsList

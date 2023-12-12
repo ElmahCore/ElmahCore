@@ -11,9 +11,9 @@ namespace ElmahCore
     public class ElmahOptions
     {
         /// <summary>
-        ///     ELMAH access url (default = 'elmah')
+        ///     ELMAH access url (default = '/elmah')
         /// </summary>
-        public string Path { get; set; }
+        public string Path { get; set; } = "/elmah";
 
         /// <summary>
         ///     ELMAH log files path (default = '"~/errors.xml"'), example: options.LogPath = "~/log"; // OR options.LogPath =

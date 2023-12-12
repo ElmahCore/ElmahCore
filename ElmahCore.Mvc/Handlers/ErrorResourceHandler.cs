@@ -1,57 +1,55 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace ElmahCore.Mvc.Handlers
 {
-    internal static class ErrorResourceHandler
+    internal static partial class Endpoints
     {
-        private static readonly string[] ResourceNames =
-            typeof(ErrorLogMiddleware).GetTypeInfo().Assembly.GetManifestResourceNames();
+        private static readonly HashSet<string> ResourceNames =
+            new(typeof(ErrorLogMiddleware).GetTypeInfo().Assembly.GetManifestResourceNames(), StringComparer.OrdinalIgnoreCase);
 
-        public static async Task ProcessRequest(HttpContext context, string path, string elmahRoot)
+        public static IEndpointConventionBuilder MapResources(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            path = path.ToLower();
+            var contentTypeProvider = new FileExtensionContentTypeProvider();
+            var assembly = typeof(Endpoints).Assembly;
+            var resourcePrefix = $"{assembly.GetName().Name}.wwwroot.";
+            var indexHtml = resourcePrefix + "index.html";
 
-            var assembly = typeof(ErrorResourceHandler).GetTypeInfo().Assembly;
-
-            var resName = $"{assembly.GetName().Name}.wwwroot.{path.Replace('/', '.').Replace('\\', '.')}";
-            if (!path.Contains("."))
+            return builder.Map($"{prefix}/{{*path}}", async ([FromRoute] string path, HttpContext context) =>
             {
-                resName = $"{assembly.GetName().Name}.wwwroot.index.html";
-                using (var stream2 = assembly.GetManifestResourceStream(resName))
-                using (var reader = new StreamReader(stream2 ?? throw new InvalidOperationException()))
+                if (!path.Contains('.', StringComparison.Ordinal))
                 {
+                    using var stream2 = assembly.GetManifestResourceStream(indexHtml);
+                    using var reader = new StreamReader(stream2 ?? throw new InvalidOperationException());
+
+                    var elmahRoot = context.GetElmahRelativeRoot();
                     var html = await reader.ReadToEndAsync();
                     html = html.Replace("ELMAH_ROOT", elmahRoot);
-                    context.Response.ContentType = "text/html";
-                    await context.Response.WriteAsync(html);
-                    return;
+                    return Results.Content(html, "text/html");
                 }
-            }
 
-            if (!((IList) ResourceNames).Contains(resName))
-            {
-                context.Response.StatusCode = 404;
-                return;
-            }
+                var resName = resourcePrefix + path.Replace('/', '.').Replace('\\', '.');
+                if (!ResourceNames.Contains(resName))
+                {
+                    return Results.NotFound();
+                }
+                
+                var resource = assembly.GetManifestResourceStream(resName);
+                if (resource is null)
+                {
+                    return Results.NoContent();
+                }
 
-            var ext = Path.GetExtension(path).ToLower();
-            if (ext == ".svg")
-                context.Response.ContentType = "image/svg+xml";
-            if (ext == ".css")
-                context.Response.ContentType = "text/css";
-            if (ext == ".js")
-                context.Response.ContentType = "text/javascript";
-
-
-            using (var resource = assembly.GetManifestResourceStream(resName))
-            {
-                if (resource != null) await resource.CopyToAsync(context.Response.Body);
-            }
+                contentTypeProvider.TryGetContentType(path, out string? contentType);
+                return Results.Stream(resource, contentType);
+            });
         }
     }
 }

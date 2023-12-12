@@ -9,7 +9,10 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using ElmahCore.Mvc.Notifiers;
 using ElmahCore.Mvc.Xml;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace ElmahCore.Mvc.Handlers
 {
@@ -18,25 +21,24 @@ namespace ElmahCore.Mvc.Handlers
     ///     recorded errors in the error log. The feed spans at most 15
     ///     days on which errors occurred.
     /// </summary>
-    internal static class ErrorDigestRssHandler
+    internal static partial class Endpoints
     {
-        public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog, string elmahRoot)
+        public static IEndpointConventionBuilder MapDigestRss(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            var log = errorLog;
+            return builder.MapMethods($"{prefix}/digestrss", new[] { HttpMethods.Get, HttpMethods.Post }, ([FromServices] ErrorLog errorLog, HttpContext context) =>
+            {
+                var log = errorLog;
 
-            var response = context.Response;
+                var title = $@"Daily digest of errors in {log.ApplicationName} on {Environment.MachineName}";
 
-            response.ContentType = "application/xml";
+                var link = context.GetElmahAbsoluteRoot();
+                var baseUrl = new Uri(link + "/");
 
-            var title = $@"Daily digest of errors in {log.ApplicationName} on {Environment.MachineName}";
+                var items = GetItems(log, baseUrl, 30, 30).Take(30);
+                var rss = RssXml.Rss(title, link, "Daily digest of application errors", items);
 
-            var link = $"{context.Request.Scheme}://{context.Request.PathBase.ToString().TrimEnd('/')}{elmahRoot}";
-            var baseUrl = new Uri(link.TrimEnd('/') + "/");
-
-            var items = GetItems(log, baseUrl, 30, 30).Take(30);
-            var rss = RssXml.Rss(title, link, "Daily digest of application errors", items);
-
-            await context.Response.WriteAsync(XmlText.StripIllegalXmlCharacters(rss.ToString()));
+                return Results.Content(XmlText.StripIllegalXmlCharacters(rss.ToString()), "application/xml");
+            });
         }
 
         private static IEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit)
@@ -66,7 +68,6 @@ namespace ElmahCore.Mvc.Handlers
                 // If we're dealing with a new day then break out to a 
                 // new channel item, finishing off the previous one.
                 //
-
                 if (day < runningDay)
                 {
                     if (runningErrorCount > 0)
@@ -109,9 +110,15 @@ namespace ElmahCore.Mvc.Handlers
             {
                 log.GetErrors(null, new List<ErrorLogFilter>(), pageIndex, pageSize, entries);
                 if (!entries.Any())
+                {
                     break;
+                }
+
                 foreach (var entry in entries)
+                {
                     yield return resultor(pageIndex, entry);
+                }
+
                 entries.Clear();
             }
         }
@@ -142,12 +149,16 @@ namespace ElmahCore.Mvc.Handlers
                 var abbreviated = errorType.Length < error.Type.Length;
 
                 if (abbreviated)
+                {
                     writer.Write("<span title='{0}'>", WebUtility.HtmlEncode(error.Type));
+                }
 
                 writer.Write(WebUtility.HtmlEncode(errorType));
 
                 if (abbreviated)
+                {
                     writer.Write("</span>");
+                }
 
                 writer.Write(": ");
             }

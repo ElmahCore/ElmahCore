@@ -9,15 +9,10 @@ namespace ElmahCore
 {
     public static class ElmahExtensions
     {
-        public static Task RaiseError(this HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError)
-        {
-            var raiser = ctx.RequestServices.GetRequiredService<IElmahExceptionLogger>();
-            return raiser.LogExceptionAsync(ctx, ex, onError);
-        }
-
         public static Task RaiseError(this HttpContext ctx, Exception ex)
         {
-            return ctx.RaiseError(ex, (context, error) => Task.CompletedTask);
+            var raiser = ctx.RequestServices.GetRequiredService<IElmahExceptionLogger>();
+            return raiser.LogExceptionAsync(ctx, ex);
         }
 
         public static void LogParams(this object source,
@@ -32,8 +27,8 @@ namespace ElmahCore
             (string name, object value) param8 = default,
             (string name, object value) param9 = default,
             (string name, object value) param10 = default,
-            [CallerMemberName] string memberName = null,
-            [CallerFilePath] string file = null,
+            [CallerMemberName] string? memberName = null,
+            [CallerFilePath] string? file = null,
             [CallerLineNumber] int line = 0)
         {
             try
@@ -44,7 +39,7 @@ namespace ElmahCore
                 var list = new[] { param1, param2, param3, param4, param5, param6, param7, param8, param9, param10 };
 
                 var typeName = source.GetType().ToString();
-                feature.LogParameters(list, typeName, memberName, file, line);
+                feature.LogParameters(list, typeName, memberName!, file!, line);
             }
             catch
             {

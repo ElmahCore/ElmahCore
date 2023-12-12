@@ -1,50 +1,46 @@
+using System;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace ElmahCore.Mvc.Handlers
 {
     /// <summary>
     ///     Renders an error as JSON Text (RFC 4627).
     /// </summary>
-    internal static class ErrorJsonHandler
+    internal static partial class Endpoints
     {
-        public static async Task ProcessRequest(HttpContext context, ErrorLog errorLog)
+        public static IEndpointConventionBuilder MapJson(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            var response = context.Response;
-            response.ContentType = "application/json";
-
-            //
-            // Retrieve the ID of the requested error and read it from 
-            // the store.
-            //
-
-            var errorId = context.Request.Query["id"].FirstOrDefault();
-
-            if (string.IsNullOrEmpty(errorId))
-                throw new ApplicationException("Missing error identifier specification.");
-
-            var entry = await errorLog.GetErrorAsync(errorId);
-
-            //
-            // Perhaps the error has been deleted from the store? Whatever
-            // the reason, pretend it does not exist.
-            //
-
-            if (entry == null) context.Response.StatusCode = 404;
-
-            // 
-            // Stream out the error as formatted JSON.
-            //
-            var jsonSerializerOptions = new JsonSerializerOptions
+            return builder.MapMethods($"{prefix}/json", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromQuery] string id, [FromServices] ErrorLog errorLog) =>
             {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault 
-            };
-            var err = new ErrorWrapper(entry?.Error, errorLog.SourcePaths) {HtmlMessage = null};
-            var jsonString = JsonSerializer.Serialize(err, jsonSerializerOptions);
-            await response.WriteAsync(jsonString);
+                if (string.IsNullOrEmpty(id))
+                {
+                    throw new ApplicationException("Missing error identifier specification.");
+                }
+
+                var entry = await errorLog.GetErrorAsync(id);
+
+                //
+                // Perhaps the error has been deleted from the store? Whatever
+                // the reason, pretend it does not exist.
+                //
+                if (entry == null)
+                {
+                    return Results.NotFound();
+                }
+
+                // 
+                // Stream out the error as formatted JSON.
+                //
+                var err = new ErrorWrapper(entry.Error, errorLog.SourcePaths) { HtmlMessage = null };
+                return Results.Json(err, DefaultJsonSerializerOptions.IgnoreDefault);
+            });
         }
     }
 }

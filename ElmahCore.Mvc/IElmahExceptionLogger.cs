@@ -15,6 +15,6 @@ namespace ElmahCore
         /// <param name="onError">The onError delegate</param>
         /// <param name="body">The HTTP response body (optional)</param>
         /// <returns>The <see cref="ErrorLogEntry"/> for the created log entry</returns>
-        Task<ErrorLogEntry> LogExceptionAsync(HttpContext ctx, Exception ex, Func<HttpContext, Error, Task> onError, string body = null);
+        Task<ErrorLogEntry?> LogExceptionAsync(HttpContext ctx, Exception ex, string? body = null);
     }
 }

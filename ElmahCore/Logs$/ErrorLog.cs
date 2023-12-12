@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable VirtualMemberNeverOverridden.Global
 // ReSharper disable UnusedParameter.Global
-
 namespace ElmahCore
 {
     /// <summary>
@@ -17,7 +16,7 @@ namespace ElmahCore
     /// </summary>
     public abstract class ErrorLog
     {
-        private string _appName;
+        private string? _appName;
         private bool _appNameInitialized;
 
         /// <summary>
@@ -32,12 +31,14 @@ namespace ElmahCore
 
         public string ApplicationName
         {
-            get => _appName ?? Assembly.GetEntryAssembly()?.GetName().Name;
+            get => _appName ?? Assembly.GetEntryAssembly()?.GetName().Name!;
 
             set
             {
                 if (_appNameInitialized)
+                {
                     throw new InvalidOperationException("The application name cannot be reset once initialized.");
+                }
 
                 _appName = value;
                 _appNameInitialized = (value ?? string.Empty).Length > 0;
@@ -95,14 +96,14 @@ namespace ElmahCore
         ///     Retrieves a single application error from log given its
         ///     identifier, or null if it does not exist.
         /// </summary>
-        public abstract ErrorLogEntry GetError(string id);
+        public abstract ErrorLogEntry? GetError(string id);
 
 
         /// <summary>
         ///     When overridden in a subclass, starts a task that asynchronously
         ///     does the same as <see cref="GetError" />.
         /// </summary>
-        public Task<ErrorLogEntry> GetErrorAsync(string id)
+        public Task<ErrorLogEntry?> GetErrorAsync(string id)
         {
             return GetErrorAsync(id, CancellationToken.None);
         }
@@ -114,7 +115,7 @@ namespace ElmahCore
         /// </summary>
 
         // ReSharper disable once UnusedParameter.Global
-        public virtual Task<ErrorLogEntry> GetErrorAsync(string id, CancellationToken cancellationToken)
+        public virtual Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
         {
             return Task.FromResult(GetError(id));
         }
@@ -142,7 +143,7 @@ namespace ElmahCore
         ///     Retrieves a page of application errors from the log in
         ///     descending order of logged time.
         /// </summary>
-        public abstract int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+        public abstract int GetErrors(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
             ICollection<ErrorLogEntry> errorEntryList);
 
 
@@ -151,7 +152,7 @@ namespace ElmahCore
         ///     does the same as <see cref="GetErrors" />. An additional
         ///     parameter specifies a <see cref="CancellationToken" /> to use.
         /// </summary>
-        public Task<int> GetErrorsAsync(string searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+        public Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         {
             return GetErrorsAsync(searchText, errorLogFilters, errorIndex, pageSize, errorEntryList, CancellationToken.None);
         }
@@ -160,7 +161,7 @@ namespace ElmahCore
         ///     When overridden in a subclass, starts a task that asynchronously
         ///     does the same as <see cref="GetErrors" />.
         /// </summary>
-        public virtual Task<int> GetErrorsAsync(string searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList,
+        public virtual Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList,
             CancellationToken cancellationToken)
         {
             return Task.FromResult(GetErrors(searchText, errorLogFilters, errorIndex, pageSize, errorEntryList));
@@ -204,7 +205,7 @@ namespace ElmahCore
             }
         }
 
-        public async Task<int> GetNewErrorsAsync(string searchText, List<ErrorLogFilter> errorLogFilters, string id, List<ErrorLogEntry> entries)
+        public async Task<int> GetNewErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, string id, List<ErrorLogEntry> entries)
         {
             int cnt = 0, count, page = 0;
             do
