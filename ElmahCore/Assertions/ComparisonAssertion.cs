@@ -40,7 +40,7 @@ namespace ElmahCore.Assertions
 
         public object ExpectedValue { get; }
 
-        public override bool Test(object context)
+        public override bool Test(AssertionHelperContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             return ExpectedValue != null && base.Test(context);

@@ -21,7 +21,7 @@ namespace ElmahCore.Assertions
         {
         }
 
-        public abstract bool Test(object context);
+        public abstract bool Test(AssertionHelperContext context);
 
         private static IEnumerable<IAssertion> Validate(IEnumerable<IAssertion> assertions)
         {

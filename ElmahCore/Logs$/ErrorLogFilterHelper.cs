@@ -5,7 +5,7 @@ namespace ElmahCore
 {
     internal static class ErrorLogFilterHelper
     {
-        public static bool IsMatched(ErrorLogEntry entry, string searchText, IEnumerable<ErrorLogFilter> filters)
+        public static bool IsMatched(ErrorLogEntry entry, string? searchText, IEnumerable<ErrorLogFilter> filters)
         {
             var isMatched = DoFilter(entry, filters);
             if (isMatched)
@@ -16,7 +16,7 @@ namespace ElmahCore
             return isMatched;
         }
 
-        private static bool DoSearch(ErrorLogEntry entry, string searchText)
+        private static bool DoSearch(ErrorLogEntry entry, string? searchText)
         {
             searchText = ("" + searchText).Trim().ToLower();
             if (searchText == string.Empty) return true;

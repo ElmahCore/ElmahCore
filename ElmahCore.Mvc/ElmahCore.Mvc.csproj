@@ -29,19 +29,8 @@
 </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="wwwroot\index.html" />
-    <None Remove="wwwroot\js\*.js" />
-    <None Remove="wwwroot\img\*.svg" />
-    <None Remove="wwwroot\css\*.css" />
-    <None Remove="wwwroot\fonts\*.*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="wwwroot\index.html" />
-    <EmbeddedResource Include="wwwroot\js\*.js" />
-    <EmbeddedResource Include="wwwroot\img\*.svg" />
-    <EmbeddedResource Include="wwwroot\css\*.css" />
-    <EmbeddedResource Include="wwwroot\fonts\*.*" />
+	<None Remove="wwwroot\**\*" />
+    <EmbeddedResource Include="wwwroot\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,6 +41,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Text.Json" Version="6.0.1" />
   </ItemGroup>
 

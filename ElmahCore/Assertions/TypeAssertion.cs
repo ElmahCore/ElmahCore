@@ -36,7 +36,7 @@ namespace ElmahCore.Assertions
 
         public bool ByCompatibility { get; }
 
-        public override bool Test(object context)
+        public override bool Test(AssertionHelperContext context)
         {
             return context == null
                 ? throw new ArgumentNullException(nameof(context))

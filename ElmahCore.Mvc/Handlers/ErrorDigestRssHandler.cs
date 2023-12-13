@@ -25,7 +25,7 @@ namespace ElmahCore.Mvc.Handlers
     {
         public static IEndpointConventionBuilder MapDigestRss(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            return builder.MapMethods($"{prefix}/digestrss", new[] { HttpMethods.Get, HttpMethods.Post }, ([FromServices] ErrorLog errorLog, HttpContext context) =>
+            return builder.MapMethods($"{prefix}/digestrss", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromServices] ErrorLog errorLog, HttpContext context) =>
             {
                 var log = errorLog;
 
@@ -34,14 +34,14 @@ namespace ElmahCore.Mvc.Handlers
                 var link = context.GetElmahAbsoluteRoot();
                 var baseUrl = new Uri(link + "/");
 
-                var items = GetItems(log, baseUrl, 30, 30).Take(30);
+                var items = await GetItems(log, baseUrl, 30, 30).Take(30).ToListAsync();
                 var rss = RssXml.Rss(title, link, "Daily digest of application errors", items);
 
                 return Results.Content(XmlText.StripIllegalXmlCharacters(rss.ToString()), "application/xml");
             });
         }
 
-        private static IEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit)
+        private static async IAsyncEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit)
         {
             Debug.Assert(log != null);
             Debug.Assert(baseUrl != null);
@@ -57,7 +57,7 @@ namespace ElmahCore.Mvc.Handlers
 
             var source = GetErrors(log, pageSize, (p, e) => new {PageIndex = p, Entry = e});
 
-            foreach (var entry in from item in source.TakeWhile(e => e.PageIndex < maxPageLimit)
+            await foreach (var entry in from item in source.TakeWhile(e => e.PageIndex < maxPageLimit)
                 select item.Entry)
             {
                 var error = entry.Error;
@@ -99,7 +99,7 @@ namespace ElmahCore.Mvc.Handlers
             }
         }
 
-        private static IEnumerable<T> GetErrors<T>(ErrorLog log, int pageSize, Func<int, ErrorLogEntry, T> resultor)
+        private static async IAsyncEnumerable<T> GetErrors<T>(ErrorLog log, int pageSize, Func<int, ErrorLogEntry, T> resultor)
         {
             Debug.Assert(log != null);
             Debug.Assert(pageSize > 0);
@@ -108,7 +108,7 @@ namespace ElmahCore.Mvc.Handlers
             var entries = new List<ErrorLogEntry>(pageSize);
             for (var pageIndex = 0;; pageIndex++)
             {
-                log.GetErrors(null, new List<ErrorLogFilter>(), pageIndex, pageSize, entries);
+                await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), pageIndex, pageSize, entries);
                 if (!entries.Any())
                 {
                     break;

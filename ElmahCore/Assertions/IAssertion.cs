@@ -14,6 +14,6 @@ namespace ElmahCore.Assertions
         ///     the classes from System.Web (most of which cannot be stubbed anyhow
         ///     due to lack of virtual and instance methods).
         /// </remarks>
-        bool Test(object context);
+        bool Test(AssertionHelperContext context);
     }
 }

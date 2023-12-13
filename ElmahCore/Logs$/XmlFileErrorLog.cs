@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Hosting;
@@ -29,8 +30,10 @@ namespace ElmahCore
         {
             _logPath = options.Value.LogPath;
             if (_logPath.StartsWith("~/"))
+            {
                 _logPath = Path.Combine(hostingEnvironment.WebRootPath ?? hostingEnvironment.ContentRootPath,
                     _logPath.Substring(2));
+            }
         }
 
 
@@ -51,23 +54,16 @@ namespace ElmahCore
         /// </summary>
         /// <remarks>
         ///     Logs an error as a single XML file stored in a folder. XML files are named with a
-        ///     sortable date and a unique identifier. Currently the XML files are stored indefinately.
+        ///     sortable date and a unique identifier. Currently the XML files are stored indefinitely.
         ///     As they are stored as files, they may be managed using standard scheduled jobs.
         /// </remarks>
-        public override string Log(Error error)
-        {
-            var errorId = Guid.NewGuid();
-
-            Log(errorId, error);
-
-            return errorId.ToString();
-        }
-
-        public override void Log(Guid id, Error error)
+        public override Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
         {
             var logPath = LogPath;
             if (!Directory.Exists(logPath))
+            {
                 Directory.CreateDirectory(logPath);
+            }
 
             var timeStamp = error.Time > DateTime.MinValue ? error.Time : DateTime.Now;
 
@@ -97,26 +93,39 @@ namespace ElmahCore
                 File.Delete(path);
                 throw;
             }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
         ///     Returns a page of errors from the folder in descending order
         ///     of logged time as defined by the sortable file names.
         /// </summary>
-        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
-            ICollection<ErrorLogEntry> errorEntryList)
+        public override Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
         {
-            if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
-            if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
+            if (errorIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
+            }
+
+            if (pageSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
+            }
 
             var logPath = LogPath;
             var dir = new DirectoryInfo(logPath);
             if (!dir.Exists)
-                return 0;
+            {
+                return Task.FromResult(0);
+            }
 
             var infos = dir.GetFiles("error-*.xml");
             if (!infos.Any())
-                return 0;
+            {
+                return Task.FromResult(0);
+            }
 
             var files = infos.Where(info => IsUserFile(info.Attributes))
                 .OrderBy(info => info.Name, StringComparer.OrdinalIgnoreCase)
@@ -124,7 +133,10 @@ namespace ElmahCore
                 .Reverse()
                 .ToArray();
 
-            if (errorEntryList == null) return files.Length; // Return total
+            if (errorEntryList == null)
+            {
+                return Task.FromResult(files.Length); // Return total
+            }
 
             int totalCount;
             IEnumerable<ErrorLogEntry> entries;
@@ -139,7 +151,8 @@ namespace ElmahCore
             {
                 var fEntries = files
                     .Select(LoadErrorLogEntry)
-                    .Where(e => ErrorLogFilterHelper.IsMatched(e, searchText, filters)).ToList();
+                    .Where(e => e is not null && ErrorLogFilterHelper.IsMatched(e, searchText, filters))
+                    .ToList();
                 totalCount = fEntries.Count;
                 
                 entries = fEntries
@@ -148,19 +161,24 @@ namespace ElmahCore
             }
 
             foreach (var entry in entries)
+            {
                 errorEntryList.Add(entry);
+            }
 
-            return totalCount; // Return total
+            return Task.FromResult(totalCount); // Return total
         }
 
-        private ErrorLogEntry LoadErrorLogEntry(string path)
+        private ErrorLogEntry? LoadErrorLogEntry(string path)
         {
             for (var i = 0; i < 5; i++)
+            {
                 try
                 {
                     using var reader = XmlReader.Create(path, new XmlReaderSettings() { CheckCharacters = false });
                     if (!reader.IsStartElement("error"))
+                    {
                         return null;
+                    }
 
                     var id = reader.GetAttribute("errorId");
                     var error = ErrorXml.Decode(reader);
@@ -171,6 +189,7 @@ namespace ElmahCore
                     //ignored
                     Task.Delay(500).GetAwaiter().GetResult();
                 }
+            }
 
             throw new IOException("");
         }
@@ -178,7 +197,7 @@ namespace ElmahCore
         /// <summary>
         ///     Returns the specified error from the filesystem, or throws an exception if it does not exist.
         /// </summary>
-        public override ErrorLogEntry GetError(string id)
+        public override Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
         {
             try
             {
@@ -193,13 +212,17 @@ namespace ElmahCore
                 .FirstOrDefault();
 
             if (file == null)
-                return null;
+            {
+                return Task.FromResult<ErrorLogEntry?>(null);
+            }
 
             if (!IsUserFile(file.Attributes))
-                return null;
+            {
+                return Task.FromResult<ErrorLogEntry?>(null);
+            }
 
             using var reader = XmlReader.Create(file.FullName, new XmlReaderSettings() { CheckCharacters = false });
-            return new ErrorLogEntry(this, id, ErrorXml.Decode(reader));
+            return Task.FromResult<ErrorLogEntry?>(new ErrorLogEntry(this, id, ErrorXml.Decode(reader)));
         }
 
         private static bool IsUserFile(FileAttributes attributes)

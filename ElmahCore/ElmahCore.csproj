@@ -24,6 +24,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <UserSecretsId>c3a38668-74c2-494f-b54d-1a06c261f315</UserSecretsId>
     <Nullable>enable</Nullable>
+	<LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>

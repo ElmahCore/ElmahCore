@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -8,18 +9,18 @@ using System.Reflection;
 
 namespace ElmahCore.Assertions
 {
-    internal sealed class AssertionHelperContext
+    public sealed class AssertionHelperContext
     {
         private Exception _baseException;
         private int _httpStatusCode;
         private bool _statusCodeInitialized;
 
-        public AssertionHelperContext(Exception e, object context) :
+        public AssertionHelperContext(Exception e, HttpContext context) :
             this(null, e, context)
         {
         }
 
-        public AssertionHelperContext(object source, Exception e, object context)
+        public AssertionHelperContext(object? source, Exception e, HttpContext context)
         {
             Debug.Assert(e != null);
 
@@ -44,17 +45,22 @@ namespace ElmahCore.Assertions
         {
             get
             {
-                if (_statusCodeInitialized) return _httpStatusCode;
+                if (_statusCodeInitialized)
+                {
+                    return _httpStatusCode;
+                }
 
                 _statusCodeInitialized = true;
 
                 if (Exception is HttpException exception)
+                {
                     _httpStatusCode = exception.StatusCode;
+                }
 
                 return _httpStatusCode;
             }
         }
 
-        public object Context { get; }
+        public HttpContext Context { get; }
     }
 }

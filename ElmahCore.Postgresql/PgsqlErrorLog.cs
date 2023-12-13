@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
@@ -47,19 +49,15 @@ namespace ElmahCore.Postgresql
         /// </summary>
         public virtual string ConnectionString { get; }
 
-        public override string Log(Error error)
-        {
-            var id = Guid.NewGuid();
-
-            Log(id, error);
-
-            return id.ToString();
-        }
-
-        public override void Log(Guid id, Error error)
+        /// <summary>
+        ///     Gets the connection string used by the log to connect to the database.
+        /// </summary>
+        public override async Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
         {
             if (error == null)
+            {
                 throw new ArgumentNullException("error");
+            }
 
             var errorXml = ErrorXml.EncodeString(error);
 
@@ -68,15 +66,22 @@ namespace ElmahCore.Postgresql
                 error.Message, error.User, error.StatusCode, error.Time, errorXml))
             {
                 command.Connection = connection;
-                connection.Open();
-                command.ExecuteNonQuery();
+                await connection.OpenAsync(cancellationToken);
+                await command.ExecuteNonQueryAsync(cancellationToken);
             }
         }
 
-        public override ErrorLogEntry GetError(string id)
+        public override async Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
         {
-            if (id == null) throw new ArgumentNullException("id");
-            if (id.Length == 0) throw new ArgumentException(null, "id");
+            if (id == null)
+            {
+                throw new ArgumentNullException("id");
+            }
+
+            if (id.Length == 0)
+            {
+                throw new ArgumentException(null, "id");
+            }
 
             Guid errorGuid;
 
@@ -89,59 +94,66 @@ namespace ElmahCore.Postgresql
                 throw new ArgumentException(e.Message, "id", e);
             }
 
-            string errorXml;
+            string? errorXml;
 
             using (var connection = new NpgsqlConnection(ConnectionString))
             using (var command = Commands.GetErrorXml(ApplicationName, errorGuid))
             {
                 command.Connection = connection;
-                connection.Open();
-                errorXml = (string) command.ExecuteScalar();
+                await connection.OpenAsync(cancellationToken);
+                errorXml = (string?)await command.ExecuteScalarAsync(cancellationToken);
             }
 
             if (errorXml == null)
+            {
                 return null;
+            }
 
             var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
-            ICollection<ErrorLogEntry> errorEntryList)
+        public override async Task<int> GetErrorsAsync(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
         {
-            if (errorIndex < 0) throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
-            if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
+            if (errorIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
+            }
+
+            if (pageSize < 0)
+            {
+                throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
+            }
 
             using (var connection = new NpgsqlConnection(ConnectionString))
             {
-                connection.Open();
+                await connection.OpenAsync(cancellationToken);
 
                 using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize))
                 {
                     command.Connection = connection;
 
-                    using (var reader = command.ExecuteReader())
+                    using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                    while (await reader.ReadAsync(cancellationToken))
                     {
-                        while (reader.Read())
-                        {
-                            var id = reader.GetGuid(0);
-                            var xml = reader.GetString(1);
-                            var error = ErrorXml.DecodeString(xml);
-                            errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
-                        }
+                        var id = reader.GetGuid(0);
+                        var xml = reader.GetString(1);
+                        var error = ErrorXml.DecodeString(xml);
+                        errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
                     }
                 }
 
                 using (var command = Commands.GetErrorsXmlTotal(ApplicationName))
                 {
                     command.Connection = connection;
-                    return Convert.ToInt32(command.ExecuteScalar());
+                    return (int)await command.ExecuteScalarAsync(cancellationToken);
                 }
             }
         }
 
         /// <summary>
-        ///     Creates the neccessary tables and sequences used by this implementation
+        ///     Creates the necessary tables and sequences used by this implementation
         /// </summary>
         private void CreateTableIfNotExists()
         {

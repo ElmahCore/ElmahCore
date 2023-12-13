@@ -38,7 +38,6 @@ namespace ElmahCore
         }
     }
 
-
 	/// <summary>
 	///     Extension methods for <see cref="Task" />.
 	/// </summary>

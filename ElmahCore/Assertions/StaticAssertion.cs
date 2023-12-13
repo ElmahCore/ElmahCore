@@ -17,7 +17,7 @@ namespace ElmahCore.Assertions
             _value = value;
         }
 
-        public bool Test(object context)
+        public bool Test(AssertionHelperContext context)
         {
             return _value;
         }

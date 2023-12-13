@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace ElmahCore
     {
         private readonly List<string> _notifiers = new List<string>();
 
-        public ExceptionFilterEventArgs(Exception e, object context)
+        public ExceptionFilterEventArgs(Exception e, HttpContext context)
         {
             Exception = e ?? throw new ArgumentNullException(nameof(e));
             Context = context;
@@ -21,7 +22,7 @@ namespace ElmahCore
 
         public Exception Exception { get; }
 
-        [field: NonSerialized] public object Context { get; }
+        [field: NonSerialized] public HttpContext Context { get; }
 
         public bool Dismissed { get; private set; }
 

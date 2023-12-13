@@ -20,6 +20,8 @@
     <Description>ELMAH for ASP.NET Core</Description>
     <Copyright>ElmahCore</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <Nullable>enable</Nullable>
+	  <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>

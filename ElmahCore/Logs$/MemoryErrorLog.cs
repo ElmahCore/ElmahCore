@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -22,8 +23,7 @@ namespace ElmahCore
         // The collection that provides the actual storage for this log
         // implementation and a lock to guarantee concurrency correctness.
         //
-
-        private static EntryCollection _entries;
+        private static EntryCollection? _entries;
         private static readonly ReaderWriterLockSlim Lock = new ReaderWriterLockSlim();
 
         /// <summary>
@@ -42,7 +42,6 @@ namespace ElmahCore
         // IMPORTANT! The size must be the same for all instances
         // for the entries collection to be initialized correctly.
         //
-
         private readonly int _size;
 
         /// <summary>
@@ -59,12 +58,13 @@ namespace ElmahCore
         ///     Initializes a new instance of the <see cref="MemoryErrorLog" /> class
         ///     with a specific size for maximum recordable entries.
         /// </summary>
-
         // ReSharper disable once MemberCanBePrivate.Global
         public MemoryErrorLog(int size)
         {
             if (size < 0 || size > MaximumSize)
+            {
                 throw new ArgumentOutOfRangeException(nameof(size), size, $"Size must be between 0 and {MaximumSize}.");
+            }
 
             _size = size;
         }
@@ -72,34 +72,19 @@ namespace ElmahCore
         /// <summary>
         ///     Gets the name of this error log implementation.
         /// </summary>
-
         public override string Name => "In-Memory Error Log";
 
-        /// <summary>
-        ///     Logs an error to the application memory.
-        /// </summary>
-        /// <remarks>
-        ///     If the log is full then the oldest error entry is removed.
-        /// </remarks>
-        public override string Log(Error error)
-        {
-            var newId = Guid.NewGuid();
-
-            Log(newId, error);
-
-            return newId.ToString();
-        }
-
-        public override void Log(Guid id, Error error)
+        public override Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
         {
             if (error == null)
+            {
                 throw new ArgumentNullException(nameof(error));
+            }
 
             //
             // Make a copy of the error to log since the source is mutable.
             // Assign a new GUID and create an entry for the error.
             //
-
             error = error.Clone();
             error.ApplicationName = ApplicationName;
             var entry = new ErrorLogEntry(this, id.ToString(), error);
@@ -115,22 +100,26 @@ namespace ElmahCore
             {
                 Lock.ExitWriteLock();
             }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
         ///     Returns the specified error from application memory, or null
         ///     if it does not exist.
         /// </summary>
-        public override ErrorLogEntry GetError(string id)
+        public override Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
         {
             Lock.EnterReadLock();
 
-            ErrorLogEntry entry;
+            ErrorLogEntry? entry;
 
             try
             {
                 if (_entries == null)
-                    return null;
+                {
+                    return Task.FromResult((ErrorLogEntry?)null);
+                }
 
                 entry = _entries[id];
             }
@@ -140,25 +129,33 @@ namespace ElmahCore
             }
 
             if (entry == null)
-                return null;
+            {
+                return Task.FromResult((ErrorLogEntry?)null);
+            }
 
             //
             // Return a copy that the caller can party on.
             //
-
             var error = entry.Error.Clone();
-            return new ErrorLogEntry(this, entry.Id, error);
+            return Task.FromResult<ErrorLogEntry?>(new ErrorLogEntry(this, entry.Id, error));
         }
 
         /// <summary>
         ///     Returns a page of errors from the application memory in
         ///     descending order of logged time.
         /// </summary>
-        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
-            ICollection<ErrorLogEntry> errorEntryList)
+        public override Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
         {
-            if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
-            if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
+            if (errorIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
+            }
+
+            if (pageSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
+            }
 
             //
             // To minimize the time for which we hold the lock, we'll first
@@ -167,8 +164,7 @@ namespace ElmahCore
             // is mutable, we don't want to return direct references to our 
             // internal versions since someone could change their state.
             //
-
-            ErrorLogEntry[] selectedEntries = null;
+            ErrorLogEntry[]? selectedEntries = null;
             int totalCount;
 
             Lock.EnterReadLock();
@@ -176,7 +172,9 @@ namespace ElmahCore
             try
             {
                 if (_entries == null)
-                    return 0;
+                {
+                    return Task.FromResult(0);
+                }
 
                 var sourceEntries = (KeyedCollection<string, ErrorLogEntry>)_entries;
                 totalCount = _entries.Count;
@@ -202,7 +200,9 @@ namespace ElmahCore
                     var targetIndex = 0;
 
                     while (sourceIndex > startIndex)
+                    {
                         selectedEntries[targetIndex++] = sourceEntries[--sourceIndex];
+                    }
                 }
             }
             finally
@@ -211,18 +211,19 @@ namespace ElmahCore
             }
 
             if (errorEntryList != null && selectedEntries != null)
+            {
                 //
                 // Return copies of fetched entries. If the Error class would 
                 // be immutable then this step wouldn't be necessary.
                 //
-
                 foreach (var entry in selectedEntries)
                 {
                     var error = entry.Error.Clone();
                     errorEntryList.Add(new ErrorLogEntry(this, entry.Id, error));
                 }
+            }
 
-            return totalCount;
+            return Task.FromResult(totalCount);
         }
 
         private sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>

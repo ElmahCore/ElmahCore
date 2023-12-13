@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 
@@ -38,17 +40,19 @@ namespace ElmahCore.Sql
         ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
         ///     to use a specific connection string for connecting to the database and a specific schema and table name.
         /// </summary>
-        public SqlErrorLog(string connectionString, string schemaName, string tableName, bool createTablesIfNotExist)
+        public SqlErrorLog(string connectionString, string? schemaName, string? tableName, bool createTablesIfNotExist)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
 
             ConnectionString = connectionString;
-            DatabaseSchemaName = !string.IsNullOrWhiteSpace(schemaName) ? schemaName : "dbo";
-            DatabaseTableName = !string.IsNullOrWhiteSpace(tableName) ? tableName : "ELMAH_Error";
+            DatabaseSchemaName = !string.IsNullOrWhiteSpace(schemaName) ? schemaName! : "dbo";
+            DatabaseTableName = !string.IsNullOrWhiteSpace(tableName) ? tableName! : "ELMAH_Error";
 
             if (createTablesIfNotExist)
+            {
                 CreateTableIfNotExists();
+            }
         }
 
         /// <summary>
@@ -72,39 +76,32 @@ namespace ElmahCore.Sql
         /// </summary>
         public virtual string DatabaseTableName { get; }
 
-        public override string Log(Error error)
-        {
-            var id = Guid.NewGuid();
-            Log(id, error);
-            return id.ToString();
-        }
-
-        public override void Log(Guid id, Error error)
+        public override async Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
         {
             try
             {
                 var errorXml = ErrorXml.EncodeString(error);
 
-                using (var connection = new SqlConnection(ConnectionString))
-                using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
+                using var connection = new SqlConnection(ConnectionString);
+                using var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
                            error.Message, error.User, error.StatusCode, error.Time, errorXml,
-                           DatabaseSchemaName, DatabaseTableName))
-                {
-                    command.Connection = connection;
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
+                           DatabaseSchemaName, DatabaseTableName);
+                command.Connection = connection;
+                await connection.OpenAsync(cancellationToken);
+                await command.ExecuteNonQueryAsync(cancellationToken);
             }
             catch
             {
-                //guard: silently fail, this can't bubble up or it will create a stack overflow from errors attempting to log errors....
+                // guard: silently fail, this can't bubble up or it will create a stack overflow from errors attempting to log errors....
             }
         }
 
-        public override ErrorLogEntry GetError(string id)
+        public override async Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
         {
-            if (id == null) throw new ArgumentNullException(nameof(id));
-            if (id.Length == 0) throw new ArgumentException(null, nameof(id));
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
 
             Guid errorGuid;
 
@@ -117,57 +114,59 @@ namespace ElmahCore.Sql
                 throw new ArgumentException(e.Message, nameof(id), e);
             }
 
-            string errorXml;
+            string? errorXml;
 
             using (var connection = new SqlConnection(ConnectionString))
-            using (var command = Commands.GetErrorXml(ApplicationName, errorGuid,
-                DatabaseSchemaName, DatabaseTableName))
+            using (var command = Commands.GetErrorXml(ApplicationName, errorGuid, DatabaseSchemaName, DatabaseTableName))
             {
                 command.Connection = connection;
-                connection.Open();
-                errorXml = (string) command.ExecuteScalar();
+                await connection.OpenAsync(cancellationToken);
+                errorXml = (string)await command.ExecuteScalarAsync();
             }
 
             if (errorXml == null)
+            {
                 return null;
+            }
 
             var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
-            ICollection<ErrorLogEntry> errorEntryList)
+        public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellation)
         {
-            if (errorIndex < 0) throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
-            if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
-
-            using (var connection = new SqlConnection(ConnectionString))
+            if (errorIndex < 0)
             {
-                connection.Open();
+                throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
+            }
 
-                using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize,
-                DatabaseSchemaName, DatabaseTableName))
+            if (pageSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
+            }
+
+            using var connection = new SqlConnection(ConnectionString);
+            await connection.OpenAsync();
+
+            using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize, DatabaseSchemaName, DatabaseTableName))
+            {
+                command.Connection = connection;
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    command.Connection = connection;
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var id = reader.GetGuid(0);
-                            var xml = reader.GetString(1);
-                            var error = ErrorXml.DecodeString(xml);
-                            errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
-                        }
-                    }
+                    var id = reader.GetGuid(0);
+                    var xml = reader.GetString(1);
+                    var error = ErrorXml.DecodeString(xml);
+                    errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
                 }
+            }
 
-                using (var command = Commands.GetErrorsXmlTotal(ApplicationName,
-                DatabaseSchemaName, DatabaseTableName))
-                {
-                    command.Connection = connection;
-                    return int.Parse(command.ExecuteScalar().ToString());
-                }
+            using (var command = Commands.GetErrorsXmlTotal(ApplicationName, DatabaseSchemaName, DatabaseTableName))
+            {
+                command.Connection = connection;
+                return (int)await command.ExecuteScalarAsync();
             }
         }
 
@@ -176,39 +175,38 @@ namespace ElmahCore.Sql
         /// </summary>
         private void CreateTableIfNotExists()
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+
+            using var cmdCheck = Commands.CheckTable(DatabaseSchemaName, DatabaseTableName);
+            cmdCheck.Connection = connection;
+
+            // ReSharper disable once PossibleNullReferenceException
+            var exists = (int?)cmdCheck.ExecuteScalar();
+            if (!exists.HasValue)
             {
-                connection.Open();
-
-                using (var cmdCheck = Commands.CheckTable(DatabaseSchemaName, DatabaseTableName))
-                {
-                    cmdCheck.Connection = connection;
-                    // ReSharper disable once PossibleNullReferenceException
-                    var exists = (int?) cmdCheck.ExecuteScalar();
-
-                    if (!exists.HasValue) ExecuteBatchNonQuery(Commands.CreateTableSql(DatabaseSchemaName, DatabaseTableName), connection);
-                }
+                ExecuteBatchNonQuery(Commands.CreateTableSql(DatabaseSchemaName, DatabaseTableName), connection);
             }
         }
 
         private void ExecuteBatchNonQuery(string sql, SqlConnection conn)
         {
             var sqlBatch = string.Empty;
-            using (var cmd = new SqlCommand(string.Empty, conn))
+            using var cmd = new SqlCommand(string.Empty, conn);
+
+            sql += "\nGO"; // make sure last batch is executed.
+            foreach (var line in sql.Split(new[] { "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
             {
-                sql += "\nGO"; // make sure last batch is executed.
-                foreach (var line in sql.Split(new[] {"\n", "\r"},
-                    StringSplitOptions.RemoveEmptyEntries))
-                    if (line.ToUpperInvariant().Trim() == "GO")
-                    {
-                        cmd.CommandText = sqlBatch;
-                        cmd.ExecuteNonQuery();
-                        sqlBatch = string.Empty;
-                    }
-                    else
-                    {
-                        sqlBatch += line + "\n";
-                    }
+                if (line.ToUpperInvariant().Trim() == "GO")
+                {
+                    cmd.CommandText = sqlBatch;
+                    cmd.ExecuteNonQuery();
+                    sqlBatch = string.Empty;
+                }
+                else
+                {
+                    sqlBatch += line + "\n";
+                }
             }
         }
 
@@ -267,7 +265,6 @@ WHERE EXISTS (
                 };
                 return command;
             }
-
 
             public static SqlCommand LogError(
                 Guid id,

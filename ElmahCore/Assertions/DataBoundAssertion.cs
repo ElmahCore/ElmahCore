@@ -11,7 +11,7 @@ namespace ElmahCore.Assertions
 
         protected IContextExpression Expression { get; }
 
-        public virtual bool Test(object context)
+        public virtual bool Test(AssertionHelperContext context)
         {
             return context == null
                 ? throw new ArgumentNullException(nameof(context))

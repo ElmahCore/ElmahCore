@@ -12,7 +12,7 @@ namespace ElmahCore.Assertions
         // ReSharper disable once MemberCanBePrivate.Global
         public IAssertion Operand { get; }
 
-        public bool Test(object context)
+        public bool Test(AssertionHelperContext context)
         {
             return !Operand.Test(context);
         }

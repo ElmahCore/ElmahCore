@@ -2,25 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	  <Version>2.1.2</Version>
-	  <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-	  <AssemblyVersion>2.1.2.0</AssemblyVersion>
-	  <FileVersion>2.1.2.0</FileVersion>
-	  <AssemblyName>ElmahCore.Sql</AssemblyName>
-	  <PackageId>ElmahCore.Sql</PackageId>
-	  <Authors>ElmahCore</Authors>
-	  <Company>ElmahCore</Company>
-	  <Product>ElmahCore.Sql</Product>
-	  <NeutralLanguage>en-001</NeutralLanguage>
-	  <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
-	  <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
-	  <Description>ELMAH for ASP.NET Core</Description>
-	  <Copyright>ElmahCore</Copyright>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<Version>2.1.2</Version>
+	<PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
+	<AssemblyVersion>2.1.2.0</AssemblyVersion>
+	<FileVersion>2.1.2.0</FileVersion>
+	<AssemblyName>ElmahCore.Sql</AssemblyName>
+	<PackageId>ElmahCore.Sql</PackageId>
+	<Authors>ElmahCore</Authors>
+	<Company>ElmahCore</Company>
+	<Product>ElmahCore.Sql</Product>
+	<NeutralLanguage>en-001</NeutralLanguage>
+	<RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
+	<PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
+	<Description>ELMAH for ASP.NET Core</Description>
+	<Copyright>ElmahCore</Copyright>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<Nullable>enable</Nullable>
+	  <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>

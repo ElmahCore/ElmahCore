@@ -30,7 +30,7 @@ namespace ElmahCore.Assertions
             return new LogicalAssertion(operands, true, true);
         }
 
-        public override bool Test(object context)
+        public override bool Test(AssertionHelperContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));

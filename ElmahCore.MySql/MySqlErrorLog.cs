@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
@@ -42,19 +44,12 @@ namespace ElmahCore.MySql
         /// </summary>
         public virtual string ConnectionString { get; }
 
-        public override string Log(Error error)
-        {
-            var id = Guid.NewGuid();
-
-            Log(id, error);
-
-            return id.ToString();
-        }
-
-        public override void Log(Guid id, Error error)
+        public override async Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
         {
             if (error == null)
+            {
                 throw new ArgumentNullException("error");
+            }
 
             var errorXml = ErrorXml.EncodeString(error);
 
@@ -62,16 +57,23 @@ namespace ElmahCore.MySql
             using (var command = CommandExtension.LogError(id, ApplicationName, error.HostName, error.Type,
                 error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
             {
-                connection.Open();
+                await connection.OpenAsync(cancellationToken);
                 command.Connection = connection;
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync(cancellationToken);
             }
         }
 
-        public override ErrorLogEntry GetError(string id)
+        public override async Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
         {
-            if (id == null) throw new ArgumentNullException("id");
-            if (id.Length == 0) throw new ArgumentException(null, "id");
+            if (id == null)
+            {
+                throw new ArgumentNullException("id");
+            }
+
+            if (id.Length == 0)
+            {
+                throw new ArgumentException(null, "id");
+            }
 
             Guid errorGuid;
 
@@ -90,34 +92,43 @@ namespace ElmahCore.MySql
             using (var command = CommandExtension.GetErrorXml(ApplicationName, errorGuid))
             {
                 command.Connection = connection;
-                connection.Open();
-                errorXml = (string) command.ExecuteScalar();
+                await connection.OpenAsync(cancellationToken);
+                errorXml = (string) await command.ExecuteScalarAsync(cancellationToken);
             }
 
             if (errorXml == null)
+            {
                 return null;
+            }
 
             var error = ErrorXml.DecodeString(errorXml);
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override int GetErrors(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
-            ICollection<ErrorLogEntry> errorEntryList)
+        public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+            ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
         {
-            if (errorIndex < 0) throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
-            if (pageSize < 0) throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
+            if (errorIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
+            }
+
+            if (pageSize < 0)
+            {
+                throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
+            }
 
             using (var connection = new MySqlConnection(ConnectionString))
             {
-                connection.Open();
+                await connection.OpenAsync(cancellationToken);
 
                 using (var command = CommandExtension.GetErrorsXml(ApplicationName, errorIndex, pageSize))
                 {
                     command.Connection = connection;
 
-                    using (var reader = command.ExecuteReader())
+                    using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                     {
-                        while (reader.Read())
+                        while (await reader.ReadAsync(cancellationToken))
                         {
                             var id = reader.GetGuid(0);
                             var xml = reader.GetString(1);
@@ -127,12 +138,12 @@ namespace ElmahCore.MySql
                     }
                 }
 
-                return GetTotalErrorsXml(connection);
+                return await GetTotalErrorsXml(connection, cancellationToken);
             }
         }
 
         /// <summary>
-        ///     Creates the neccessary tables used by this implementation
+        ///     Creates the necessary tables used by this implementation
         /// </summary>
         private void CreateTableIfNotExist()
         {
@@ -156,12 +167,12 @@ namespace ElmahCore.MySql
             }
         }
 
-        private int GetTotalErrorsXml(MySqlConnection connection)
+        private async Task<int> GetTotalErrorsXml(MySqlConnection connection, CancellationToken cancellationToken)
         {
             using (var command = CommandExtension.GetTotalErrorsXml(ApplicationName))
             {
                 command.Connection = connection;
-                return Convert.ToInt32(command.ExecuteScalar());
+                return (int)await command.ExecuteScalarAsync(cancellationToken);
             }
         }
     }
