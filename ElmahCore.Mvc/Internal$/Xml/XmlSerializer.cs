@@ -1,15 +1,10 @@
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+using SystemXmlSerializer = System.Xml.Serialization.XmlSerializer;
 
 namespace ElmahCore.Mvc.Xml
 {
-    #region Imports
-
-    using SystemXmlSerializer = System.Xml.Serialization.XmlSerializer;
-
-    #endregion
-
     /// <summary>
     ///     Serializes object to and from XML documents.
     /// </summary>

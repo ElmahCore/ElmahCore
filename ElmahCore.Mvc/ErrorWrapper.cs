@@ -37,16 +37,18 @@ namespace ElmahCore.Mvc
         {
         }
 
-        public ErrorWrapper(Error error, string[] sourcePath)
+        public ErrorWrapper(Error error, string[]? sourcePath)
         {
             _error = error ?? throw new ArgumentNullException(nameof(error));
             HtmlMessage = ErrorDetailHelper.MarkupStackTrace(_error.Detail, out var srcList);
             if (srcList?.Any() == true)
+            {
                 Sources = srcList.Select(i
                         => ErrorDetailHelper.GetStackFrameSourceCodeInfo(sourcePath, i.Method, i.Type, i.Source,
                             i.Line))
                     .Where(i => !string.IsNullOrEmpty(i.ContextCode))
                     .ToList();
+            }
         }
 
         public List<StackFrameSourceCodeInfo> Sources { get; private set; }

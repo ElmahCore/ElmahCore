@@ -31,14 +31,17 @@ namespace ElmahCore.Mvc
 
         public void OnNext(DiagnosticListener value)
         {
-            if (value.Name != "SqlClientDiagnosticListener") return;
+            if (value.Name != "SqlClientDiagnosticListener")
+            {
+                return;
+            }
 
             var subscription = value.Subscribe(new ElmahDiagnosticSqlObserver(_provider));
             _subscriptions.Add(subscription);
         }
     }
 
-    public class ElmahDiagnosticSqlObserver : IObserver<KeyValuePair<string, object>>
+    public class ElmahDiagnosticSqlObserver : IObserver<KeyValuePair<string, object?>>
     {
         private readonly IServiceProvider _provider;
 
@@ -51,22 +54,28 @@ namespace ElmahCore.Mvc
         {
         }
 
-        public void OnNext(KeyValuePair<string, object> value)
+        public void OnNext(KeyValuePair<string, object?> value)
         {
             if (value.Value == null || value.Key != "System.Data.SqlClient.WriteCommandBefore" &&
-                value.Key != "System.Data.SqlClient.WriteCommandAfter") return;
+                value.Key != "System.Data.SqlClient.WriteCommandAfter")
+            {
+                return;
+            }
 
-            ElmahLogFeature sqlLog;
+            ElmahLogFeature? sqlLog;
             try
             {
                 sqlLog = _provider.GetService<IHttpContextAccessor>()?.HttpContext?.Features.Get<ElmahLogFeature>();
-	
             }
             catch (ObjectDisposedException)
             {
                 return;
             }
-            if (sqlLog == null) return;
+
+            if (sqlLog == null)
+            {
+                return;
+            }
 
             var id = GetValueFromAnonymousType<Guid>(value.Value, "OperationId");
 
@@ -106,7 +115,7 @@ namespace ElmahCore.Mvc
         private static T GetValueFromAnonymousType<T>(object dataItem, string itemKey)
         {
             var type = dataItem.GetType();
-            var value = (T) type.GetProperty(itemKey)?.GetValue(dataItem, null);
+            var value = (T)type.GetProperty(itemKey)?.GetValue(dataItem, null);
             return value;
         }
     }

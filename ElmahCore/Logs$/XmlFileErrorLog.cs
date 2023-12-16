@@ -26,7 +26,7 @@ namespace ElmahCore
         ///     Initializes a new instance of the <see cref="XmlFileErrorLog" /> class
         ///     using a dictionary of configured settings.
         /// </summary>
-        public XmlFileErrorLog(IOptions<ElmahOptions> options, IHostingEnvironment hostingEnvironment)
+        public XmlFileErrorLog(IOptions<XmlFileErrorLogOptions> options, IWebHostEnvironment hostingEnvironment)
         {
             _logPath = options.Value.LogPath;
             if (_logPath.StartsWith("~/"))

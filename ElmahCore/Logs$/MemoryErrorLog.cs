@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,6 +44,8 @@ namespace ElmahCore
         // for the entries collection to be initialized correctly.
         //
         private readonly int _size;
+
+        public MemoryErrorLog(IOptions<MemoryErrorLogOptions> options) : this(options.Value.Size) { }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="MemoryErrorLog" /> class

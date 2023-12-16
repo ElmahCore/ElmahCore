@@ -21,7 +21,7 @@ namespace ElmahCore.Sql
         ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
         ///     using a dictionary of configured settings.
         /// </summary>
-        public SqlErrorLog(IOptions<ElmahOptions> option) 
+        public SqlErrorLog(IOptions<SqlErrorLogOptions> option) 
             : this(option.Value.ConnectionString, option.Value.SqlServerDatabaseSchemaName, option.Value.SqlServerDatabaseTableName, option.Value.CreateTablesIfNotExist)
         {
         }

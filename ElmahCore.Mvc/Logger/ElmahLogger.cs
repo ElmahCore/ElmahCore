@@ -57,7 +57,7 @@ namespace ElmahCore.Mvc.Logger
         }
 
         public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message,
-            Exception exception)
+            Exception? exception)
         {
             var entry = new ElmahLogMessageEntry
             {

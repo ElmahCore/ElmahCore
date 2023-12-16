@@ -81,13 +81,13 @@ namespace ElmahCore
         public abstract Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList,
             CancellationToken cancellationToken);
 
-        public async Task<int> GetNewErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, string id, List<ErrorLogEntry> entries)
+        public async Task<int> GetNewErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, string id, List<ErrorLogEntry> entries, CancellationToken cancellationToken)
         {
             int cnt = 0, count, page = 0;
             do
             {
                 var errors = new List<ErrorLogEntry>();
-                count = await GetErrorsAsync(searchText, errorLogFilters, page, 10, errors, default);
+                count = await GetErrorsAsync(searchText, errorLogFilters, page, 10, errors, cancellationToken);
                 foreach (var el in errors)
                 {
                     if (el.Id == id)

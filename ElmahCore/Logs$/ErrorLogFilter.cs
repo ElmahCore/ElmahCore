@@ -20,17 +20,23 @@ namespace ElmahCore
 
         public DateTime? GetValueAsDateTime()
         {
-            if (string.IsNullOrEmpty(Value)) return null;
+            if (string.IsNullOrEmpty(Value))
+            {
+                return null;
+            }
 
             return DateTime.ParseExact(Value, Value.Length == 10 ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm:ss",
                 System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        public static ErrorLogFilter Parse(string str)
+        public static ErrorLogFilter? Parse(string str)
         {
             var regex = new Regex(@"([^\s]*)\s+([^\s]*)\s+(.*)");
             var match = regex.Match(str);
-            if (!match.Success) return null;
+            if (!match.Success)
+            {
+                return null;
+            }
 
             var property = match.Groups[1].Value;
             var condition = match.Groups[2].Value;

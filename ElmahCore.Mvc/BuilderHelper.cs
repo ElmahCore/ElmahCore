@@ -1,6 +1,6 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
+using ElmahCore.Mvc;
 using ElmahCore.Mvc.Logger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -8,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ElmahCore.Mvc
+namespace ElmahCore
 {
-    public static class BuilderHelper
+    public static class ServiceCollectionExtensions
     {
         public static IApplicationBuilder UseElmahExceptionPage(this IApplicationBuilder app)
         {
@@ -27,59 +27,71 @@ namespace ElmahCore.Mvc
             return app;
         }
 
+        /// <summary>
+        /// Registers Elmah services and in-memory error logging.
+        /// </summary>
+        /// <param name="services">The service collection</param>
+        /// <returns></returns>
         public static IServiceCollection AddElmah(this IServiceCollection services)
         {
-            return AddElmah<MemoryErrorLog>(services);
+            return services.AddElmah(builder => builder.PersistInMemory());
         }
 
-        public static IServiceCollection AddElmah<T>(this IServiceCollection services) where T : ErrorLog
+        public static IServiceCollection AddElmah(this IServiceCollection services, Action<ElmahBuilder> configureElmah)
         {
-            return services.AddElmah<T>(o => { });
-        }
+            services.AddElmahCoreServices();
 
-        public static IServiceCollection SetElmahLogLevel(this IServiceCollection services, LogLevel level)
-        {
-            services.AddLogging(builder => { builder.AddFilter<ElmahLoggerProvider>(l => l >= level); });
+            var elmah = new ElmahBuilder(services);
+            configureElmah(elmah);
+            
             return services;
         }
 
-        public static IServiceCollection AddElmah(this IServiceCollection services, Action<ElmahOptions> setupAction)
+        public static void Configure(this IElmahBuilder builder, Action<ElmahOptions> configureOptions)
         {
-            return AddElmah<MemoryErrorLog>(services, setupAction);
+            builder.Services.Configure(configureOptions);
         }
 
-        public static IServiceCollection AddElmah<T>(this IServiceCollection services, Action<ElmahOptions> setupAction)
-            where T : ErrorLog
+        public static void PersistInMemory(this IElmahBuilder builder)
         {
-            if (services == null) throw new ArgumentNullException(nameof(services));
+            builder.PersistInMemory(o => { });
+        }
 
-            if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
+        public static void PersistInMemory(this IElmahBuilder builder, Action<MemoryErrorLogOptions> configureOptions)
+        {
+            builder.Services.Configure(configureOptions);
+            builder.PersistTo(provider => new MemoryErrorLog(provider.GetRequiredService<IOptions<MemoryErrorLogOptions>>()));
+        }
+
+        public static void PersistToFile(this IElmahBuilder builder, string logPath)
+        {
+            builder.Services.Configure<XmlFileErrorLogOptions>(o => o.LogPath = logPath); 
+            builder.PersistTo<XmlFileErrorLog>();
+        }
+
+        public static void PersistToFile(this IElmahBuilder builder, Action<XmlFileErrorLogOptions> configureOptions)
+        {
+            builder.Services.Configure(configureOptions);
+            builder.PersistTo<XmlFileErrorLog>();
+        }
+
+        public static void SetLogLevel(this IElmahBuilder builder, LogLevel level)
+        {
+            builder.Services.AddLogging(builder => { builder.AddFilter<ElmahLoggerProvider>(l => l >= level); });
+        }
+
+        public static IServiceCollection AddElmahCoreServices(this IServiceCollection services)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
 
             services.AddHttpContextAccessor();
             services.AddSingleton<IElmahExceptionLogger, ElmahExceptionLogger>();
             services.AddSingleton<ILoggerProvider>(provider =>
                 new ElmahLoggerProvider(provider.GetRequiredService<IHttpContextAccessor>()));
 
-            services.AddSingleton<T>();
-            services.AddSingleton<ErrorLog, T>(provider =>
-            {
-                var log = provider.GetRequiredService<T>();
-                var options = provider.GetRequiredService<IOptions<ElmahOptions>>().Value;
-
-                if (!string.IsNullOrWhiteSpace(options.ApplicationName))
-                {
-                    log.ApplicationName = options.ApplicationName;
-                }
-
-                if (options.SourcePaths?.Any() ?? false)
-                {
-                    log.SourcePaths = options.SourcePaths;
-                }
-
-                return log;
-            });
-
-            services.Configure(setupAction);
             services.PostConfigure<ElmahOptions>(o =>
             {
                 string elmahRoot = o.Path;

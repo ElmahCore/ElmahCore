@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using ElmahCore.Mvc.Handlers;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 
-namespace ElmahCore.Mvc.Handlers
+namespace ElmahCore
 {
     public static class ElmahEndpoints
     {
-        public static IEndpointConventionBuilder MapElmahEndpoints(this IEndpointRouteBuilder builder)
+        public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder builder)
         {
             var prefix = builder.ServiceProvider.GetRequiredService<IOptions<ElmahOptions>>().Value.Path;
 

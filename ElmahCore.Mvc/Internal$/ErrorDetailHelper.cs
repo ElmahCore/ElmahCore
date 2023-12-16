@@ -21,13 +21,16 @@ namespace ElmahCore.Mvc
             new Dictionary<string, StackFrameSourceCodeInfo>();
 
         // make it internal to enable unit testing
-        internal static StackFrameSourceCodeInfo GetStackFrameSourceCodeInfo(string[] sourcePath, string method,
+        internal static StackFrameSourceCodeInfo GetStackFrameSourceCodeInfo(string[]? sourcePath, string method,
             string type, string filePath, int lineNumber)
         {
             var key = $"{method}:{type}:{filePath}:{lineNumber}";
             lock (Cache)
             {
-                if (Cache.ContainsKey(key)) return Cache[key];
+                if (Cache.ContainsKey(key))
+                {
+                    return Cache[key];
+                }
             }
 
             var stackFrame = new StackFrameSourceCodeInfo
@@ -39,24 +42,36 @@ namespace ElmahCore.Mvc
                 Line = lineNumber
             };
 
-            if (string.IsNullOrEmpty(stackFrame.File)) return stackFrame;
+            if (string.IsNullOrEmpty(stackFrame.File))
+            {
+                return stackFrame;
+            }
 
-            IEnumerable<string> lines = null;
+            IEnumerable<string>? lines = null;
             var path = GetPath(sourcePath, filePath);
 
-            if (path != null) lines = File.ReadLines(path);
+            if (path != null)
+            {
+                lines = File.ReadLines(path);
+            }
 
-            if (lines != null) ReadFrameContent(stackFrame, lines, stackFrame.Line, stackFrame.Line);
+            if (lines != null)
+            {
+                ReadFrameContent(stackFrame, lines, stackFrame.Line, stackFrame.Line);
+            }
 
             lock (Cache)
             {
-                if (!Cache.ContainsKey(key)) Cache.Add(key, stackFrame);
+                if (!Cache.ContainsKey(key))
+                {
+                    Cache.Add(key, stackFrame);
+                }
             }
 
             return stackFrame;
         }
 
-        private static string GetPath(string[] sourcePaths, string filePath)
+        private static string? GetPath(string[]? sourcePaths, string filePath)
         {
             sourcePaths ??= new[] {""};
             foreach (var source in sourcePaths)
@@ -64,13 +79,19 @@ namespace ElmahCore.Mvc
                 var sourcePath = source;
                 var split = filePath.Split(Path.DirectorySeparatorChar);
                 if (source != "" && !sourcePath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                {
                     sourcePath += Path.DirectorySeparatorChar;
+                }
+
                 var curLen = 0;
                 foreach (var subPath in split)
                 {
                     var curPath = sourcePath + filePath.Substring(curLen);
                     if (File.Exists(curPath))
+                    {
                         return curPath;
+                    }
+
                     curLen += subPath.Length + 1;
                 }
             }

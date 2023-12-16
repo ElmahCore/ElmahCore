@@ -20,7 +20,7 @@ namespace ElmahCore.Postgresql
         ///     Initializes a new instance of the <see cref="PgsqlErrorLog" /> class
         ///     using a dictionary of configured settings.
         /// </summary>
-        public PgsqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString, option.Value.CreateTablesIfNotExist)
+        public PgsqlErrorLog(IOptions<PgsqlErrorLogOptions> option) : this(option.Value.ConnectionString, option.Value.CreateTablesIfNotExist)
         {
         }
 

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.1.32104.313
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5AD4204F-9CC1-492F-8E9A-2064D4E8AE8A}"
 	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -16,13 +18,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore", "ElmahCore\Elma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Mvc", "ElmahCore.Mvc\ElmahCore.Mvc.csproj", "{BF039A92-379C-41E5-A8D2-6C26DAEFDC60}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.DemoCore3", "ElmahCore.DemoCore3\ElmahCore.DemoCore3.csproj", "{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Postgresql", "ElmahCore.Postgresql\ElmahCore.Postgresql.csproj", "{75B6FE36-D765-4685-9AA6-5878002A5290}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.MySql", "ElmahCore.MySql\ElmahCore.MySql.csproj", "{DA992081-7177-4153-81CF-A726EEADC730}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.DemoCore5", "ElmahCore.DemoCore5\ElmahCore.DemoCore5.csproj", "{289FB7BF-7E2C-406D-9B46-360B5B4B8AAF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{93D72C8F-498F-4E86-AB88-6D77394CE495}"
 EndProject
@@ -48,10 +46,6 @@ Global
 		{BF039A92-379C-41E5-A8D2-6C26DAEFDC60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF039A92-379C-41E5-A8D2-6C26DAEFDC60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF039A92-379C-41E5-A8D2-6C26DAEFDC60}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75B6FE36-D765-4685-9AA6-5878002A5290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{75B6FE36-D765-4685-9AA6-5878002A5290}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75B6FE36-D765-4685-9AA6-5878002A5290}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,10 +54,6 @@ Global
 		{DA992081-7177-4153-81CF-A726EEADC730}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA992081-7177-4153-81CF-A726EEADC730}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA992081-7177-4153-81CF-A726EEADC730}.Release|Any CPU.Build.0 = Release|Any CPU
-		{289FB7BF-7E2C-406D-9B46-360B5B4B8AAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{289FB7BF-7E2C-406D-9B46-360B5B4B8AAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{289FB7BF-7E2C-406D-9B46-360B5B4B8AAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{289FB7BF-7E2C-406D-9B46-360B5B4B8AAF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B54072F0-F35A-424C-A153-286152BA9272}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B54072F0-F35A-424C-A153-286152BA9272}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B54072F0-F35A-424C-A153-286152BA9272}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -77,8 +67,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A6EABDE3-E1CD-43B5-BB15-880210D8FC3F} = {8E26F641-674E-421C-B37C-AF2A690DA1CF}
-		{289FB7BF-7E2C-406D-9B46-360B5B4B8AAF} = {8E26F641-674E-421C-B37C-AF2A690DA1CF}
 		{B54072F0-F35A-424C-A153-286152BA9272} = {93D72C8F-498F-4E86-AB88-6D77394CE495}
 		{BF17E6CC-ECC6-4FAE-A821-3BE169E5A3D8} = {8E26F641-674E-421C-B37C-AF2A690DA1CF}
 	EndGlobalSection

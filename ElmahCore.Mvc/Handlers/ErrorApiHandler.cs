@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using ElmahCore.Mvc.Notifiers;
 using Microsoft.AspNetCore.Builder;
@@ -15,14 +16,17 @@ namespace ElmahCore.Mvc.Handlers
     {
         public static IEndpointConventionBuilder MapApiError(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            return builder.MapMethods($"{prefix}/api/error", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromQuery] string? id, [FromServices] ErrorLog errorLog) =>
+            return builder.MapMethods($"{prefix}/api/error", new[] { HttpMethods.Get, HttpMethods.Post }, async (
+                [FromQuery] string? id,
+                [FromServices] ErrorLog errorLog,
+                CancellationToken cancellationToken) =>
             {
                 if (string.IsNullOrEmpty(id))
                 {
                     return Results.Content("{}", "application/json");
                 }
 
-                var error = await GetErrorAsync(errorLog, id);
+                var error = await GetErrorAsync(errorLog, id, cancellationToken);
                 return Results.Json(error, DefaultJsonSerializerOptions.ApiSerializerOptions);
             });
         }
@@ -34,26 +38,28 @@ namespace ElmahCore.Mvc.Handlers
                 [FromQuery(Name = "s")] int? pageSize,
                 [FromQuery(Name = "q")] string? searchText,
                 [FromServices] ErrorLog errorLog,
-                HttpRequest request) =>
+                HttpRequest request,
+                CancellationToken cancellationToken) =>
             {
                 var filters = await ReadErrorFilters(request);
 
-                var entities = await GetErrorsAsync(searchText, errorLog, filters, errorIndex ?? 0, pageSize ?? 0);
+                var entities = await GetErrorsAsync(searchText, errorLog, filters, errorIndex ?? 0, pageSize ?? 0, cancellationToken);
                 return Results.Json(entities, DefaultJsonSerializerOptions.ApiSerializerOptions);
             });
         }
 
         public static IEndpointConventionBuilder MapApiNewErrors(this IEndpointRouteBuilder builder, string prefix = "")
         {
-            return builder.MapMethods($"{prefix}/api/new-errors", new[] { HttpMethods.Post, HttpMethods.Get }, async (
+            return builder.MapPost($"{prefix}/api/new-errors", async (
                 [FromQuery] string id,
                 [FromQuery(Name = "q")] string? searchText,
                 [FromServices] ErrorLog errorLog,
-                HttpRequest request) =>
+                HttpRequest request,
+                CancellationToken cancellationToken) =>
             {
                 var filters = await ReadErrorFilters(request);
 
-                var newEntities = await GetNewErrorsAsync(searchText, errorLog, id, filters);
+                var newEntities = await GetNewErrorsAsync(searchText, errorLog, id, filters, cancellationToken);
                 return Results.Json(newEntities, DefaultJsonSerializerOptions.ApiSerializerOptions);
             });
         }
@@ -79,14 +85,14 @@ namespace ElmahCore.Mvc.Handlers
             return filters;
         }
 
-        private static async Task<ErrorLogEntryWrapper?> GetErrorAsync(ErrorLog errorLog, string id)
+        private static async Task<ErrorLogEntryWrapper?> GetErrorAsync(ErrorLog errorLog, string id, CancellationToken cancellationToken)
         {
-            var error = await errorLog.GetErrorAsync(id);
+            var error = await errorLog.GetErrorAsync(id, cancellationToken);
             return error == null ? null : new ErrorLogEntryWrapper(error);
         }
 
         private static async Task<ErrorsList> GetErrorsAsync(string? searchText, ErrorLog errorLog, List<ErrorLogFilter> errorFilters,
-            int errorIndex, int pageSize)
+            int errorIndex, int pageSize, CancellationToken cancellationToken)
         {
             errorIndex = Math.Max(0, errorIndex);
             pageSize = pageSize switch
@@ -97,7 +103,7 @@ namespace ElmahCore.Mvc.Handlers
             };
 
             var entries = new List<ErrorLogEntry>(pageSize);
-            var totalCount = await errorLog.GetErrorsAsync(searchText, errorFilters, errorIndex, pageSize, entries);
+            var totalCount = await errorLog.GetErrorsAsync(searchText, errorFilters, errorIndex, pageSize, entries, cancellationToken);
             return new ErrorsList
             {
                 Errors = entries.Select(i => new ErrorLogEntryWrapper(i)).ToList(),
@@ -106,15 +112,15 @@ namespace ElmahCore.Mvc.Handlers
         }
 
         private static async Task<ErrorsList> GetNewErrorsAsync(string? searchText, ErrorLog errorLog, string id,
-            List<ErrorLogFilter> errorFilters)
+            List<ErrorLogFilter> errorFilters, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return await GetErrorsAsync(searchText, errorLog, errorFilters, 0, 50);
+                return await GetErrorsAsync(searchText, errorLog, errorFilters, 0, 50, cancellationToken);
             }
 
             var entries = new List<ErrorLogEntry>();
-            var totalCount = await errorLog.GetNewErrorsAsync(searchText, errorFilters, id, entries);
+            var totalCount = await errorLog.GetNewErrorsAsync(searchText, errorFilters, id, entries, cancellationToken);
             return new ErrorsList
             {
                 Errors = entries.Select(i => new ErrorLogEntryWrapper(i)).ToList(),

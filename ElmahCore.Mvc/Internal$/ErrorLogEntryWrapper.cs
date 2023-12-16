@@ -7,7 +7,11 @@ namespace ElmahCore.Mvc
     {
         public ErrorLogEntryWrapper(ErrorLogEntry entry)
         {
-            if (entry == null) throw new ArgumentNullException(nameof(entry));
+            if (entry == null)
+            {
+                throw new ArgumentNullException(nameof(entry));
+            }
+
             Log = entry.Log;
             Id = entry.Id;
             Error = new ErrorWrapper(entry.Error, entry.Log.SourcePaths);

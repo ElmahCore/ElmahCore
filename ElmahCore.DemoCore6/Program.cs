@@ -7,11 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddElmah<XmlFileErrorLog>(options =>
+builder.Services.AddElmah(elmah =>
 {
-    options.LogPath = "~/log";
-    options.Notifiers.Add(new MyNotifier());
-    options.Filters.Add(new CmsErrorLogFilter());
+    elmah.Configure(options =>
+    {
+        options.Notifiers.Add(new MyNotifier());
+        options.Filters.Add(new CmsErrorLogFilter());
+    });
+
+    elmah.PersistToFile("~/log");
 });
 
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
@@ -45,6 +49,6 @@ app.UseAuthorization();
 app.UseElmah();
 
 app.MapRazorPages();
-app.MapElmahEndpoints();
+app.MapElmah();
 
 app.Run();

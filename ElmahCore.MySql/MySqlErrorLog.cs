@@ -17,7 +17,7 @@ namespace ElmahCore.MySql
         ///     Initializes a new instance of the <see cref="MySqlErrorLog" /> class
         ///     using a dictionary of configured settings.
         /// </summary>
-        public MySqlErrorLog(IOptions<ElmahOptions> option) : this(option.Value.ConnectionString)
+        public MySqlErrorLog(IOptions<MySqlErrorLogOptions> option) : this(option.Value.ConnectionString)
         {
         }
 
@@ -86,14 +86,14 @@ namespace ElmahCore.MySql
                 throw new ArgumentException(e.Message, "id", e);
             }
 
-            string errorXml;
+            string? errorXml;
 
             using (var connection = new MySqlConnection(ConnectionString))
             using (var command = CommandExtension.GetErrorXml(ApplicationName, errorGuid))
             {
                 command.Connection = connection;
                 await connection.OpenAsync(cancellationToken);
-                errorXml = (string) await command.ExecuteScalarAsync(cancellationToken);
+                errorXml = (string?) await command.ExecuteScalarAsync(cancellationToken);
             }
 
             if (errorXml == null)

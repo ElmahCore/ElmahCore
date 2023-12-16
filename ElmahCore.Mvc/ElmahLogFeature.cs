@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,12 +7,12 @@ namespace ElmahCore.Mvc
 {
     internal class ElmahLogFeature : IElmahLogFeature
     {
-        private readonly Dictionary<Guid, ElmahLogSqlEntry> _map = new();
-        private readonly List<ElmahLogMessageEntry> _logs = new();
-        private readonly List<ElmahLogParameters> _params = new();
+        private readonly ConcurrentDictionary<Guid, ElmahLogSqlEntry> _map = new();
+        private readonly ConcurrentBag<ElmahLogMessageEntry> _logs = new();
+        private readonly ConcurrentBag<ElmahLogParameters> _params = new();
 
-        public IReadOnlyCollection<ElmahLogMessageEntry> Log => _logs;
-        public IReadOnlyCollection<ElmahLogParameters> Params => _params;
+        public IReadOnlyCollection<ElmahLogMessageEntry> Log => _logs.ToList();
+        public IReadOnlyCollection<ElmahLogParameters> Params => _params.ToList();
         public IReadOnlyCollection<ElmahLogSqlEntry> LogSql => _map.Values.OrderBy(i => i.TimeStamp).ToList();
 
         public void AddMessage(ElmahLogMessageEntry entry)
@@ -21,18 +22,15 @@ namespace ElmahCore.Mvc
 
         public void AddSql(Guid id, ElmahLogSqlEntry entry)
         {
-            _map.Add(id, entry);
+            _map.TryAdd(id, entry);
         }
 
         public void SetSqlDuration(Guid id)
         {
-            if (!_map.ContainsKey(id))
+            if (_map.TryGetValue(id, out ElmahLogSqlEntry? data))
             {
-                return;
+                data.DurationMs = (int)Math.Round((DateTime.Now - data.TimeStamp).TotalMilliseconds);
             }
-
-            var data = _map[id];
-            data.DurationMs = (int)Math.Round((DateTime.Now - data.TimeStamp).TotalMilliseconds);
         }
 
         public void LogParameters((string name, object value)[] list, string typeName, string memberName,
