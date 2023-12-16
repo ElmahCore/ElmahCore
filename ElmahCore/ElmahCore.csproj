@@ -1,30 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
+    <TargetFramework>net6.0</TargetFramework>
     <Version>2.1.2</Version>
-    <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
     <AssemblyVersion>2.1.2.0</AssemblyVersion>
     <FileVersion>2.1.2.0</FileVersion>
     <AssemblyName>ElmahCore</AssemblyName>
     <PackageId>ElmahCore.Common</PackageId>
-    <Authors>ElmahCore</Authors>
-    <Company>ElmahCore</Company>
     <Product>ElmahCore</Product>
-    <NeutralLanguage>en-001</NeutralLanguage>
-    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
     <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
     <Description>ELMAH for ASP.NET Core</Description>
-    <Copyright>ElmahCore</Copyright>
     <RootNamespace>ElmahCore</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <UserSecretsId>c3a38668-74c2-494f-b54d-1a06c261f315</UserSecretsId>
-    <Nullable>enable</Nullable>
-	<LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -32,19 +19,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
-    <PackageReference Include="MinVer" Version="2.5.0">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    <PackageReference Include="MinVer">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Text.Json" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
