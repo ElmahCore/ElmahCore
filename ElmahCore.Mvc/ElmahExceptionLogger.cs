@@ -17,13 +17,13 @@ namespace ElmahCore
         private readonly ErrorLog _errorLog;
         private readonly ILogger<ElmahExceptionLogger> _logger;
         private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
-        private readonly IEnumerable<IErrorNotifier> _notifiers;
+        private readonly IEnumerable<IErrorNotifier> _notifiers = Enumerable.Empty<IErrorNotifier>();
         private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
-        public event ExceptionFilterEventHandler Filtering;
+        public event ExceptionFilterEventHandler? Filtering;
 
         // ReSharper disable once EventNeverSubscribedTo.Global
-        public event ErrorLoggedEventHandler Logged;
+        public event ErrorLoggedEventHandler? Logged;
         public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
 
         public ElmahExceptionLogger(ErrorLog errorLog, IOptions<ElmahOptions> elmahOptions, ILogger<ElmahExceptionLogger> logger)

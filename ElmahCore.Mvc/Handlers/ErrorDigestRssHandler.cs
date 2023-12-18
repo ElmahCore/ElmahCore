@@ -50,7 +50,7 @@ namespace ElmahCore.Mvc.Handlers
 
             var runningDay = DateTime.MaxValue;
             var runningErrorCount = 0;
-            string title = null;
+            string? title = null;
             DateTime? pubDate = null;
             var sb = new StringBuilder();
             var writer = new StringWriter(sb);

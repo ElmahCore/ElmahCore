@@ -31,7 +31,7 @@ namespace ElmahCore.Mvc
             "spbot", "tweetedtimes bot", "mj12bot", "who.is bot", "psbot", "robot", "jbot", "bbot", "bot"
         };
 
-        private readonly Error _error;
+        private readonly Error _error = default!;
 
         public ErrorWrapper()
         {
@@ -51,7 +51,7 @@ namespace ElmahCore.Mvc
             }
         }
 
-        public List<StackFrameSourceCodeInfo> Sources { get; private set; }
+        public List<StackFrameSourceCodeInfo>? Sources { get; private set; }
 
         [XmlElement("ApplicationName")]
         public string ApplicationName
@@ -78,7 +78,7 @@ namespace ElmahCore.Mvc
         }
 
         [XmlElement("Body")]
-        public string Body
+        public string? Body
         {
             get => _error.Body;
             // ReSharper disable once ValueParameterNotUsed
@@ -140,60 +140,147 @@ namespace ElmahCore.Mvc
             get
             {
                 var u = _error.ServerVariables["Header_User-Agent"];
-                if (string.IsNullOrEmpty(u)) return false;
-                return Codes.IsMatch(u) || Keys.IsMatch(u.Substring(0, 4));
+                if (string.IsNullOrEmpty(u))
+                {
+                    return false;
+                }
+
+                return Codes.IsMatch(u) || Keys.IsMatch(u[..4]);
             }
         }
 
-        public string Os
+        public string? Os
         {
             get
             {
                 var userAgent = _error.ServerVariables["Header_User-Agent"];
-                if (string.IsNullOrEmpty(userAgent)) return null;
+                if (string.IsNullOrEmpty(userAgent))
+                {
+                    return null;
+                }
 
-                if (userAgent.Contains("Windows")) return "Windows";
-                if (userAgent.Contains("Android")) return "Android";
-                if (userAgent.Contains("Linux")) return "Linux";
-                if (userAgent.Contains("iPhone")) return "iPhone";
-                if (userAgent.Contains("iPad")) return "iPhone";
-                if (userAgent.Contains("Macintosh")) return "Macintosh";
+                if (userAgent.Contains("Windows"))
+                {
+                    return "Windows";
+                }
+
+                if (userAgent.Contains("Android"))
+                {
+                    return "Android";
+                }
+
+                if (userAgent.Contains("Linux"))
+                {
+                    return "Linux";
+                }
+
+                if (userAgent.Contains("iPhone"))
+                {
+                    return "iPhone";
+                }
+
+                if (userAgent.Contains("iPad"))
+                {
+                    return "iPhone";
+                }
+
+                if (userAgent.Contains("Macintosh"))
+                {
+                    return "Macintosh";
+                }
+
                 return null;
             }
         }
 
-        public string Browser
+        public string? Browser
         {
             get
             {
                 var userAgent = _error.ServerVariables["Header_User-Agent"];
-                if (string.IsNullOrEmpty(userAgent)) return null;
+                if (string.IsNullOrEmpty(userAgent))
+                {
+                    return null;
+                }
 
                 if (Crawlers.Exists(x => userAgent.Contains(x)))
+                {
                     return "Bot";
+                }
 
-                if (userAgent.Contains("Chrome")) return "Chrome";
-                if (userAgent.Contains("Firefox")) return "Firefox";
-                if (userAgent.Contains("Safari") || userAgent.Contains("AppleWebKit")) return "Safari";
-                if (userAgent.Contains("OP")) return "Opera";
-                if (userAgent.Contains("Edge")) return "Edge";
-                if (userAgent.Contains("AppleWebKit")) return "AndroidBrowser";
-                if (userAgent.Contains("Vivaldi")) return "Vivaldi";
-                if (userAgent.Contains("Brave")) return "Brave";
-                if (userAgent.Contains("MSIE") || userAgent.Contains("rv:")) return "MSIE";
+                if (userAgent.Contains("Chrome"))
+                {
+                    return "Chrome";
+                }
+
+                if (userAgent.Contains("Firefox"))
+                {
+                    return "Firefox";
+                }
+
+                if (userAgent.Contains("Safari") || userAgent.Contains("AppleWebKit"))
+                {
+                    return "Safari";
+                }
+
+                if (userAgent.Contains("OP"))
+                {
+                    return "Opera";
+                }
+
+                if (userAgent.Contains("Edge"))
+                {
+                    return "Edge";
+                }
+
+                if (userAgent.Contains("AppleWebKit"))
+                {
+                    return "AndroidBrowser";
+                }
+
+                if (userAgent.Contains("Vivaldi"))
+                {
+                    return "Vivaldi";
+                }
+
+                if (userAgent.Contains("Brave"))
+                {
+                    return "Brave";
+                }
+
+                if (userAgent.Contains("MSIE") || userAgent.Contains("rv:"))
+                {
+                    return "MSIE";
+                }
+
                 return "Generic";
             }
         }
-
 
         public string Severity
         {
             get
             {
-                if (_error.StatusCode == 0) return "Error";
-                if (_error.StatusCode < 200) return "Info";
-                if (_error.StatusCode < 400) return "Success";
-                if (_error.StatusCode < 500) return "Warning";
+                if (_error.StatusCode == 0)
+                {
+                    return "Error";
+                }
+
+                if (_error.StatusCode < 200)
+                {
+                    return "Info";
+                }
+
+                if (_error.StatusCode < 400)
+                {
+                    return "Success";
+                }
+
+                if (_error.StatusCode < 500)
+                {
+                    return "Warning";
+                }
+
                 return "Error";
             }
         }
@@ -201,7 +288,7 @@ namespace ElmahCore.Mvc
         [XmlElement("Method")]
         public string Method
         {
-            get => _error.ServerVariables["Method"];
+            get => _error.ServerVariables["Method"]!;
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
@@ -215,14 +302,14 @@ namespace ElmahCore.Mvc
         }
 
         [XmlElement("Client")]
-        public string Client
+        public string? Client
         {
             get => _error.ServerVariables["Connection_RemoteIpAddress"];
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public string Version => _error.ServerVariables["Version"];
+        public string? Version => _error.ServerVariables["Version"];
 
         [XmlIgnore]
         public List<ElmahLogMessageEntry> MessageLog
@@ -234,10 +321,10 @@ namespace ElmahCore.Mvc
 
         private List<ElmahLogMessageEntry> GetMessageLog()
         {
-            var resut = _error.MessageLog.ToList();
+            var result = _error.MessageLog.ToList();
             foreach (var param in _error.Params)
             {
-                resut.Add(new ElmahLogMessageEntry
+                result.Add(new ElmahLogMessageEntry
                 {
                     Collapsed = true,
                     TimeStamp = param.TimeStamp,
@@ -247,7 +334,7 @@ namespace ElmahCore.Mvc
                 });
             }
 
-            return resut.OrderBy(i => i.TimeStamp).ToList();
+            return result.OrderBy(i => i.TimeStamp).ToList();
         }
 
         [XmlIgnore]
@@ -257,6 +344,7 @@ namespace ElmahCore.Mvc
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
+
         [XmlIgnore]
         public List<ElmahLogParamEntry> Params
         {
@@ -265,90 +353,102 @@ namespace ElmahCore.Mvc
             set { }
         }
 
-        public SerializableDictionary<string, string> Form
+        public SerializableDictionary<string, string?> Form
         {
             get =>
                 _error.Form.AllKeys
                     .Where(i => i != "$request-body")
-                    .ToSerializableDictionary(k => k, k => _error.Form[k]);
+                    .ToSerializableDictionary(k => k!, k => _error.Form[k]);
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public SerializableDictionary<string, string> QueryString
+        public SerializableDictionary<string, string?> QueryString
         {
             get =>
                 _error.QueryString.AllKeys
-                    .ToSerializableDictionary(k => k, k => _error.QueryString[k]);
+                    .ToSerializableDictionary(k => k!, k => _error.QueryString[k]);
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public SerializableDictionary<string, string> Cookies
+        public SerializableDictionary<string, string?> Cookies
         {
             get =>
                 _error.Cookies.AllKeys
-                    .ToSerializableDictionary(k => k, k => _error.Cookies[k]);
+                    .ToSerializableDictionary(k => k!, k => _error.Cookies[k]);
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
         [XmlElement("Header")]
-        public SerializableDictionary<string, string> Header
+        public SerializableDictionary<string, string?> Header
         {
             get
             {
-                return _error.ServerVariables.AllKeys.Where(i => i.StartsWith("Header_"))
-                    .ToSerializableDictionary(k => k.Substring("Header_".Length), k => _error.ServerVariables[k]);
+                return _error.ServerVariables.AllKeys
+                    .Where(i => !string.IsNullOrEmpty(i))
+                    .Where(i => i!.StartsWith("Header_"))
+                    .ToSerializableDictionary(k => k!["Header_".Length..], k => _error.ServerVariables[k]);
             }
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public SerializableDictionary<string, string> Connection
+        public SerializableDictionary<string, string?> Connection
         {
             get =>
-                _error.ServerVariables.AllKeys.Where(i => i.StartsWith("Connection_"))
-                    .Where(i => i.Contains("Port") && _error.ServerVariables[i] != "0") //ignore empty
-                    .ToSerializableDictionary(k => k.Substring("Connection_".Length), k => _error.ServerVariables[k]);
+                _error.ServerVariables.AllKeys
+                    .Where(i => !string.IsNullOrEmpty(i))
+                    .Where(i => i!.StartsWith("Connection_"))
+                    .Where(i => i!.Contains("Port") && _error.ServerVariables[i] != "0") //ignore empty
+                    .ToSerializableDictionary(k => k!["Connection_".Length..], k => _error.ServerVariables[k]);
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public SerializableDictionary<string, string> Items
+        public SerializableDictionary<string, string?> Items
         {
             get =>
-                _error.ServerVariables.AllKeys.Where(i => i.StartsWith("Items_"))
-                    .ToSerializableDictionary(k => k.Substring("Items_".Length), k => _error.ServerVariables[k]);
+                _error.ServerVariables.AllKeys
+                    .Where(i => !string.IsNullOrEmpty(i))
+                    .Where(i => i!.StartsWith("Items_"))
+                    .ToSerializableDictionary(k => k!["Items_".Length..], k => _error.ServerVariables[k]);
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public SerializableDictionary<string, string> Session
+        public SerializableDictionary<string, string?> Session
         {
             get =>
-                _error.ServerVariables.AllKeys.Where(i => i.StartsWith("Session_"))
-                    .ToSerializableDictionary(k => k.Substring("Session_".Length), k => _error.ServerVariables[k]);
+                _error.ServerVariables.AllKeys
+                    .Where(i => !string.IsNullOrEmpty(i))
+                    .Where(i => i!.StartsWith("Session_"))
+                    .ToSerializableDictionary(k => k!["Session_".Length..], k => _error.ServerVariables[k]);
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public SerializableDictionary<string, string> UserData
+        public SerializableDictionary<string, string?> UserData
         {
             get =>
-                _error.ServerVariables.AllKeys.Where(i => i.StartsWith("User_"))
-                    .ToSerializableDictionary(k => k.Substring("User_".Length), k => _error.ServerVariables[k]);
+                _error.ServerVariables.AllKeys
+                    .Where(i => !string.IsNullOrEmpty(i))    
+                    .Where(i => i!.StartsWith("User_"))
+                    .ToSerializableDictionary(k => k!["User_".Length..], k => _error.ServerVariables[k]);
             // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
-        public SerializableDictionary<string, string> ServerVariables
+        public SerializableDictionary<string, string?> ServerVariables
         {
             get
             {
                 var keyWords = new[] {"User_", "Header_", "Connection_", "Items_", "Session_"};
-                return _error.ServerVariables.AllKeys.Where(i => !keyWords.Any(i.StartsWith))
-                    .ToSerializableDictionary(k => k, k => _error.ServerVariables[k]);
+                return _error.ServerVariables.AllKeys
+                    .Where(i => !string.IsNullOrEmpty(i))
+                    .Where(i => !keyWords.Any(i!.StartsWith))
+                    .ToSerializableDictionary(k => k!, k => _error.ServerVariables[k]);
             }
             // ReSharper disable once ValueParameterNotUsed
             set { }

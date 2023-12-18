@@ -36,7 +36,11 @@ namespace ElmahCore.Mvc.Notifiers.ErrorMailHtml
     {
         public ErrorMailHtmlPage(Error error)
         {
-            if (error == null) throw new ArgumentNullException(nameof(error));
+            if (error == null)
+            {
+                throw new ArgumentNullException(nameof(error));
+            }
+
             Error = error;
         }
 

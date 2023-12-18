@@ -90,7 +90,7 @@ namespace ElmahCore
             catch (AggregateException e)
             {
                 // ReSharper disable once PossibleNullReferenceException
-                throw e.InnerException; // TODO handle stack trace reset?
+                throw e.GetBaseException(); // TODO handle stack trace reset?
             }
         }
     }

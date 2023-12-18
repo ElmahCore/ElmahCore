@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -20,18 +21,18 @@ namespace ElmahCore
 	[Serializable]
     public sealed class Error : ICloneable
     {
-        private string _applicationName;
-        private NameValueCollection _cookies;
-        private string _detail;
-        private NameValueCollection _form;
-        private string _hostName;
-        private string _message;
-        private NameValueCollection _queryString;
-        private NameValueCollection _serverVariables;
-        private string _source;
-        private string _typeName;
-        private string _user;
-        private string _webHostHtmlMessage;
+        private string? _applicationName;
+        private NameValueCollection? _cookies;
+        private string? _detail;
+        private NameValueCollection? _form;
+        private string? _hostName;
+        private string? _message;
+        private NameValueCollection? _queryString;
+        private NameValueCollection? _serverVariables;
+        private string? _source;
+        private string? _typeName;
+        private string? _user;
+        private string? _webHostHtmlMessage;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Error" /> class.
@@ -46,7 +47,7 @@ namespace ElmahCore
         ///     <see cref="HttpContext" /> instance representing the HTTP
         ///     context during the exception.
         /// </summary>
-        public Error(Exception e, HttpContext? context = null, string? body = null)
+        public Error(Exception? e, HttpContext? context = null, string? body = null)
         {
             var baseException = e?.GetBaseException();
             _message = baseException?.Message;
@@ -60,12 +61,17 @@ namespace ElmahCore
             {
                 StatusCode = httpExc.StatusCode;
                 baseException = baseException.InnerException;
-                if (baseException == null) _typeName = "HTTP";
+                if (baseException == null)
+                {
+                    _typeName = "HTTP";
+                }
             }
             else
             {
                 if (context?.Connection?.LocalIpAddress != null && StatusCode == 0)
+                {
                     StatusCode = 500;
+                }
             }
 
             Exception = baseException;
@@ -100,8 +106,10 @@ namespace ElmahCore
             {
                 var webUser = context.User;
                 if (webUser != null
-                    && (webUser.Identity.Name ?? string.Empty).Length > 0)
+                    && !string.IsNullOrEmpty(webUser.Identity?.Name))
+                {
                     _user = webUser.Identity.Name;
+                }
 
                 var request = context.Request;
 
@@ -152,9 +160,13 @@ namespace ElmahCore
             (from param in paramParams where param != default 
                 select new KeyValuePair<string,string>(param.name, ToJsonString(param.value))).ToArray();
 
-        private string ToJsonString(object paramValue)
+        private string ToJsonString(object? paramValue)
         {
-            if (paramValue == null) return "null";
+            if (paramValue == null)
+            {
+                return "null";
+            }
+
             try
             {
                 var jsonResult = JsonSerializer.Serialize(paramValue, new JsonSerializerOptions
@@ -167,7 +179,7 @@ namespace ElmahCore
             }
             catch
             {
-                return paramValue.ToString();
+                return paramValue.ToString()!;
             }
         }
 
@@ -187,11 +199,12 @@ namespace ElmahCore
         ///     <see cref="ErrorXml.Encode(Error,XmlWriter)" />.
         /// </remarks>
 
-        public Exception Exception { get; }
+        public Exception? Exception { get; }
 
         /// <summary>
         ///     Gets or sets the name of application in which this error occurred.
         /// </summary>
+        [AllowNull]
         public string ApplicationName
         {
             get => _applicationName ?? string.Empty;
@@ -201,16 +214,18 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets name of host machine where this error occurred.
         /// </summary>
+        [AllowNull]
         public string HostName
         {
             get => _hostName ?? Environment.GetEnvironmentVariable("COMPUTERNAME") ??
-                Environment.GetEnvironmentVariable("HOSTNAME");
+                Environment.GetEnvironmentVariable("HOSTNAME") ?? string.Empty;
             set => _hostName = value;
         }
 
         /// <summary>
         ///     Gets or sets the type, class or category of the error.
         /// </summary>
+        [AllowNull]
         public string Type
         {
             get => _typeName ?? string.Empty;
@@ -221,7 +236,7 @@ namespace ElmahCore
         ///     Gets or sets the Request Body
         /// </summary>
 
-        public string Body
+        public string? Body
         {
             get => _form == null ? null : _form["$request-body"] ?? string.Empty;
             // ReSharper disable once ValueParameterNotUsed
@@ -231,6 +246,7 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets the source that is the cause of the error.
         /// </summary>
+        [AllowNull]
         public string Source
         {
             get => _source ?? string.Empty;
@@ -240,6 +256,7 @@ namespace ElmahCore
         /// <summary>
         ///     Gets or sets a brief text describing the error.
         /// </summary>
+        [AllowNull]
         public string Message
         {
             get => _message ?? string.Empty;
@@ -250,6 +267,7 @@ namespace ElmahCore
         ///     Gets or sets a detailed text describing the error, such as a
         ///     stack trace.
         /// </summary>
+        [AllowNull]
         public string Detail
         {
             get => _detail ?? string.Empty;
@@ -260,6 +278,7 @@ namespace ElmahCore
         ///     Gets or sets the user logged into the application at the time
         ///     of the error.
         /// </summary>
+        [AllowNull]
         public string User
         {
             get => _user ?? Environment.GetEnvironmentVariable("USERDOMAIN") ??
@@ -288,6 +307,7 @@ namespace ElmahCore
         ///     Gets or sets the HTML message generated by the web host (ASP.NET)
         ///     for the given error.
         /// </summary>
+        [AllowNull]
         public string WebHostHtmlMessage
         {
             get => _webHostHtmlMessage ?? string.Empty;
@@ -347,7 +367,10 @@ namespace ElmahCore
 
             var ss = context.RequestServices?.GetService(typeof(ISession));
             if (ss != null)
+            {
                 LoadVariables(serverVariables, () => context.Session, "Session_");
+            }
+
             LoadVariables(serverVariables, () => context.Items, "Items_");
             LoadVariables(serverVariables, () => context.Connection, "Connection_");
             return serverVariables;
@@ -359,7 +382,10 @@ namespace ElmahCore
             try
             {
                 obj = getObject();
-                if (obj == null) return;
+                if (obj == null)
+                {
+                    return;
+                }
             }
             catch
             {
@@ -369,7 +395,7 @@ namespace ElmahCore
             var props = obj.GetType().GetProperties();
             foreach (var prop in props)
             {
-                object value = null;
+                object? value = null;
                 try
                 {
                     value = prop.GetValue(obj);
@@ -383,9 +409,15 @@ namespace ElmahCore
                 if (value is IEnumerable en && !(en is string))
                 {
                     if (value is IDictionary<object, object> dic)
+                    {
                         if (dic.Keys.Count == 0)
+                        {
                             continue;
+                        }
+                    }
+
                     foreach (var item in en)
+                    {
                         try
                         {
                             var keyProp = item.GetType().GetProperty("Key");
@@ -411,15 +443,21 @@ namespace ElmahCore
                         {
                             // ignored
                         }
+                    }
                 }
 
-                if (isProcessed) continue;
+                if (isProcessed)
+                {
+                    continue;
+                }
 
                 try
                 {
                     if (value != null && value.GetType().ToString() != value.ToString() &&
                         !value.GetType().IsSubclassOf(typeof(Stream)))
+                    {
                         serverVariables.Add(prefix + prop.Name, value?.ToString());
+                    }
                 }
                 catch
                 {
@@ -441,48 +479,62 @@ namespace ElmahCore
             return (Error) ((ICloneable) this).Clone();
         }
 
-        private static NameValueCollection CopyCollection(NameValueCollection collection)
+        private static NameValueCollection? CopyCollection(NameValueCollection? collection)
         {
             if (collection == null || collection.Count == 0)
+            {
                 return null;
+            }
 
             return new NameValueCollection(collection);
         }
 
-        private static NameValueCollection CopyCollection(IEnumerable<KeyValuePair<string, StringValues>> collection)
+        private static NameValueCollection? CopyCollection(IEnumerable<KeyValuePair<string, StringValues>>? collection)
         {
             // ReSharper disable once PossibleMultipleEnumeration
             if (collection == null || !collection.Any())
+            {
                 return null;
+            }
             // ReSharper disable once PossibleMultipleEnumeration
             var keyValuePairs = collection as KeyValuePair<string, StringValues>[] ?? collection.ToArray();
             if (!keyValuePairs.Any())
+            {
                 return null;
+            }
+
             var col = new NameValueCollection();
-            foreach (var pair in keyValuePairs) col.Add(pair.Key, pair.Value);
+            foreach (var pair in keyValuePairs)
+            {
+                col.Add(pair.Key, pair.Value);
+            }
 
             return col;
         }
 
-        private static NameValueCollection CopyCollection(IRequestCookieCollection cookies)
+        private static NameValueCollection? CopyCollection(IRequestCookieCollection cookies)
         {
             if (cookies == null || cookies.Count == 0)
+            {
                 return null;
+            }
 
             var copy = new NameValueCollection(cookies.Count);
 
             foreach (var cookie in cookies)
+            {
                 //
                 // NOTE: We drop the Path and Domain properties of the 
                 // cookie for sake of simplicity.
                 //
 
                 copy.Add(cookie.Key, cookie.Value);
+            }
 
             return copy;
         }
 
-        private static NameValueCollection FaultIn(ref NameValueCollection collection)
+        private static NameValueCollection FaultIn(ref NameValueCollection? collection)
         {
             return collection ??= new NameValueCollection();
         }

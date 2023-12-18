@@ -33,10 +33,14 @@ namespace ElmahCore.Assertions
         public override bool Test(AssertionHelperContext context)
         {
             if (context == null)
+            {
                 throw new ArgumentNullException(nameof(context));
+            }
 
             if (Count == 0)
+            {
                 return false;
+            }
 
             //
             // Walk through all child assertions and determine the
@@ -48,21 +52,32 @@ namespace ElmahCore.Assertions
             foreach (var assertion in this)
             {
                 if (assertion == null)
+                {
                     continue;
+                }
 
                 var testResult = assertion.Test(context);
 
                 if (_not)
+                {
                     testResult = !testResult;
+                }
 
                 if (testResult)
                 {
-                    if (!_all) return true;
+                    if (!_all)
+                    {
+                        return true;
+                    }
+
                     result = true;
                 }
                 else
                 {
-                    if (_all) return false;
+                    if (_all)
+                    {
+                        return false;
+                    }
                 }
             }
 

@@ -94,7 +94,9 @@ namespace ElmahCore.Assertions
             bool dontCompile)
         {
             if ((pattern ?? string.Empty).Length == 0)
+            {
                 return StaticAssertion.False;
+            }
 
             //
             // NOTE: There is an assumption here that most uses of this
@@ -107,20 +109,25 @@ namespace ElmahCore.Assertions
             var options = RegexOptions.CultureInvariant;
 
             if (!caseSensitive)
+            {
                 options |= RegexOptions.IgnoreCase;
+            }
 
             if (!dontCompile)
+            {
                 options |= RegexOptions.Compiled;
+            }
 
             // ReSharper disable once AssignNullToNotNullAttribute
-            return new RegexMatchAssertion(binding, new Regex(pattern, options));
+            return new RegexMatchAssertion(binding, new Regex(pattern!, options));
         }
-
 
         public static IAssertion Create(XmlElement config)
         {
             if (config == null)
+            {
                 throw new ArgumentNullException(nameof(config));
+            }
 
             try
             {
@@ -135,13 +142,14 @@ namespace ElmahCore.Assertions
         public static IAssertion[] Create(XmlNodeList nodes)
         {
             if (nodes == null)
+            {
                 throw new ArgumentNullException(nameof(nodes));
+            }
 
             //
             // First count the number of elements, which will be used to
             // allocate the array at its correct and final size.
             //
-
             var elementCount = 0;
 
             foreach (XmlNode child in nodes)
@@ -151,17 +159,19 @@ namespace ElmahCore.Assertions
                 //
                 // Skip comments and whitespaces.
                 //
-
                 if (nodeType == XmlNodeType.Comment || nodeType == XmlNodeType.Whitespace)
+                {
                     continue;
+                }
 
                 //
                 // Otherwise all elements only.
                 //
-
                 if (nodeType != XmlNodeType.Element)
+                {
                     throw new Exception(
                         $"Unexpected type of node ({nodeType.ToString()}).");
+                }
 
                 elementCount++;
             }
@@ -170,13 +180,16 @@ namespace ElmahCore.Assertions
             // In the second pass, create and configure the assertions
             // from each element.
             //
-
             var assertions = new IAssertion[elementCount];
             elementCount = 0;
 
             foreach (XmlNode node in nodes)
+            {
                 if (node.NodeType == XmlNodeType.Element)
+                {
                     assertions[elementCount++] = Create((XmlElement) node);
+                }
+            }
 
             return assertions;
         }
@@ -188,7 +201,9 @@ namespace ElmahCore.Assertions
             var name = "assert_" + config.LocalName;
 
             if (name.IndexOf('-') > 0)
+            {
                 name = name.Replace("-", "_");
+            }
 
             Type factoryType;
 
@@ -198,11 +213,13 @@ namespace ElmahCore.Assertions
             {
                 if (!DecodeClrTypeNamespaceFromXmlNamespace(xmlns, out var ns, out var assemblyName)
                     || ns.Length == 0 || assemblyName.Length == 0)
+                {
                     throw new Exception(
                         $"Error decoding CLR type namespace and assembly from the XML namespace '{xmlns}'.");
+                }
 
                 var assembly = Assembly.Load(assemblyName);
-                factoryType = assembly.GetType(ns + ".AssertionFactory", /* throwOnError */ true);
+                factoryType = assembly.GetType(ns + ".AssertionFactory", /* throwOnError */ true)!;
             }
             else
             {
@@ -211,8 +228,10 @@ namespace ElmahCore.Assertions
 
             var method = factoryType.GetMethod(name, BindingFlags.Public | BindingFlags.Static);
             if (method == null)
+            {
                 throw new MissingMemberException($"{factoryType} does not have a method named {name}. " +
                                                  "Ensure that the method is named correctly and that it is public and static.");
+            }
 
             var parameters = method.GetParameters();
 
@@ -226,29 +245,31 @@ namespace ElmahCore.Assertions
                 return handler(config); // TODO Check if Delegate.CreateDelegate could return null
             }
 
-            return (IAssertion) method.Invoke(null, ParseArguments(method, config));
+            return (IAssertion) method.Invoke(null, ParseArguments(method, config))!;
         }
 
-        private static object[] ParseArguments(MethodInfo method, XmlElement config)
+        private static object?[] ParseArguments(MethodInfo method, XmlElement config)
         {
             Debug.Assert(method != null);
             Debug.Assert(config != null);
 
             var parameters = method.GetParameters();
-            var args = new object[parameters.Length];
+            var args = new object?[parameters.Length];
 
             foreach (var parameter in parameters)
+            {
                 args[parameter.Position] = ParseArgument(parameter, config);
+            }
 
             return args;
         }
 
-        private static object ParseArgument(ParameterInfo parameter, XmlElement config)
+        private static object? ParseArgument(ParameterInfo parameter, XmlElement config)
         {
             Debug.Assert(parameter != null);
             Debug.Assert(config != null);
 
-            var name = parameter.Name;
+            var name = parameter.Name!;
             var type = parameter.ParameterType;
             string text;
 
@@ -261,16 +282,22 @@ namespace ElmahCore.Assertions
             {
                 var element = config[name];
                 if (element == null)
+                {
                     return null;
+                }
 
                 text = element.InnerText;
             }
 
             if (type == typeof(IContextExpression))
+            {
                 return new WebDataBindingExpression(text);
+            }
 
             if (type == typeof(Type))
+            {
                 return TypeResolution.GetType(text);
+            }
 
             if (type == typeof(bool))
             {

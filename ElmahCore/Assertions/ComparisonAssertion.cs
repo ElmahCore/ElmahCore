@@ -42,19 +42,27 @@ namespace ElmahCore.Assertions
 
         public override bool Test(AssertionHelperContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             return ExpectedValue != null && base.Test(context);
         }
 
-        protected override bool TestResult(object result)
+        protected override bool TestResult(object? result)
         {
             if (result == null)
+            {
                 return false;
+            }
 
             var right = ExpectedValue as IComparable;
 
             if (right == null)
+            {
                 return false;
+            }
 
             return Convert.ChangeType(result, right.GetType(), CultureInfo.InvariantCulture) is IComparable left &&
                    TestComparison(left, right);
@@ -62,7 +70,11 @@ namespace ElmahCore.Assertions
 
         protected bool TestComparison(IComparable left, IComparable right)
         {
-            if (left == null) throw new ArgumentNullException(nameof(left));
+            if (left == null)
+            {
+                throw new ArgumentNullException(nameof(left));
+            }
+
             return _predicate(left.CompareTo(right));
         }
     }

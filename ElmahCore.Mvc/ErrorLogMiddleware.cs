@@ -51,18 +51,22 @@ namespace ElmahCore.Mvc
             catch (Exception exception)
             {
                 var entry = await _elmahLogger.LogExceptionAsync(context, exception, body);
-                var location = $"{context.GetElmahRelativeRoot()}/detail/{entry.Id}";
 
-                context.Features.Set<IElmahFeature>(new ElmahFeature(entry.Id, location));
+                string? location = null;
+                if (entry is not null)
+                {
+                    location = $"{context.GetElmahRelativeRoot()}/detail/{entry.Id}";
+                    context.Features.Set<IElmahFeature>(new ElmahFeature(entry.Id, location));
+                }
 
                 //To next middleware
-                if (!ShowDebugPage)
+                if (entry is null || !ShowDebugPage)
                 {
                     throw;
                 }
 
                 //Show Debug page
-                context.Response.Redirect(location);
+                context.Response.Redirect(location!);
             }
         }
     }

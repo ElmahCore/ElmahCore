@@ -36,7 +36,6 @@ namespace ElmahCore
             }
         }
 
-
         /// <summary>
         ///     Gets the path to where the log is stored.
         /// </summary>
@@ -144,7 +143,8 @@ namespace ElmahCore
             {
                 entries = files.Skip(errorIndex)
                     .Take(pageSize)
-                    .Select(LoadErrorLogEntry);
+                    .Select(LoadErrorLogEntry)
+                    .Where(x => x is not null)!;
                 totalCount = files.Length;
             }
             else
@@ -157,7 +157,7 @@ namespace ElmahCore
                 
                 entries = fEntries
                     .Skip(errorIndex)
-                    .Take(pageSize);
+                    .Take(pageSize)!;
             }
 
             foreach (var entry in entries)
@@ -180,7 +180,7 @@ namespace ElmahCore
                         return null;
                     }
 
-                    var id = reader.GetAttribute("errorId");
+                    var id = reader.GetAttribute("errorId")!;
                     var error = ErrorXml.Decode(reader);
                     return new ErrorLogEntry(this, id, error);
                 }

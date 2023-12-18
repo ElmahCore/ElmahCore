@@ -28,7 +28,6 @@ namespace ElmahCore.Mvc
         {
         }
 
-
         public void OnNext(DiagnosticListener value)
         {
             if (value.Name != "SqlClientDiagnosticListener")
@@ -88,7 +87,7 @@ namespace ElmahCore.Mvc
                 {
                     var cmd = GetValueFromAnonymousType<SqlCommand>(value.Value, "Command");
 
-                    var query = cmd.Parameters.Cast<SqlParameter>().Aggregate(cmd.CommandText, (current, p) =>
+                    var query = cmd!.Parameters.Cast<SqlParameter>().Aggregate(cmd.CommandText, (current, p) =>
                         current.Replace(p.ParameterName, p.Value?.ToString()));
 
                     if (!query.Contains("/* elmah */"))
@@ -112,10 +111,10 @@ namespace ElmahCore.Mvc
         {
         }
 
-        private static T GetValueFromAnonymousType<T>(object dataItem, string itemKey)
+        private static T? GetValueFromAnonymousType<T>(object dataItem, string itemKey)
         {
             var type = dataItem.GetType();
-            var value = (T)type.GetProperty(itemKey)?.GetValue(dataItem, null);
+            var value = (T?)type.GetProperty(itemKey)?.GetValue(dataItem, null);
             return value;
         }
     }

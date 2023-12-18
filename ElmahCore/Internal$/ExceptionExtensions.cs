@@ -7,9 +7,13 @@ namespace ElmahCore
     {
         private const string CallerInfoKey = "ElmahCallerInfo";
 
-        public static CallerInfo TryGetCallerInfo(this Exception exception)
+        public static CallerInfo? TryGetCallerInfo(this Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException(nameof(exception));
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
+
             var datum = exception.IsData()
                 ? exception.Data[CallerInfoKey]
                 : null;

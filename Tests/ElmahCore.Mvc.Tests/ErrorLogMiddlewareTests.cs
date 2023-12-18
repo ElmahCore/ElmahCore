@@ -12,7 +12,7 @@ namespace ElmahCore.Mvc.Tests
     public class ErrorLogMiddlewareTests
     {
         private readonly RequestDelegate _requestDelegate;
-        private readonly ErrorLog _errorLog;
+        private readonly ErrorLog _errorLog = new MemoryErrorLog();
         private readonly IOptions<ElmahOptions> _options;
         private readonly IElmahExceptionLogger _elmahLogger;
 

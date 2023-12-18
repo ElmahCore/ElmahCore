@@ -25,7 +25,11 @@ namespace ElmahCore.Assertions
 
         private static IEnumerable<IAssertion> Validate(IEnumerable<IAssertion> assertions)
         {
-            if (assertions == null) throw new ArgumentNullException(nameof(assertions));
+            if (assertions == null)
+            {
+                throw new ArgumentNullException(nameof(assertions));
+            }
+
             return ValidateImpl(assertions);
         }
 
@@ -34,7 +38,10 @@ namespace ElmahCore.Assertions
             foreach (var assertion in assertions)
             {
                 if (assertion == null)
+                {
                     throw new ArgumentException(null, nameof(assertions));
+                }
+
                 yield return assertion;
             }
         }

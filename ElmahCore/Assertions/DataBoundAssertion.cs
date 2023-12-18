@@ -18,6 +18,6 @@ namespace ElmahCore.Assertions
                 : TestResult(Expression.Evaluate(context));
         }
 
-        protected abstract bool TestResult(object result);
+        protected abstract bool TestResult(object? result);
     }
 }

@@ -8,9 +8,14 @@ namespace ElmahCore.Mvc
     {
         public static SerializableDictionary<TKey, TElement> ToSerializableDictionary<TSource, TKey, TElement>(
             this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector)
+            where TKey : notnull
         {
             var d = new SerializableDictionary<TKey, TElement>();
-            foreach (var element in source) d.Add(keySelector(element), elementSelector(element));
+            foreach (var element in source)
+            {
+                d.Add(keySelector(element), elementSelector(element));
+            }
+
             return d;
         }
         /// <summary>
@@ -43,8 +48,16 @@ namespace ElmahCore.Mvc
         public static IEnumerable<TResult> Pairwise<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TSource, TResult> resultSelector)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            if (resultSelector == null) throw new ArgumentNullException(nameof(resultSelector));
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (resultSelector == null)
+            {
+                throw new ArgumentNullException(nameof(resultSelector));
+            }
+
             return PairwiseImpl(source, resultSelector);
         }
 
@@ -57,7 +70,9 @@ namespace ElmahCore.Mvc
             using (var e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
+                {
                     yield break;
+                }
 
                 var previous = e.Current;
                 while (e.MoveNext())

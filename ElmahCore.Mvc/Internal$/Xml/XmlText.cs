@@ -17,7 +17,7 @@ namespace ElmahCore.Mvc.Xml
         ///     See section <a href="http://www.w3.org/TR/2006/REC-xml-20060816/#charsets">2.2 Characters</a>
         ///     of <a href="http://www.w3.org/TR/2006/REC-xml-20060816">Extensible Markup Language (XML) 1.0 (Fourth Edition)</a>.
         /// </remarks>
-        public static string StripIllegalXmlCharacters(string xml, string replacement = null)
+        public static string StripIllegalXmlCharacters(string xml, string? replacement = null)
         {
             // TODO Consider expanding illegal character set to XML 1.1
 

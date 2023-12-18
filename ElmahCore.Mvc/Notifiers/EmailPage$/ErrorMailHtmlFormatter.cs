@@ -54,8 +54,15 @@ namespace ElmahCore.Mvc.Notifiers
         /// </summary>
         public override void Format(TextWriter writer, Error error)
         {
-            if (writer == null) throw new ArgumentNullException(nameof(writer));
-            if (error == null) throw new ArgumentNullException(nameof(error));
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (error == null)
+            {
+                throw new ArgumentNullException(nameof(error));
+            }
 
             var page = new ErrorMailHtmlPage(error);
             writer.Write(page.TransformText());

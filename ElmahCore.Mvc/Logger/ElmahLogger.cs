@@ -12,13 +12,12 @@ namespace ElmahCore.Mvc.Logger
         private readonly IHttpContextAccessor _accessor;
         private Func<string, LogLevel, bool> _filter;
 
-
-        internal ElmahLogger(string name, Func<string, LogLevel, bool> filter, IExternalScopeProvider scopeProvider,
+        internal ElmahLogger(string name, Func<string, LogLevel, bool> filter, IExternalScopeProvider? scopeProvider,
             IHttpContextAccessor accessor)
         {
             _accessor = accessor;
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Filter = filter ?? ((category, logLevel) => true);
+            _filter = filter ?? ((category, logLevel) => true);
             ScopeProvider = scopeProvider;
         }
 
@@ -30,19 +29,27 @@ namespace ElmahCore.Mvc.Logger
 
         public string Name { get; }
 
-        internal IExternalScopeProvider ScopeProvider { get; set; }
+        internal IExternalScopeProvider? ScopeProvider { get; set; }
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
-            Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
         {
-            if (!IsEnabled(logLevel)) return;
+            if (!IsEnabled(logLevel))
+            {
+                return;
+            }
 
-            if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+            if (formatter == null)
+            {
+                throw new ArgumentNullException(nameof(formatter));
+            }
 
             var message = formatter(state, exception);
 
             if (!string.IsNullOrEmpty(message) || exception != null)
+            {
                 WriteMessage(logLevel, Name, eventId.Id, message, exception);
+            }
         }
 
         public bool IsEnabled(LogLevel logLevel)
@@ -51,10 +58,17 @@ namespace ElmahCore.Mvc.Logger
                    Filter(Name, logLevel);
         }
 
+#if NET6_0
         public IDisposable BeginScope<TState>(TState state)
         {
             return ScopeProvider?.Push(state) ?? NullScope.Instance;
         }
+#else
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return ScopeProvider?.Push(state);
+        }
+#endif
 
         public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message,
             Exception? exception)

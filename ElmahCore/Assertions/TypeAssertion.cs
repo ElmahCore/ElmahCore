@@ -16,15 +16,19 @@ namespace ElmahCore.Assertions
             base(MaskNullExpression(source))
         {
             if (expectedType == null)
+            {
                 throw new ArgumentNullException(nameof(expectedType));
+            }
 
             if (expectedType.IsInterface || expectedType.IsClass && expectedType.IsAbstract)
+            {
                 //
                 // Interfaces and abstract classes will always have an 
                 // ancestral relationship.
                 //
 
                 byCompatibility = true;
+            }
 
             ExpectedType = expectedType;
             ByCompatibility = byCompatibility;
@@ -43,10 +47,12 @@ namespace ElmahCore.Assertions
                 : ExpectedType != null && base.Test(context);
         }
 
-        protected override bool TestResult(object result)
+        protected override bool TestResult(object? result)
         {
             if (result == null)
+            {
                 return false;
+            }
 
             var resultType = result.GetType();
             var expectedType = ExpectedType;
@@ -61,7 +67,7 @@ namespace ElmahCore.Assertions
             return expression ?? new DelegatedContextExpression(EvaluateToException);
         }
 
-        private static object EvaluateToException(object context)
+        private static object? EvaluateToException(object context)
         {
             return context is ExceptionFilterEventArgs args ? args.Exception : DataBinder.Eval(context, "Exception");
         }

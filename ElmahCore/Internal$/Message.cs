@@ -16,7 +16,10 @@ namespace ElmahCore
 
         public IDisposable PushHandler(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder)
         {
-            if (binder == null) throw new ArgumentNullException(nameof(binder));
+            if (binder == null)
+            {
+                throw new ArgumentNullException(nameof(binder));
+            }
 
             for (var updated = false; !updated;)
             {
@@ -41,47 +44,53 @@ namespace ElmahCore
             }
         }
 
-        public TOutput Send(TInput input)
+        public TOutput? Send(TInput input)
         {
             return Send(null, input);
         }
 
-        private TOutput Send(object sender, TInput input)
+        private TOutput? Send(object? sender, TInput input)
         {
-            Func<object, TInput, TOutput> handler = null;
+            Func<object?, TInput, TOutput?>? handler = null;
             for (var updated = false; !updated;)
             {
                 var state = _state;
                 handler = state.Handler;
                 if (handler != null)
+                {
                     break;
+                }
+
                 var binder = _state.Binder;
                 if (binder == null)
+                {
                     return default;
+                }
+
                 var delegates = binder.GetInvocationList();
                 var binders =
                     from Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> d
                         in delegates
                     select d;
-                handler = binders.Aggregate((Func<object, TInput, TOutput>) delegate { return default; },
+                handler = binders.Aggregate((Func<object?, TInput, TOutput?>) delegate { return default; },
                     (next, b) => b(next));
                 updated = TryUpdateState(new State(state.Binder, handler), state);
             }
 
-            return handler(sender, input);
+            return handler!(sender, input);
         }
 
         private sealed class State
         {
-            public State(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> binder,
-                Func<object, TInput, TOutput> handler)
+            public State(Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>? binder,
+                Func<object?, TInput, TOutput?>? handler)
             {
                 Binder = binder;
                 Handler = handler;
             }
 
-            public Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>> Binder { get; }
-            public Func<object, TInput, TOutput> Handler { get; }
+            public Func<Func<object, TInput, TOutput>, Func<object, TInput, TOutput>>? Binder { get; }
+            public Func<object?, TInput, TOutput?>? Handler { get; }
         }
     }
 }

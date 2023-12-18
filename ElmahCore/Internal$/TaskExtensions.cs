@@ -18,8 +18,15 @@ namespace ElmahCore
 	    /// </summary>
 	    public static void TryConcludeFrom<T>(this TaskCompletionSource<T> source, Task<T> task)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            if (task == null) throw new ArgumentNullException(nameof(task));
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
 
             if (task.IsCanceled)
             {
@@ -52,12 +59,12 @@ namespace ElmahCore
 	    ///     when the supplied task concludes (fails, cancels or completes
 	    ///     successfully).
 	    /// </summary>
-	    public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object state,
-            TaskScheduler scheduler = null)
+	    public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object? state,
+            TaskScheduler? scheduler = null)
         {
             var result = task;
 
-            TaskCompletionSource<T> tcs = null;
+            TaskCompletionSource<T>? tcs = null;
             if (task.AsyncState != state)
             {
                 tcs = new TaskCompletionSource<T>(state);
@@ -66,16 +73,21 @@ namespace ElmahCore
 
             Task t = task;
             if (tcs != null)
+            {
                 t = t.ContinueWith(delegate { tcs.TryConcludeFrom(task); },
                     CancellationToken.None,
                     TaskContinuationOptions.ExecuteSynchronously,
                     TaskScheduler.Default);
+            }
+
             if (callback != null)
+            {
                 // ReSharper disable RedundantAssignment
                 t = t.ContinueWith(delegate { callback(result); }, // ReSharper restore RedundantAssignment
                     CancellationToken.None,
                     TaskContinuationOptions.None,
                     scheduler ?? TaskScheduler.Default);
+            }
 
             return result;
         }

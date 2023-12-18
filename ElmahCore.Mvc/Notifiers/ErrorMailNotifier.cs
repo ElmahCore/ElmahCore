@@ -32,15 +32,10 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading;
+using MailAttachment = System.Net.Mail.Attachment;
 
 namespace ElmahCore.Mvc.Notifiers
 {
-    #region Imports
-
-    using MailAttachment = Attachment;
-
-    #endregion
-
     /// <summary>
     ///     HTTP module that sends an e-mail whenever an unhandled exception
     ///     occurs in an ASP.NET web application.
@@ -59,7 +54,6 @@ namespace ElmahCore.Mvc.Notifiers
             // Extract the settings.
             //
 
-
             MailRecipient = options.MailRecipient;
             MailSender = options.MailSender;
             MailCopyRecipient = options.MailCopyRecipient;
@@ -74,12 +68,10 @@ namespace ElmahCore.Mvc.Notifiers
             UseSsl = options.UseSsl;
         }
 
-
         /// <summary>
         ///     Gets the e-mail address of the sender.
         /// </summary>
-
-        protected virtual string MailSender { get; }
+        protected virtual string? MailSender { get; }
 
         /// <summary>
         ///     Gets the e-mail address of the recipient, or a
@@ -92,8 +84,7 @@ namespace ElmahCore.Mvc.Notifiers
         ///     When using System.Net.Mail components under .NET Framework 2.0
         ///     or later, multiple recipients must be comma-delimited.
         /// </remarks>
-
-        protected virtual string MailRecipient { get; }
+        protected virtual string? MailRecipient { get; }
 
         /// <summary>
         ///     Gets the e-mail address of the recipient for mail carbon
@@ -106,8 +97,7 @@ namespace ElmahCore.Mvc.Notifiers
         ///     When using System.Net.Mail components under .NET Framework 2.0
         ///     or later, multiple recipients must be comma-delimited.
         /// </remarks>
-
-        protected virtual string MailCopyRecipient { get; }
+        protected virtual string? MailCopyRecipient { get; }
 
         /// <summary>
         ///     Gets the text used to format the e-mail subject.
@@ -118,66 +108,60 @@ namespace ElmahCore.Mvc.Notifiers
         ///     and {1} <see cref="Error.Type" /> where the error type should
         ///     be insert.
         /// </remarks>
-
-        protected virtual string MailSubjectFormat { get; }
+        protected virtual string? MailSubjectFormat { get; }
 
         /// <summary>
         ///     Gets the priority of the e-mail.
         /// </summary>
-
         protected virtual MailPriority MailPriority { get; }
 
         /// <summary>
         ///     Gets the SMTP server host name used when sending the mail.
         /// </summary>
-
-        protected string SmtpServer { get; }
+        protected string? SmtpServer { get; }
 
         /// <summary>
         ///     Gets the SMTP port used when sending the mail.
         /// </summary>
-
         protected int SmtpPort { get; }
 
         /// <summary>
         ///     Gets the user name to use if the SMTP server requires authentication.
         /// </summary>
-
-        protected string AuthUserName { get; }
+        protected string? AuthUserName { get; }
 
         /// <summary>
         ///     Gets the clear-text password to use if the SMTP server requires
         ///     authentication.
         /// </summary>
-
-        protected string AuthPassword { get; }
+        protected string? AuthPassword { get; }
 
         /// <summary>
         ///     Indicates whether <a href="http://en.wikipedia.org/wiki/Screens_of_death#ASP.NET">YSOD</a>
         ///     is attached to the e-mail or not. If <c>true</c>, the YSOD is
         ///     not attached.
         /// </summary>
-
         protected bool NoYsod { get; }
 
         /// <summary>
         ///     Determines if SSL will be used to encrypt communication with the
         ///     mail server.
         /// </summary>
-
         protected bool UseSsl { get; }
-
 
         public void Notify(Error error)
         {
             if (_reportAsynchronously)
+            {
                 ReportErrorAsync(error);
+            }
             else
+            {
                 ReportError(error);
+            }
         }
 
         public string Name { get; }
-
 
         /// <summary>
         ///     Schedules the error to be e-mailed asynchronously.
@@ -189,7 +173,9 @@ namespace ElmahCore.Mvc.Notifiers
         protected virtual void ReportErrorAsync(Error error)
         {
             if (error == null)
+            {
                 throw new ArgumentNullException(nameof(error));
+            }
 
             //
             // Schedule the reporting at a later time using a worker from 
@@ -202,11 +188,11 @@ namespace ElmahCore.Mvc.Notifiers
             ThreadPool.QueueUserWorkItem(ReportError, error);
         }
 
-        private void ReportError(object state)
+        private void ReportError(object? state)
         {
             try
             {
-                ReportError((Error) state);
+                ReportError((Error) state!);
             }
 
             //
@@ -233,7 +219,9 @@ namespace ElmahCore.Mvc.Notifiers
         protected virtual void ReportError(Error error)
         {
             if (error == null)
+            {
                 throw new ArgumentNullException(nameof(error));
+            }
 
             //
             // Start by checking if we have a sender and a recipient.
@@ -247,7 +235,9 @@ namespace ElmahCore.Mvc.Notifiers
             var copyRecipient = MailCopyRecipient ?? string.Empty;
 
             if (recipient.Length == 0)
+            {
                 return;
+            }
 
             //
             // Create the mail, setting up the sender and recipient and priority.
@@ -258,12 +248,18 @@ namespace ElmahCore.Mvc.Notifiers
 
             mail.From = new MailAddress(sender);
             var recipients = recipient.Split(';');
-            foreach (var r in recipients) mail.To.Add(r);
+            foreach (var r in recipients)
+            {
+                mail.To.Add(r);
+            }
 
             if (copyRecipient.Length > 0)
             {
                 recipients = copyRecipient.Split(';');
-                foreach (var r in recipients) mail.CC.Add(r);
+                foreach (var r in recipients)
+                {
+                    mail.CC.Add(r);
+                }
             }
 
             //
@@ -301,7 +297,6 @@ namespace ElmahCore.Mvc.Notifiers
                 }
             }
 
-
             try
             {
                 //
@@ -314,7 +309,9 @@ namespace ElmahCore.Mvc.Notifiers
                     var ysodAttachment = CreateHtmlAttachment("YSOD", error.WebHostHtmlMessage);
 
                     if (ysodAttachment != null)
+                    {
                         mail.Attachments.Add(ysodAttachment);
+                    }
                 }
 
                 //
@@ -351,7 +348,9 @@ namespace ElmahCore.Mvc.Notifiers
         protected virtual void SendMail(MailMessage mail)
         {
             if (mail == null)
+            {
                 throw new ArgumentNullException(nameof(mail));
+            }
 
             //
             // Under .NET Framework 2.0, the authentication settings
@@ -371,13 +370,17 @@ namespace ElmahCore.Mvc.Notifiers
 
             var port = SmtpPort;
             if (port > 0)
+            {
                 client.Port = port;
+            }
 
             var userName = AuthUserName ?? string.Empty;
             var password = AuthPassword ?? string.Empty;
 
             if (userName.Length > 0 && password.Length > 0)
+            {
                 client.Credentials = new NetworkCredential(userName, password);
+            }
 
             client.EnableSsl = UseSsl;
 
@@ -387,16 +390,16 @@ namespace ElmahCore.Mvc.Notifiers
 
     public class EmailOptions
     {
-        public string MailRecipient { get; set; }
-        public string MailSender { get; set; }
-        public string MailCopyRecipient { get; set; }
-        public string MailSubjectFormat { get; set; }
+        public string? MailRecipient { get; set; }
+        public string? MailSender { get; set; }
+        public string? MailCopyRecipient { get; set; }
+        public string? MailSubjectFormat { get; set; }
         public MailPriority MailPriority { get; set; }
         public bool ReportAsynchronously { get; set; }
-        public string SmtpServer { get; set; }
+        public string? SmtpServer { get; set; }
         public int SmtpPort { get; set; }
-        public string AuthUserName { get; set; }
-        public string AuthPassword { get; set; }
+        public string? AuthUserName { get; set; }
+        public string? AuthPassword { get; set; }
         public bool SendYsod { get; set; }
         public bool UseSsl { get; set; }
     }

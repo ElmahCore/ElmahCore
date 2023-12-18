@@ -11,7 +11,7 @@ namespace ElmahCore.Assertions
 {
     public sealed class AssertionHelperContext
     {
-        private Exception _baseException;
+        private Exception? _baseException;
         private int _httpStatusCode;
         private bool _statusCodeInitialized;
 

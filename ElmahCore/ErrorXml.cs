@@ -25,7 +25,9 @@ namespace ElmahCore
             using (var reader = XmlReader.Create(sr, new XmlReaderSettings() { CheckCharacters = false }))
             {
                 if (!reader.IsStartElement("error"))
+                {
                     throw new ApplicationException("The error XML is not in the expected format.");
+                }
 
                 return Decode(reader);
             }
@@ -36,9 +38,15 @@ namespace ElmahCore
         /// </summary>
         public static Error Decode(XmlReader reader)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
             if (!reader.IsStartElement())
+            {
                 throw new ArgumentException("Reader is not positioned at the start of an element.", nameof(reader));
+            }
 
             //
             // Read out the attributes that contain the simple
@@ -61,7 +69,10 @@ namespace ElmahCore
             {
                 ReadInnerXml(reader, error);
                 while (reader.NodeType != XmlNodeType.EndElement)
+                {
                     reader.Skip();
+                }
+
                 reader.ReadEndElement();
             }
 
@@ -73,9 +84,15 @@ namespace ElmahCore
         /// </summary>
         private static void ReadXmlAttributes(XmlReader reader, Error error)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
             if (!reader.IsStartElement())
+            {
                 throw new ArgumentException("Reader is not positioned at the start of an element.", nameof(reader));
+            }
 
             error.ApplicationName = reader.GetAttribute("application");
             error.HostName = reader.GetAttribute("host");
@@ -98,7 +115,10 @@ namespace ElmahCore
         /// </summary>
         private static void ReadInnerXml(XmlReader reader, Error error)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
 
             //
             // Loop through the elements, reading those that we
@@ -119,23 +139,35 @@ namespace ElmahCore
                 if (reader.Name == "paramsLog")
                 {
                     if (reader.IsEmptyElement)
+                    {
                         reader.Read();
+                    }
                     else
+                    {
                         UpcodeToParams(reader, error.Params);
+                    }
                 }
                 if (reader.Name == "sqlLog")
                 {
                     if (reader.IsEmptyElement)
+                    {
                         reader.Read();
+                    }
                     else
+                    {
                         UpcodeToSqlLog(reader, error.SqlLog);
+                    }
                 }
                 else if (reader.Name == "messageLog")
                 {
                     if (reader.IsEmptyElement)
+                    {
                         reader.Read();
+                    }
                     else
+                    {
                         UpcodeToLog(reader, error.MessageLog);
+                    }
                 }
                 else
                 {
@@ -159,9 +191,13 @@ namespace ElmahCore
                     }
 
                     if (reader.IsEmptyElement)
+                    {
                         reader.Read();
+                    }
                     else
+                    {
                         UpcodeTo(reader, collection);
+                    }
                 }
             }
         }
@@ -194,9 +230,15 @@ namespace ElmahCore
         /// </summary>
         public static void Encode(Error error, XmlWriter writer)
         {
-            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             if (writer.WriteState != WriteState.Element)
+            {
                 throw new ArgumentException("Writer is not in the expected Element state.", nameof(writer));
+            }
 
             //
             // Write out the basic typed information in attributes
@@ -213,7 +255,10 @@ namespace ElmahCore
         private static void WriteXmlAttributes(Error error, XmlWriter writer)
         {
             Debug.Assert(error != null);
-            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
 
             WriteXmlAttribute(writer, "application", error.ApplicationName);
             WriteXmlAttribute(writer, "host", error.HostName);
@@ -223,10 +268,16 @@ namespace ElmahCore
             WriteXmlAttribute(writer, "detail", error.Detail);
             WriteXmlAttribute(writer, "user", error.User);
             if (error.Time != DateTime.MinValue)
+            {
                 WriteXmlAttribute(writer, "time",
                     XmlConvert.ToString(error.Time.ToUniversalTime(), @"yyyy-MM-dd\THH:mm:ss.fffffff\Z"));
+            }
+
             if (error.StatusCode != 0)
+            {
                 WriteXmlAttribute(writer, "statusCode", XmlConvert.ToString(error.StatusCode));
+            }
+
             WriteXmlAttribute(writer, "webHostHtmlMessage", error.WebHostHtmlMessage);
         }
 
@@ -236,7 +287,10 @@ namespace ElmahCore
         private static void WriteInnerXml(Error error, XmlWriter writer)
         {
             Debug.Assert(error != null);
-            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
 
             WriteCollection(writer, "serverVariables", error.ServerVariables);
             WriteCollection(writer, "queryString", error.QueryString);
@@ -249,10 +303,17 @@ namespace ElmahCore
 
         private static void WriteParamsLog(XmlWriter writer, string name, IEnumerable<ElmahLogParamEntry> log)
         {
-            if (log == null) return;
+            if (log == null)
+            {
+                return;
+            }
 
             var list = log.ToList();
-            if (list.Count == 0) return;
+            if (list.Count == 0)
+            {
+                return;
+            }
+
             writer.WriteStartElement(name);
             foreach (var entry in list)
             {
@@ -277,10 +338,17 @@ namespace ElmahCore
         }
         private static void WriteSqlLog(XmlWriter writer, string name, IEnumerable<ElmahLogSqlEntry> log)
         {
-            if (log == null) return;
+            if (log == null)
+            {
+                return;
+            }
 
             var list = log.ToList();
-            if (list.Count == 0) return;
+            if (list.Count == 0)
+            {
+                return;
+            }
+
             writer.WriteStartElement(name);
             foreach (var entry in list)
             {
@@ -298,10 +366,17 @@ namespace ElmahCore
 
         private static void WriteMessageLog(XmlWriter writer, string name, IEnumerable<ElmahLogMessageEntry> log)
         {
-            if (log == null) return;
+            if (log == null)
+            {
+                return;
+            }
 
             var list = log.ToList();
-            if (list.Count == 0) return;
+            if (list.Count == 0)
+            {
+                return;
+            }
+
             writer.WriteStartElement(name);
             foreach (var entry in list)
             {
@@ -323,19 +398,23 @@ namespace ElmahCore
             Debug.Assert(writer != null);
 
             if (collection == null || collection.Count == 0)
+            {
                 return;
+            }
 
             writer.WriteStartElement(name);
             Encode(collection, writer);
             writer.WriteEndElement();
         }
 
-        private static void WriteXmlAttribute(XmlWriter writer, string name, string value)
+        private static void WriteXmlAttribute(XmlWriter writer, string name, string? value)
         {
             Debug.Assert(writer != null);
 
             if (!string.IsNullOrEmpty(value))
+            {
                 writer.WriteAttributeString(name, value);
+            }
         }
 
         /// <summary>
@@ -344,11 +423,20 @@ namespace ElmahCore
         /// </summary>
         private static void Encode(NameValueCollection collection, XmlWriter writer)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
-            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            if (collection == null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
+
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
 
             if (collection.Count == 0)
+            {
                 return;
+            }
 
             //
             // Write out a named multi-value collection as follows 
@@ -371,12 +459,14 @@ namespace ElmahCore
                 var values = collection.GetValues(key);
 
                 if (values != null)
+                {
                     foreach (var value in values)
                     {
                         writer.WriteStartElement("value");
                         writer.WriteAttributeString("string", value);
                         writer.WriteEndElement();
                     }
+                }
 
                 writer.WriteEndElement();
             }
@@ -388,8 +478,15 @@ namespace ElmahCore
         /// </summary>
         private static void UpcodeTo(XmlReader reader, NameValueCollection collection)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            if (collection == null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
 
             Debug.Assert(!reader.IsEmptyElement);
             reader.Read();
@@ -424,7 +521,10 @@ namespace ElmahCore
                                 {
                                     reader.Read();
                                     while (reader.NodeType != XmlNodeType.EndElement)
+                                    {
                                         reader.Skip();
+                                    }
+
                                     reader.ReadEndElement();
                                 }
                             }
@@ -456,8 +556,15 @@ namespace ElmahCore
 
         private static void UpcodeToLog(XmlReader reader, ICollection<ElmahLogMessageEntry> log)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
-            if (log == null) throw new ArgumentNullException(nameof(log));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
 
             Debug.Assert(!reader.IsEmptyElement);
             reader.Read();
@@ -492,8 +599,15 @@ namespace ElmahCore
 
         private static void UpcodeToParams(XmlReader reader, ICollection<ElmahLogParamEntry> log)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
-            if (log == null) throw new ArgumentNullException(nameof(log));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
 
             Debug.Assert(!reader.IsEmptyElement);
             reader.Read();
@@ -503,7 +617,7 @@ namespace ElmahCore
                 if (reader.IsStartElement("parameter"))
                 {
                     var timeStamp = LoadTime(reader.GetAttribute("time-stamp") ?? string.Empty);
-                    var list = new List<KeyValuePair<string,string>>();
+                    var list = new List<KeyValuePair<string, string>>();
                     var typeName = reader.GetAttribute("type-name");
                     var memberName = reader.GetAttribute("member-name");
                     var line = int.Parse(reader.GetAttribute("line") ?? "0");
@@ -514,8 +628,8 @@ namespace ElmahCore
                     {
                         if (reader.IsStartElement("param"))
                         {
-                            var data = new KeyValuePair<string,string>(
-                                reader.GetAttribute("name"), reader.GetAttribute("value"));
+                            var data = new KeyValuePair<string, string>(
+                                reader.GetAttribute("name")!, reader.GetAttribute("value")!);
                             list.Add(data);
                         }
                         else
@@ -526,13 +640,15 @@ namespace ElmahCore
                     }
 
                     if (list.Any())
+                    {
                         log.Add(new ElmahLogParamEntry(
                             timeStamp,
                             list.ToArray(),
                             typeName,
-                            memberName,
-                            reader.GetAttribute("file"),
+                            memberName!,
+                            reader.GetAttribute("file")!,
                             line));
+                    }
                 }
                 else
                 {
@@ -553,8 +669,15 @@ namespace ElmahCore
         
         private static void UpcodeToSqlLog(XmlReader reader, ICollection<ElmahLogSqlEntry> log)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
-            if (log == null) throw new ArgumentNullException(nameof(log));
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
 
             Debug.Assert(!reader.IsEmptyElement);
             reader.Read();
@@ -586,7 +709,7 @@ namespace ElmahCore
             reader.ReadEndElement();
         }
 
-        private static LogLevel GetLogLevel(string level)
+        private static LogLevel GetLogLevel(string? level)
         {
             Enum.TryParse(level, out LogLevel result);
             return result;

@@ -20,7 +20,7 @@ namespace ElmahCore.Mvc.Xml
                         items));
         }
 
-        public static XElement Item(string title, string description, DateTime pubDate, string link = null)
+        public static XElement Item(string title, string description, DateTime pubDate, string? link = null)
         {
             return
                 new XElement("item",

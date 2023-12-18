@@ -6,7 +6,6 @@
     <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
     <Copyright>ElmahCore</Copyright>
     <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

@@ -5,7 +5,7 @@ namespace ElmahCore
 {
     public class ElmahLogParamEntry
     {
-        public ElmahLogParamEntry(DateTime timeStamp, KeyValuePair<string,string>[] @params, string typeName, string memberName,
+        public ElmahLogParamEntry(DateTime timeStamp, KeyValuePair<string,string>[] @params, string? typeName, string memberName,
             string file, int line)
         {
             Params = @params;
@@ -18,7 +18,7 @@ namespace ElmahCore
 
         public DateTime TimeStamp { get; }
         public KeyValuePair<string,string>[] Params { get; }
-        public string TypeName { get; }
+        public string? TypeName { get; }
         public string MemberName { get; }
         public string File { get; }
         public int Line { get; }

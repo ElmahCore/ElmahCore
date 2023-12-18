@@ -36,29 +36,35 @@ namespace ElmahCore.Mvc.Notifiers
     internal class RazorTemplateBase
     {
         private readonly StringBuilder _generatingEnvironment = new StringBuilder();
-        private string _content;
+        private string? _content;
 
-        public RazorTemplateBase Layout { get; set; }
+        public RazorTemplateBase? Layout { get; set; }
 
         public virtual void Execute()
         {
         }
 
-        public void WriteLiteral(string textToAppend)
+        public void WriteLiteral(string? textToAppend)
         {
             if (string.IsNullOrEmpty(textToAppend))
+            {
                 return;
+            }
+
             _generatingEnvironment.Append(textToAppend);
         }
 
-        public virtual void Write(object value)
+        public virtual void Write(object? value)
         {
             if (value == null)
+            {
                 return;
+            }
+
             WriteLiteral(value.ToString());
         }
 
-        public virtual object RenderBody()
+        public virtual object? RenderBody()
         {
             return _content;
         }

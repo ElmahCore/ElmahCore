@@ -12,7 +12,7 @@ namespace ElmahCore.Assertions
         // ReSharper disable once MemberCanBePrivate.Global
         public string Expression => _expression ?? string.Empty;
 
-        public object Evaluate(object context)
+        public object? Evaluate(object context)
         {
             return DataBinder.Eval(context, Expression);
         }

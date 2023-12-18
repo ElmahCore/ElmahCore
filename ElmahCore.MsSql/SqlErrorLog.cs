@@ -43,7 +43,9 @@ namespace ElmahCore.Sql
         public SqlErrorLog(string connectionString, string? schemaName, string? tableName, bool createTablesIfNotExist)
         {
             if (string.IsNullOrEmpty(connectionString))
+            {
                 throw new ArgumentNullException(nameof(connectionString));
+            }
 
             ConnectionString = connectionString;
             DatabaseSchemaName = !string.IsNullOrWhiteSpace(schemaName) ? schemaName! : "dbo";
@@ -121,7 +123,7 @@ namespace ElmahCore.Sql
             {
                 command.Connection = connection;
                 await connection.OpenAsync(cancellationToken);
-                errorXml = (string)await command.ExecuteScalarAsync();
+                errorXml = (string?)await command.ExecuteScalarAsync();
             }
 
             if (errorXml == null)
@@ -166,7 +168,7 @@ namespace ElmahCore.Sql
             using (var command = Commands.GetErrorsXmlTotal(ApplicationName, DatabaseSchemaName, DatabaseTableName))
             {
                 command.Connection = connection;
-                return (int)await command.ExecuteScalarAsync();
+                return (int)(await command.ExecuteScalarAsync())!;
             }
         }
 
@@ -318,7 +320,6 @@ WHERE
 "
                 };
 
-
                 command.Parameters.Add(new SqlParameter("Application", appName));
                 command.Parameters.Add(new SqlParameter("ErrorId", id));
 
@@ -343,7 +344,6 @@ OFFSET     @offset ROWS
 FETCH NEXT @limit ROWS ONLY;
 "
                 };
-
 
                 command.Parameters.Add("@Application", SqlDbType.NVarChar, MaxAppNameLength).Value = appName;
                 command.Parameters.Add("@offset", SqlDbType.Int).Value = errorIndex;

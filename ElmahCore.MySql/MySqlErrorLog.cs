@@ -28,7 +28,9 @@ namespace ElmahCore.MySql
         public MySqlErrorLog(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))
+            {
                 throw new ArgumentNullException("connectionString");
+            }
 
             ConnectionString = connectionString;
             CreateTableIfNotExist();
@@ -158,11 +160,13 @@ namespace ElmahCore.MySql
                     var exists = Convert.ToBoolean(commandCheck.ExecuteScalar());
 
                     if (!exists)
+                    {
                         using (var commandCreate = CommandExtension.CreateTable())
                         {
                             commandCreate.Connection = connection;
                             commandCreate.ExecuteNonQuery();
                         }
+                    }
                 }
             }
         }
@@ -172,7 +176,7 @@ namespace ElmahCore.MySql
             using (var command = CommandExtension.GetTotalErrorsXml(ApplicationName))
             {
                 command.Connection = connection;
-                return (int)await command.ExecuteScalarAsync(cancellationToken);
+                return (int)(await command.ExecuteScalarAsync(cancellationToken))!;
             }
         }
     }

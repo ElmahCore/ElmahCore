@@ -9,9 +9,9 @@ namespace ElmahCore.Mvc
 {
     internal class SourceInfo
     {
-        public string Type { get; set; }
-        public string Method { get; set; }
-        public string Source { get; set; }
+        public string Type { get; set; } = default!;
+        public string Method { get; set; } = default!;
+        public string Source { get; set; } = default!;
         public int Line { get; set; }
     }
 
@@ -158,6 +158,7 @@ namespace ElmahCore.Mvc
                 (f, l, m, t) =>
                 {
                     if (int.TryParse(l.Html, out var line))
+                    {
                         list.Add(new SourceInfo
                         {
                             Source = f.Html,
@@ -165,6 +166,8 @@ namespace ElmahCore.Mvc
                             Method = m.Html,
                             Type = t.Html
                         });
+                    }
+
                     return new
                     {
                         File = f.Html.Length > 0

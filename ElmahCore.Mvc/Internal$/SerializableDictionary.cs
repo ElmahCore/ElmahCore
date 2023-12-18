@@ -9,6 +9,7 @@ namespace ElmahCore.Mvc
 {
     [Serializable]
     public class SerializableDictionary<TKey, TVal> : Dictionary<TKey, TVal>, IXmlSerializable, ISerializable
+        where TKey : notnull
     {
         #region Constants
 
@@ -58,7 +59,7 @@ namespace ElmahCore.Mvc
             var itemCount = info.GetInt32("ItemCount");
             for (var i = 0; i < itemCount; i++)
             {
-                var kvp = (KeyValuePair<TKey, TVal>) info.GetValue($"Item{i}", typeof(KeyValuePair<TKey, TVal>));
+                var kvp = (KeyValuePair<TKey, TVal>) info.GetValue($"Item{i}", typeof(KeyValuePair<TKey, TVal>))!;
                 Add(kvp.Key, kvp.Value);
             }
         }
@@ -98,7 +99,7 @@ namespace ElmahCore.Mvc
             throw new NotImplementedException();
         }
 
-        XmlSchema IXmlSerializable.GetSchema()
+        XmlSchema? IXmlSerializable.GetSchema()
         {
             return null;
         }

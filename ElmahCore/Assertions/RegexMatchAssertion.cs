@@ -26,9 +26,9 @@ namespace ElmahCore.Assertions
         // ReSharper disable once MemberCanBePrivate.Global
         public Regex RegexObject { get; }
 
-        protected override bool TestResult(object result)
+        protected override bool TestResult(object? result)
         {
-            return TestResultMatch(Convert.ToString(result, CultureInfo.InvariantCulture));
+            return TestResultMatch(Convert.ToString(result, CultureInfo.InvariantCulture)!);
         }
 
         private bool TestResultMatch(string result)

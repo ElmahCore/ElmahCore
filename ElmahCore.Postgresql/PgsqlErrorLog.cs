@@ -31,12 +31,16 @@ namespace ElmahCore.Postgresql
         public PgsqlErrorLog(string connectionString, bool createTablesIfNotExist)
         {
             if (string.IsNullOrEmpty(connectionString))
+            {
                 throw new ArgumentNullException("connectionString");
+            }
 
             ConnectionString = connectionString;
 
             if (createTablesIfNotExist)
+            {
                 CreateTableIfNotExists();
+            }
         }
 
         /// <summary>
@@ -113,7 +117,7 @@ namespace ElmahCore.Postgresql
             return new ErrorLogEntry(this, id, error);
         }
 
-        public override async Task<int> GetErrorsAsync(string searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+        public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
             ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
         {
             if (errorIndex < 0)
@@ -147,7 +151,7 @@ namespace ElmahCore.Postgresql
                 using (var command = Commands.GetErrorsXmlTotal(ApplicationName))
                 {
                     command.Connection = connection;
-                    return (int)await command.ExecuteScalarAsync(cancellationToken);
+                    return (int)(await command.ExecuteScalarAsync(cancellationToken))!;
                 }
             }
         }
@@ -165,18 +169,19 @@ namespace ElmahCore.Postgresql
                 {
                     cmdCheck.Connection = connection;
                     // ReSharper disable once PossibleNullReferenceException
-                    var exists = (bool) cmdCheck.ExecuteScalar();
+                    var exists = (bool) cmdCheck.ExecuteScalar()!;
 
                     if (!exists)
+                    {
                         using (var cmdCreate = Commands.CreateTable())
                         {
                             cmdCreate.Connection = connection;
                             cmdCreate.ExecuteNonQuery();
                         }
+                    }
                 }
             }
         }
-
 
         private static class Commands
         {

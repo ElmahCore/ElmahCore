@@ -62,12 +62,16 @@ namespace ElmahCore.Mvc.Notifiers
         public static string HumaneExceptionErrorType(string type)
         {
             if (type == null || type.Length == 0)
+            {
                 return string.Empty;
+            }
 
             var lastDotIndex = CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(type, '.');
 
             if (lastDotIndex > 0)
+            {
                 type = type.Substring(lastDotIndex + 1);
+            }
 
             const string conventionalSuffix = "Exception";
 
@@ -77,7 +81,9 @@ namespace ElmahCore.Mvc.Notifiers
 
                 if (string.Compare(type, suffixIndex, conventionalSuffix, 0,
                     conventionalSuffix.Length, true, CultureInfo.InvariantCulture) == 0)
+                {
                     type = type.Substring(0, suffixIndex);
+                }
             }
 
             return type;
@@ -90,7 +96,9 @@ namespace ElmahCore.Mvc.Notifiers
         public static string HumaneExceptionErrorType(Error error)
         {
             if (error == null)
+            {
                 throw new ArgumentNullException(nameof(error));
+            }
 
             return HumaneExceptionErrorType(error.Type);
         }

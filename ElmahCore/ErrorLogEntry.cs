@@ -16,10 +16,14 @@ namespace ElmahCore
 	    public ErrorLogEntry(ErrorLog log, string id, Error error)
         {
             if (id == null)
+            {
                 throw new ArgumentNullException(nameof(id));
+            }
 
             if (id.Length == 0)
+            {
                 throw new ArgumentException(null, nameof(id));
+            }
 
             Log = log ?? throw new ArgumentNullException(nameof(log));
             Id = id;

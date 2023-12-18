@@ -34,8 +34,13 @@ namespace ElmahCore
         public void DismissForNotifiers(IEnumerable<string> notifiers)
         {
             foreach (var notifier in notifiers)
+            {
                 if (!_notifiers.Any(i => i.Equals(notifier, StringComparison.InvariantCultureIgnoreCase)))
+                {
                     _notifiers.Add(notifier);
+                }
+            }
+
             Dismissed = true;
         }
     }

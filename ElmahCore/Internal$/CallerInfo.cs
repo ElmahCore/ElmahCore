@@ -7,12 +7,12 @@ namespace ElmahCore
     internal sealed class CallerInfo
     {
         public static readonly CallerInfo Empty = new CallerInfo(null);
-        private readonly string _filePath;
+        private readonly string? _filePath;
 
-        private readonly string _memberName;
+        private readonly string? _memberName;
 
-        public CallerInfo([CallerMemberName] string memberName = null,
-            [CallerFilePath] string filePath = null,
+        public CallerInfo([CallerMemberName] string? memberName = null,
+            [CallerFilePath] string? filePath = null,
             [CallerLineNumber] int lineNumber = 0)
         {
             _memberName = memberName;

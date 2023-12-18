@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -22,7 +19,7 @@ namespace ElmahCore.Mvc.Handlers
         {
             return builder.MapMethods($"{prefix}/exception/{{*path}}", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromRoute] string path) =>
             {
-                string json = await Cache.GetOrCreateAsync(path, LoadAndCacheMsdnEntryAsync);
+                string json = (await Cache.GetOrCreateAsync(path, LoadAndCacheMsdnEntryAsync))!;
                 return Results.Content(json, "application/json");
             });
         }
@@ -31,7 +28,7 @@ namespace ElmahCore.Mvc.Handlers
         {
             return builder.MapMethods($"{prefix}/status/{{status}}", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromRoute] int status) =>
             {
-                string json = await Cache.GetOrCreateAsync($"status-{status}", LoadAndCacheStatusAsync);
+                string json = (await Cache.GetOrCreateAsync($"status-{status}", LoadAndCacheStatusAsync))!;
                 return Results.Content(json, "application/json");
             });
         }
@@ -99,6 +96,7 @@ namespace ElmahCore.Mvc.Handlers
             var links = doc.DocumentNode.SelectNodes("//article[@class='article']/div//a");
 
             if (links != null)
+            {
                 foreach (var link in links)
                 {
                     if (!link.Attributes.Contains("target"))
@@ -117,6 +115,7 @@ namespace ElmahCore.Mvc.Handlers
                             ? $"https://developer.mozilla.org{href}"
                             : $"https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/{href}");
                 }
+            }
 
             var html = nodes.FirstOrDefault()?.InnerHtml;
 
@@ -135,10 +134,10 @@ namespace ElmahCore.Mvc.Handlers
         private class MsdnInfo
         {
             // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            public string Html { get; set; }
+            public string Html { get; set; } = string.Empty;
 
             // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            public string Path { get; set; }
+            public string Path { get; set; } = string.Empty;
         }
     }
 }

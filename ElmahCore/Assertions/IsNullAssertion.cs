@@ -7,7 +7,7 @@ namespace ElmahCore.Assertions
         {
         }
 
-        protected override bool TestResult(object result)
+        protected override bool TestResult(object? result)
         {
             return result == null;
         }

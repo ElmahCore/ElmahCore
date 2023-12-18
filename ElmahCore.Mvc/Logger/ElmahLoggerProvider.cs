@@ -6,7 +6,7 @@ namespace ElmahCore.Mvc.Logger
     public class ElmahLoggerProvider : ILoggerProvider, ISupportExternalScope
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private IExternalScopeProvider _scopeProvider;
+        private IExternalScopeProvider? _scopeProvider;
 
         public ElmahLoggerProvider(IHttpContextAccessor httpContextAccessor)
         {

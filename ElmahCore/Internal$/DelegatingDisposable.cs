@@ -4,7 +4,7 @@ namespace ElmahCore
 {
     internal sealed class DelegatingDisposable : IDisposable
     {
-        private Action _disposer;
+        private Action? _disposer;
 
         public DelegatingDisposable(Action disposer)
         {
@@ -15,7 +15,10 @@ namespace ElmahCore
         {
             var disposer = _disposer;
             if (disposer == null)
+            {
                 return;
+            }
+
             _disposer = null;
             disposer();
         }

@@ -29,16 +29,24 @@ namespace ElmahCore
         public void OnErrorModuleFiltering(object sender, ExceptionFilterEventArgs args)
         {
             if (args == null)
+            {
                 throw new ArgumentNullException(nameof(args));
+            }
 
             if (args.Exception == null)
+            {
                 throw new ArgumentException(null, nameof(args));
+            }
 
             try
             {
                 if (Assertion.Test(new AssertionHelperContext(sender, args.Exception, args.Context)))
                 {
-                    if (Notifiers.Any()) args.DismissForNotifiers(Notifiers);
+                    if (Notifiers.Any())
+                    {
+                        args.DismissForNotifiers(Notifiers);
+                    }
+
                     args.Dismiss();
                 }
             }
