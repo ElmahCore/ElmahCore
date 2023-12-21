@@ -13,7 +13,7 @@ namespace ElmahCore
         /// <summary>
         ///     ELMAH access url (default = '/elmah')
         /// </summary>
-        public string Path { get; set; } = "/elmah";
+        internal PathString Path { get; set; }
 
         /// <summary>
         ///     Filters file path, example: options.LogPath = "~/elmah.xml"; // OR options.LogPath = "с:\elmah.xml"
@@ -49,6 +49,11 @@ namespace ElmahCore
         ///     Enable/Disable request body logging
         /// </summary>
         public bool LogRequestBody { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to show the Elmah error page when an error is raised.
+        /// </summary>
+        public bool ShowElmahErrorPage { get; set; }
 
         public virtual Task Error(HttpContext context, Error error)
         {

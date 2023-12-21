@@ -42,6 +42,7 @@ namespace ElmahCore.Mvc
         {
         }
 
+#if !NET8_0_OR_GREATER
         /// <summary>
         ///     Initializes a new instance of the <see cref="TestException" /> class
         ///     with serialized data.
@@ -50,5 +51,6 @@ namespace ElmahCore.Mvc
             base(info, context)
         {
         }
+#endif
     }
 }
