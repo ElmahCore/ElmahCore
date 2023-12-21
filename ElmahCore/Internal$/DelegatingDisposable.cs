@@ -1,26 +1,25 @@
 using System;
 
-namespace ElmahCore
+namespace ElmahCore;
+
+internal sealed class DelegatingDisposable : IDisposable
 {
-    internal sealed class DelegatingDisposable : IDisposable
+    private Action? _disposer;
+
+    public DelegatingDisposable(Action disposer)
     {
-        private Action? _disposer;
+        _disposer = disposer ?? throw new ArgumentNullException(nameof(disposer));
+    }
 
-        public DelegatingDisposable(Action disposer)
+    public void Dispose()
+    {
+        var disposer = _disposer;
+        if (disposer == null)
         {
-            _disposer = disposer ?? throw new ArgumentNullException(nameof(disposer));
+            return;
         }
 
-        public void Dispose()
-        {
-            var disposer = _disposer;
-            if (disposer == null)
-            {
-                return;
-            }
-
-            _disposer = null;
-            disposer();
-        }
+        _disposer = null;
+        disposer();
     }
 }

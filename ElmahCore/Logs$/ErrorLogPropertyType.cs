@@ -1,7 +1,6 @@
-﻿namespace ElmahCore
+﻿namespace ElmahCore;
+
+public enum ErrorLogPropertyType
 {
-    public enum ErrorLogPropertyType
-    {
-        Undefined, String, DateTime
-    }
+    Undefined, String, DateTime
 }

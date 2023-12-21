@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace ElmahCore
+namespace ElmahCore;
+
+public class ElmahLogSqlEntry
 {
-    public class ElmahLogSqlEntry
-    {
-        public DateTime TimeStamp { get; set; }
-        public string? SqlText { get; set; }
-        public string? CommandType { get; set; }
-        public int DurationMs { get; set; }
-    }
+    public DateTime TimeStamp { get; set; }
+    public string? SqlText { get; set; }
+    public string? CommandType { get; set; }
+    public int DurationMs { get; set; }
 }

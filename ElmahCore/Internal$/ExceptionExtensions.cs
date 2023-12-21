@@ -1,40 +1,39 @@
 using System;
 using System.Diagnostics;
 
-namespace ElmahCore
+namespace ElmahCore;
+
+internal static class ExceptionExtensions
 {
-    internal static class ExceptionExtensions
+    private const string CallerInfoKey = "ElmahCallerInfo";
+
+    public static CallerInfo? TryGetCallerInfo(this Exception exception)
     {
-        private const string CallerInfoKey = "ElmahCallerInfo";
-
-        public static CallerInfo? TryGetCallerInfo(this Exception exception)
+        if (exception == null)
         {
-            if (exception == null)
-            {
-                throw new ArgumentNullException(nameof(exception));
-            }
-
-            var datum = exception.IsData()
-                ? exception.Data[CallerInfoKey]
-                : null;
-            return datum as CallerInfo;
+            throw new ArgumentNullException(nameof(exception));
         }
 
-        private static bool IsData(this Exception exception, bool writable = false)
-        {
-            Debug.Assert(exception != null);
+        var datum = exception.IsData()
+            ? exception.Data[CallerInfoKey]
+            : null;
+        return datum as CallerInfo;
+    }
 
-            var data = exception.Data;
+    private static bool IsData(this Exception exception, bool writable = false)
+    {
+        Debug.Assert(exception != null);
 
-            // "The ExecutionEngineException, OutOfMemoryException, 
-            //  StackOverflowException and ThreadAbortException classes 
-            //  always return null for the value of the Data property."
-            //
-            // http://msdn.microsoft.com/en-us/library/system.exception.data(v=vs.80).aspx
+        var data = exception.Data;
 
-            // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            return data != null // ReSharper restore ConditionIsAlwaysTrueOrFalse
-                   && (!writable || !data.IsReadOnly);
-        }
+        // "The ExecutionEngineException, OutOfMemoryException, 
+        //  StackOverflowException and ThreadAbortException classes 
+        //  always return null for the value of the Data property."
+        //
+        // http://msdn.microsoft.com/en-us/library/system.exception.data(v=vs.80).aspx
+
+        // ReSharper disable ConditionIsAlwaysTrueOrFalse
+        return data != null // ReSharper restore ConditionIsAlwaysTrueOrFalse
+               && (!writable || !data.IsReadOnly);
     }
 }

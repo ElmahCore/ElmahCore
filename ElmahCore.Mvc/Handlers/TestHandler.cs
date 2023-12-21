@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace ElmahCore.Mvc.Handlers
+namespace ElmahCore.Mvc.Handlers;
+
+internal static partial class Endpoints
 {
-    internal static partial class Endpoints
+    public static IEndpointConventionBuilder MapTest(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        public static IEndpointConventionBuilder MapTest(this IEndpointRouteBuilder builder, string prefix = "")
-        {
-            return builder.MapMethods($"{prefix}/test", new[] { HttpMethods.Get, HttpMethods.Post }, (HttpContext _) => throw new TestException());
-        }
+        return builder.MapMethods($"{prefix}/test", new[] { HttpMethods.Get, HttpMethods.Post }, (HttpContext _) => throw new TestException());
     }
 }

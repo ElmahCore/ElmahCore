@@ -6,58 +6,59 @@ using System.Text;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.Net.Http.Headers;
+using System.Net.Mime;
 
-namespace ElmahCore.Mvc
+namespace ElmahCore.Mvc;
+
+internal static class HttpContextExceptions
 {
-    internal static class HttpContextExceptions
+    private static readonly string[] SupportedContentTypes =
+{
+        MediaTypeNames.Application.Json,
+        "application/x-www-form-urlencoded",
+        "application/javascript",
+        MediaTypeNames.Application.Soap,
+        "application/xhtml+xml",
+        MediaTypeNames.Application.Xml,
+        MediaTypeNames.Text.Html,
+        "text/javascript",
+        MediaTypeNames.Text.Plain,
+        MediaTypeNames.Text.Xml,
+        "text/markdown"
+    };
+
+    public static string GetElmahRelativeRoot(this HttpContext context)
     {
-        private static readonly string[] SupportedContentTypes =
-{
-            "application/json",
-            "application/x-www-form-urlencoded",
-            "application/javascript",
-            "application/soap+xml",
-            "application/xhtml+xml",
-            "application/xml",
-            "text/html",
-            "text/javascript",
-            "text/plain",
-            "text/xml",
-            "text/markdown"
-        };
+        var options = context.RequestServices.GetRequiredService<IOptions<ElmahOptions>>().Value;
+        return context.Request.PathBase.Add(options.Path);
+    }
 
-        public static string GetElmahRelativeRoot(this HttpContext context)
+    public static string GetElmahAbsoluteRoot(this HttpContext context)
+    {
+        var options = context.RequestServices.GetRequiredService<IOptions<ElmahOptions>>().Value;
+        return $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase.Add(options.Path)}";
+    }
+
+    public static async Task<string?> ReadBodyAsync(this HttpContext context)
+    {
+        var ct = context.Request.ContentType?.ToLower();
+        var tEnc = string.Join(",", context.Request.Headers[HeaderNames.TransferEncoding].ToArray());
+        if (string.IsNullOrEmpty(ct) || tEnc.Contains("chunked") || !SupportedContentTypes.Any(i => ct.Contains(ct)))
         {
-            var options = context.RequestServices.GetRequiredService<IOptions<ElmahOptions>>().Value;
-            return context.Request.PathBase.Add(options.Path);
+            return null;
         }
 
-        public static string GetElmahAbsoluteRoot(this HttpContext context)
-        {
-            var options = context.RequestServices.GetRequiredService<IOptions<ElmahOptions>>().Value;
-            return $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase.Add(options.Path)}";
-        }
+        context.Request.EnableBuffering();
+        var body = context.Request.Body;
+        var buffer = new byte[Convert.ToInt32(context.Request.ContentLength)];
 
-        public static async Task<string?> ReadBodyAsync(this HttpContext context)
-        {
-            var ct = context.Request.ContentType?.ToLower();
-            var tEnc = string.Join(",", context.Request.Headers["Transfer-Encoding"].ToArray());
-            if (string.IsNullOrEmpty(ct) || tEnc.Contains("chunked") || !SupportedContentTypes.Any(i => ct.Contains(ct)))
-            {
-                return null;
-            }
+        // ReSharper disable once MustUseReturnValue
+        await context.Request.Body.ReadAsync(buffer, 0, buffer.Length);
+        var bodyAsText = Encoding.UTF8.GetString(buffer);
+        body.Seek(0, SeekOrigin.Begin);
+        context.Request.Body = body;
 
-            context.Request.EnableBuffering();
-            var body = context.Request.Body;
-            var buffer = new byte[Convert.ToInt32(context.Request.ContentLength)];
-
-            // ReSharper disable once MustUseReturnValue
-            await context.Request.Body.ReadAsync(buffer, 0, buffer.Length);
-            var bodyAsText = Encoding.UTF8.GetString(buffer);
-            body.Seek(0, SeekOrigin.Begin);
-            context.Request.Body = body;
-
-            return bodyAsText;
-        }
+        return bodyAsText;
     }
 }

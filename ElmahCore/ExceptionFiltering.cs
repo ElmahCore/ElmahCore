@@ -3,45 +3,44 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ElmahCore
+namespace ElmahCore;
+
+public delegate void ExceptionFilterEventHandler(object sender, ExceptionFilterEventArgs args);
+
+[Serializable]
+public sealed class ExceptionFilterEventArgs : EventArgs
 {
-    public delegate void ExceptionFilterEventHandler(object sender, ExceptionFilterEventArgs args);
+    private readonly List<string> _notifiers = new List<string>();
 
-    [Serializable]
-    public sealed class ExceptionFilterEventArgs : EventArgs
+    public ExceptionFilterEventArgs(Exception e, HttpContext context)
     {
-        private readonly List<string> _notifiers = new List<string>();
+        Exception = e ?? throw new ArgumentNullException(nameof(e));
+        Context = context;
+    }
 
-        public ExceptionFilterEventArgs(Exception e, HttpContext context)
+    internal IEnumerable<string> DismissedNotifiers => _notifiers;
+
+    public Exception Exception { get; }
+
+    [field: NonSerialized] public HttpContext Context { get; }
+
+    public bool Dismissed { get; private set; }
+
+    public void Dismiss()
+    {
+        Dismissed = true;
+    }
+
+    public void DismissForNotifiers(IEnumerable<string> notifiers)
+    {
+        foreach (var notifier in notifiers)
         {
-            Exception = e ?? throw new ArgumentNullException(nameof(e));
-            Context = context;
-        }
-
-        internal IEnumerable<string> DismissedNotifiers => _notifiers;
-
-        public Exception Exception { get; }
-
-        [field: NonSerialized] public HttpContext Context { get; }
-
-        public bool Dismissed { get; private set; }
-
-        public void Dismiss()
-        {
-            Dismissed = true;
-        }
-
-        public void DismissForNotifiers(IEnumerable<string> notifiers)
-        {
-            foreach (var notifier in notifiers)
+            if (!_notifiers.Any(i => i.Equals(notifier, StringComparison.InvariantCultureIgnoreCase)))
             {
-                if (!_notifiers.Any(i => i.Equals(notifier, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    _notifiers.Add(notifier);
-                }
+                _notifiers.Add(notifier);
             }
-
-            Dismissed = true;
         }
+
+        Dismissed = true;
     }
 }

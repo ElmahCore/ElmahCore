@@ -3,13 +3,13 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ElmahCore
-{
+namespace ElmahCore;
+
 	/// <summary>
 	///     Extension methods for <see cref="TaskCompletionSource{TResult}" />.
 	/// </summary>
 	internal static class TaskCompletionSourceExtensions
-    {
+{
 	    /// <summary>
 	    ///     Attempts to conclude <see cref="TaskCompletionSource{TResult}" />
 	    ///     as being canceled, faulted or having completed successfully
@@ -17,39 +17,39 @@ namespace ElmahCore
 	    ///     <see cref="Task{T}" />.
 	    /// </summary>
 	    public static void TryConcludeFrom<T>(this TaskCompletionSource<T> source, Task<T> task)
+    {
+        if (source == null)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
+            throw new ArgumentNullException(nameof(source));
+        }
 
-            if (task == null)
-            {
-                throw new ArgumentNullException(nameof(task));
-            }
+        if (task == null)
+        {
+            throw new ArgumentNullException(nameof(task));
+        }
 
-            if (task.IsCanceled)
-            {
-                source.TrySetCanceled();
-            }
-            else if (task.IsFaulted)
-            {
-                var aggregate = task.Exception;
-                Debug.Assert(aggregate != null);
-                source.TrySetException(aggregate.InnerExceptions);
-            }
-            else if (TaskStatus.RanToCompletion == task.Status)
-            {
-                source.TrySetResult(task.Result);
-            }
+        if (task.IsCanceled)
+        {
+            source.TrySetCanceled();
+        }
+        else if (task.IsFaulted)
+        {
+            var aggregate = task.Exception;
+            Debug.Assert(aggregate != null);
+            source.TrySetException(aggregate.InnerExceptions);
+        }
+        else if (TaskStatus.RanToCompletion == task.Status)
+        {
+            source.TrySetResult(task.Result);
         }
     }
+}
 
 	/// <summary>
 	///     Extension methods for <see cref="Task" />.
 	/// </summary>
 	internal static class TaskExtensions
-    {
+{
 	    /// <summary>
 	    ///     Returns a <see cref="Task{T}" /> that can be used as the
 	    ///     <see cref="IAsyncResult" /> return value from the method
@@ -60,36 +60,35 @@ namespace ElmahCore
 	    ///     successfully).
 	    /// </summary>
 	    public static Task<T> Apmize<T>(this Task<T> task, AsyncCallback callback, object? state,
-            TaskScheduler? scheduler = null)
+        TaskScheduler? scheduler = null)
+    {
+        var result = task;
+
+        TaskCompletionSource<T>? tcs = null;
+        if (task.AsyncState != state)
         {
-            var result = task;
-
-            TaskCompletionSource<T>? tcs = null;
-            if (task.AsyncState != state)
-            {
-                tcs = new TaskCompletionSource<T>(state);
-                result = tcs.Task;
-            }
-
-            Task t = task;
-            if (tcs != null)
-            {
-                t = t.ContinueWith(delegate { tcs.TryConcludeFrom(task); },
-                    CancellationToken.None,
-                    TaskContinuationOptions.ExecuteSynchronously,
-                    TaskScheduler.Default);
-            }
-
-            if (callback != null)
-            {
-                // ReSharper disable RedundantAssignment
-                t = t.ContinueWith(delegate { callback(result); }, // ReSharper restore RedundantAssignment
-                    CancellationToken.None,
-                    TaskContinuationOptions.None,
-                    scheduler ?? TaskScheduler.Default);
-            }
-
-            return result;
+            tcs = new TaskCompletionSource<T>(state);
+            result = tcs.Task;
         }
+
+        Task t = task;
+        if (tcs != null)
+        {
+            t = t.ContinueWith(delegate { tcs.TryConcludeFrom(task); },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
+
+        if (callback != null)
+        {
+            // ReSharper disable RedundantAssignment
+            t = t.ContinueWith(delegate { callback(result); }, // ReSharper restore RedundantAssignment
+                CancellationToken.None,
+                TaskContinuationOptions.None,
+                scheduler ?? TaskScheduler.Default);
+        }
+
+        return result;
     }
 }

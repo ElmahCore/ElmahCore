@@ -1,7 +1,6 @@
-﻿namespace ElmahCore
+﻿namespace ElmahCore;
+
+public interface IErrorFilter
 {
-    public interface IErrorFilter
-    {
-        void OnErrorModuleFiltering(object sender, ExceptionFilterEventArgs args);
-    }
+    void OnErrorModuleFiltering(object sender, ExceptionFilterEventArgs args);
 }

@@ -1,7 +1,6 @@
-﻿namespace ElmahCore
+﻿namespace ElmahCore;
+
+public enum ErrorLogFilterCondition
 {
-    public enum ErrorLogFilterCondition
-    {
-        Undefined, Equals, NotEquals, Contains, DoesNotContain
-    }
+    Undefined, Equals, NotEquals, Contains, DoesNotContain
 }

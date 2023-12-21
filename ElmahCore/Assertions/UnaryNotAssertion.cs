@@ -1,20 +1,19 @@
 using System;
 
-namespace ElmahCore.Assertions
+namespace ElmahCore.Assertions;
+
+internal sealed class UnaryNotAssertion : IAssertion
 {
-    internal sealed class UnaryNotAssertion : IAssertion
+    public UnaryNotAssertion(IAssertion operand)
     {
-        public UnaryNotAssertion(IAssertion operand)
-        {
-            Operand = operand ?? throw new ArgumentNullException(nameof(operand));
-        }
+        Operand = operand ?? throw new ArgumentNullException(nameof(operand));
+    }
 
-        // ReSharper disable once MemberCanBePrivate.Global
-        public IAssertion Operand { get; }
+    // ReSharper disable once MemberCanBePrivate.Global
+    public IAssertion Operand { get; }
 
-        public bool Test(AssertionHelperContext context)
-        {
-            return !Operand.Test(context);
-        }
+    public bool Test(AssertionHelperContext context)
+    {
+        return !Operand.Test(context);
     }
 }

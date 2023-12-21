@@ -1,25 +1,24 @@
 using System;
 
-namespace ElmahCore.Assertions
+namespace ElmahCore.Assertions;
+
+internal sealed class DelegatedContextExpression : IContextExpression
 {
-    internal sealed class DelegatedContextExpression : IContextExpression
+    public DelegatedContextExpression(Func<object, object?> handler)
     {
-        public DelegatedContextExpression(Func<object, object?> handler)
-        {
-            Handler = handler ?? throw new ArgumentNullException(nameof(handler));
-        }
+        Handler = handler ?? throw new ArgumentNullException(nameof(handler));
+    }
 
-        // ReSharper disable once MemberCanBePrivate.Global
-        public Func<object, object?> Handler { get; }
+    // ReSharper disable once MemberCanBePrivate.Global
+    public Func<object, object?> Handler { get; }
 
-        public object? Evaluate(object context)
-        {
-            return Handler(context);
-        }
+    public object? Evaluate(object context)
+    {
+        return Handler(context);
+    }
 
-        public override string? ToString()
-        {
-            return Handler.ToString();
-        }
+    public override string? ToString()
+    {
+        return Handler.ToString();
     }
 }

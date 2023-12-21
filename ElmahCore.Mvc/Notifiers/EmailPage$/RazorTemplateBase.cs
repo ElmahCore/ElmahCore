@@ -25,61 +25,60 @@
 
 using System.Text;
 
-namespace ElmahCore.Mvc.Notifiers
+namespace ElmahCore.Mvc.Notifiers;
+
+// Adapted from RazorTemplateBase.cs[1]
+// Microsoft Public License (Ms-PL)[2]
+//
+// [1] http://razorgenerator.codeplex.com/SourceControl/changeset/view/964fcd1393be#RazorGenerator.Templating%2fRazorTemplateBase.cs
+// [2] http://razorgenerator.codeplex.com/license
+
+internal class RazorTemplateBase
 {
-    // Adapted from RazorTemplateBase.cs[1]
-    // Microsoft Public License (Ms-PL)[2]
-    //
-    // [1] http://razorgenerator.codeplex.com/SourceControl/changeset/view/964fcd1393be#RazorGenerator.Templating%2fRazorTemplateBase.cs
-    // [2] http://razorgenerator.codeplex.com/license
+    private readonly StringBuilder _generatingEnvironment = new StringBuilder();
+    private string? _content;
 
-    internal class RazorTemplateBase
+    public RazorTemplateBase? Layout { get; set; }
+
+    public virtual void Execute()
     {
-        private readonly StringBuilder _generatingEnvironment = new StringBuilder();
-        private string? _content;
+    }
 
-        public RazorTemplateBase? Layout { get; set; }
-
-        public virtual void Execute()
+    public void WriteLiteral(string? textToAppend)
+    {
+        if (string.IsNullOrEmpty(textToAppend))
         {
+            return;
         }
 
-        public void WriteLiteral(string? textToAppend)
-        {
-            if (string.IsNullOrEmpty(textToAppend))
-            {
-                return;
-            }
+        _generatingEnvironment.Append(textToAppend);
+    }
 
-            _generatingEnvironment.Append(textToAppend);
+    public virtual void Write(object? value)
+    {
+        if (value == null)
+        {
+            return;
         }
 
-        public virtual void Write(object? value)
-        {
-            if (value == null)
-            {
-                return;
-            }
+        WriteLiteral(value.ToString());
+    }
 
-            WriteLiteral(value.ToString());
+    public virtual object? RenderBody()
+    {
+        return _content;
+    }
+
+    public virtual string TransformText()
+    {
+        Execute();
+
+        if (Layout != null)
+        {
+            Layout._content = _generatingEnvironment.ToString();
+            return Layout.TransformText();
         }
 
-        public virtual object? RenderBody()
-        {
-            return _content;
-        }
-
-        public virtual string TransformText()
-        {
-            Execute();
-
-            if (Layout != null)
-            {
-                Layout._content = _generatingEnvironment.ToString();
-                return Layout.TransformText();
-            }
-
-            return _generatingEnvironment.ToString();
-        }
+        return _generatingEnvironment.ToString();
     }
 }

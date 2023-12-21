@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace ElmahCore
+namespace ElmahCore;
+
+public interface INotifierProvider
 {
-    public interface INotifierProvider
-    {
-        IEnumerable<string> Notifiers { get; }
-    }
+    IEnumerable<string> Notifiers { get; }
 }
