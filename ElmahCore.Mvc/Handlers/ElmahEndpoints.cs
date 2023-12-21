@@ -4,17 +4,24 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ElmahCore
 {
     public static class ElmahEndpoints
     {
-        public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder builder)
+        public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder builder) => builder.MapElmah("/elmah");
+
+        public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder builder, [StringSyntax("Route")]string prefix)
         {
-            var prefix = builder.ServiceProvider.GetRequiredService<IOptions<ElmahOptions>>().Value.Path;
+            // HACK: we're using the options instance as global configuration. It might make more sense to create our
+            // own object to store configuration context that is shared.
+            var options = builder.ServiceProvider.GetRequiredService<IOptions<ElmahOptions>>().Value;
+            options.Path = prefix;
 
 #if NET7_0_OR_GREATER
             var group = builder.MapGroup(prefix);
+            group.MapRoot();
             group.MapApiError();
             group.MapApiErrors();
             group.MapApiNewErrors();
@@ -31,6 +38,7 @@ namespace ElmahCore
 #else
             var routes = new[]
             {
+                builder.MapRoot(prefix),
                 builder.MapApiError(prefix),
                 builder.MapApiErrors(prefix),
                 builder.MapApiNewErrors(prefix),
