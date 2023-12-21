@@ -1,12 +1,11 @@
 using ElmahCore;
 using ElmahCore.DemoCore6;
-using ElmahCore.Mvc;
-using ElmahCore.Mvc.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
+
+// Register and configure the services used by Elmah.
 builder.Services.AddElmah(elmah =>
 {
     elmah.Configure(options =>
@@ -16,6 +15,7 @@ builder.Services.AddElmah(elmah =>
     });
 
     elmah.PersistToFile("~/log");
+    elmah.UseElmahExceptionPage();
 });
 
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
@@ -28,8 +28,6 @@ builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseElmahExceptionPage();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -42,13 +40,19 @@ app.UseCors("MyPolicy");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Adds elmah middleware - the placement of this call is important.
+// All middleware after this has context captured and available to
+// elmah.
+app.UseElmah();
+
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseElmah();
-
 app.MapRazorPages();
+
+// Map the endpoints exposed by Elmah. You can use the returned builder
+// to add metadata to configure authn, authz, etc.
 app.MapElmah();
 
 app.Run();

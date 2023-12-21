@@ -24,6 +24,10 @@ public static class ServiceCollectionExtensions
         services.AddElmahCoreServices();
 
         var elmah = new ElmahBuilder(services);
+
+        // Set as default because it is required - consumer can replace in configure delegate
+        elmah.PersistInMemory();
+
         configureElmah(elmah);
 
         return services;
