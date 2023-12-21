@@ -11,27 +11,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Sql", "ElmahCore.MsSql\ElmahCore.Sql.csproj", "{BCE602D7-1ABB-42F5-BC1F-77F7C1985708}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Sql", "src\ElmahCore.MsSql\ElmahCore.Sql.csproj", "{BCE602D7-1ABB-42F5-BC1F-77F7C1985708}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{8E26F641-674E-421C-B37C-AF2A690DA1CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore", "ElmahCore\ElmahCore.csproj", "{0F75E1E4-32CB-47A5-8548-2798FFBAC4B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore", "src\ElmahCore\ElmahCore.csproj", "{0F75E1E4-32CB-47A5-8548-2798FFBAC4B1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Mvc", "ElmahCore.Mvc\ElmahCore.Mvc.csproj", "{BF039A92-379C-41E5-A8D2-6C26DAEFDC60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Mvc", "src\ElmahCore.Mvc\ElmahCore.Mvc.csproj", "{BF039A92-379C-41E5-A8D2-6C26DAEFDC60}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Postgresql", "ElmahCore.Postgresql\ElmahCore.Postgresql.csproj", "{75B6FE36-D765-4685-9AA6-5878002A5290}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Postgresql", "src\ElmahCore.Postgresql\ElmahCore.Postgresql.csproj", "{75B6FE36-D765-4685-9AA6-5878002A5290}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.MySql", "ElmahCore.MySql\ElmahCore.MySql.csproj", "{DA992081-7177-4153-81CF-A726EEADC730}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.MySql", "src\ElmahCore.MySql\ElmahCore.MySql.csproj", "{DA992081-7177-4153-81CF-A726EEADC730}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{93D72C8F-498F-4E86-AB88-6D77394CE495}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.Mvc.Tests", "Tests\ElmahCore.Mvc.Tests\ElmahCore.Mvc.Tests.csproj", "{B54072F0-F35A-424C-A153-286152BA9272}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.DemoCore6", "ElmahCore.DemoCore6\ElmahCore.DemoCore6.csproj", "{BF17E6CC-ECC6-4FAE-A821-3BE169E5A3D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.DemoCore6", "demos\ElmahCore.DemoCore6\ElmahCore.DemoCore6.csproj", "{BF17E6CC-ECC6-4FAE-A821-3BE169E5A3D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.DemoCore7", "ElmahCore.DemoCore7\ElmahCore.DemoCore7.csproj", "{8AA4F5D2-FA4E-4ADA-9563-13CC630DCDBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElmahCore.DemoCore7", "demos\ElmahCore.DemoCore7\ElmahCore.DemoCore7.csproj", "{8AA4F5D2-FA4E-4ADA-9563-13CC630DCDBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElmahCore.DemoCore8", "ElmahCore.DemoCore8\ElmahCore.DemoCore8.csproj", "{69E7AFF6-8C5A-4E4C-B220-0B4821C015E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElmahCore.DemoCore8", "demos\ElmahCore.DemoCore8\ElmahCore.DemoCore8.csproj", "{69E7AFF6-8C5A-4E4C-B220-0B4821C015E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

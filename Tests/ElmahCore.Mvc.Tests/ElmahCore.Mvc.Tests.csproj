@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ElmahCore.Mvc\ElmahCore.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\ElmahCore.Mvc\ElmahCore.Mvc.csproj" />
   </ItemGroup>
 
 </Project>
