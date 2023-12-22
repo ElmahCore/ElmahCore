@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ElmahCore.Mvc;
@@ -61,10 +62,10 @@ public class ElmahDiagnosticSqlObserver : IObserver<KeyValuePair<string, object?
             return;
         }
 
-        ElmahLogFeature? sqlLog;
+        IElmahLogFeature? sqlLog;
         try
         {
-            sqlLog = _provider.GetService<IHttpContextAccessor>()?.HttpContext?.Features.Get<ElmahLogFeature>();
+            sqlLog = _provider.GetService<IHttpContextAccessor>()?.HttpContext?.Features.Get<IElmahLogFeature>();
         }
         catch (ObjectDisposedException)
         {
@@ -85,14 +86,29 @@ public class ElmahDiagnosticSqlObserver : IObserver<KeyValuePair<string, object?
                 break;
             case "System.Data.SqlClient.WriteCommandBefore":
             {
-                var cmd = GetValueFromAnonymousType<SqlCommand>(value.Value, "Command");
+                var cmd = GetValueFromAnonymousType<DbCommand>(value.Value, "Command");
+                    if (cmd is null)
+                    {
+                        return;
+                    }
 
-                var query = cmd!.Parameters.Cast<SqlParameter>().Aggregate(cmd.CommandText, (current, p) =>
-                    current.Replace(p.ParameterName, p.Value?.ToString()));
+                    string query = cmd.CommandText;
+                    if (cmd.CommandType == CommandType.StoredProcedure)
+                    {
+                        query = (query + " " + string.Join(", ", cmd.Parameters
+                            .Cast<DbParameter>()
+                            .Select(p => $"{p.ParameterName}={FormatParameterValue(p)}")))
+                            .Trim();
+                    }
+                    else
+                    {
+                        query = cmd.Parameters
+                            .Cast<DbParameter>()
+                            .Aggregate(cmd.CommandText, (current, p) => current.Replace(p.ParameterName, $"/*{p.ParameterName}*/ {FormatParameterValue(p)}"));
+                    }
 
                 if (!query.Contains("/* elmah */"))
                 {
-
                     sqlLog.AddSql(id, new ElmahLogSqlEntry
                     {
                         CommandType = cmd.CommandType.ToString(),
@@ -116,5 +132,31 @@ public class ElmahDiagnosticSqlObserver : IObserver<KeyValuePair<string, object?
         var type = dataItem.GetType();
         var value = (T?)type.GetProperty(itemKey)?.GetValue(dataItem, null);
         return value;
+    }
+
+    private static string FormatParameterValue(DbParameter parameter)
+    {
+        if (parameter.Value is null || parameter.Value == DBNull.Value)
+        {
+            return "null";
+        }
+
+        switch (parameter.DbType)
+        {
+            case DbType.String:
+            case DbType.AnsiString:
+            case DbType.AnsiStringFixedLength:
+            case DbType.StringFixedLength:
+            case DbType.Xml:
+                return $"'{parameter.Value}'";
+            case DbType.Date:
+            case DbType.Time:
+            case DbType.DateTime:
+            case DbType.DateTime2:
+            case DbType.DateTimeOffset:
+                return $"'{parameter.Value}'";
+            default:
+                return parameter.Value.ToString()!;
+        }
     }
 }

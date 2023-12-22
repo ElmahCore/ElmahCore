@@ -21,7 +21,7 @@ internal sealed class ErrorLogMiddleware
         _next = next;
         _elmahLogger = elmahLogger;
         _logRequestBody = elmahOptions.Value.LogRequestBody;
-        _showDebugPage = elmahOptions.Value.LogRequestBody;
+        _showDebugPage = elmahOptions.Value.ShowElmahErrorPage;
     }
 
     public Task InvokeAsync(HttpContext context)

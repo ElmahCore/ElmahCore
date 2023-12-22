@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ElmahCore;
 
@@ -31,4 +32,8 @@ public interface IElmahLogFeature
     /// <param name="file">The file name</param>
     /// <param name="line">The line number</param>
     void LogParameters((string name, object value)[] list, string typeName, string memberName, string file, int line);
+
+    void SetSqlDuration(Guid id);
+
+    void AddSql(Guid id, ElmahLogSqlEntry entry);
 }
