@@ -18,7 +18,7 @@ internal static class ErrorLogFilterHelper
 
     private static bool DoSearch(ErrorLogEntry entry, string? searchText)
     {
-        searchText = ("" + searchText).Trim().ToLower();
+        searchText = ("" + searchText).Trim();
         if (searchText == string.Empty)
         {
             return true;
@@ -32,7 +32,7 @@ internal static class ErrorLogFilterHelper
                 continue;
             }
 
-            if (stringValue.Trim().ToLower().Contains(searchText))
+            if (stringValue.Trim().Contains(searchText, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

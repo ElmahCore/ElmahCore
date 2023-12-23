@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ public class XmlFileErrorLog : ErrorLog
         if (_logPath.StartsWith("~/"))
         {
             _logPath = Path.Combine(hostingEnvironment.WebRootPath ?? hostingEnvironment.ContentRootPath,
-                _logPath.Substring(2));
+                _logPath[2..]);
         }
     }
 
@@ -100,7 +101,7 @@ public class XmlFileErrorLog : ErrorLog
     ///     Returns a page of errors from the folder in descending order
     ///     of logged time as defined by the sortable file names.
     /// </summary>
-    public override Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+    public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
         ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
     {
         if (errorIndex < 0)
@@ -117,13 +118,13 @@ public class XmlFileErrorLog : ErrorLog
         var dir = new DirectoryInfo(logPath);
         if (!dir.Exists)
         {
-            return Task.FromResult(0);
+            return 0;
         }
 
         var infos = dir.GetFiles("error-*.xml");
         if (!infos.Any())
         {
-            return Task.FromResult(0);
+            return 0;
         }
 
         var files = infos.Where(info => IsUserFile(info.Attributes))
@@ -134,25 +135,30 @@ public class XmlFileErrorLog : ErrorLog
 
         if (errorEntryList == null)
         {
-            return Task.FromResult(files.Length); // Return total
+            return files.Length; // Return total
         }
 
         int totalCount;
         IEnumerable<ErrorLogEntry> entries;
         if (filters.Count == 0 && string.IsNullOrEmpty(searchText))
         {
-            entries = files.Skip(errorIndex)
+            entries = await files
+                .Skip(errorIndex)
                 .Take(pageSize)
-                .Select(LoadErrorLogEntry)
-                .Where(x => x is not null)!;
+                .ToAsyncEnumerable()
+                .SelectAwait(LoadErrorLogEntryAsync)
+                .Where(e => e is not null)
+                .Select(e => e!)
+                .ToListAsync(cancellationToken: cancellationToken);
             totalCount = files.Length;
         }
         else
         {
-            var fEntries = files
-                .Select(LoadErrorLogEntry)
+            var fEntries = await files
+                .ToAsyncEnumerable()
+                .SelectAwait(LoadErrorLogEntryAsync)
                 .Where(e => e is not null && ErrorLogFilterHelper.IsMatched(e, searchText, filters))
-                .ToList();
+                .ToListAsync(cancellationToken: cancellationToken);
             totalCount = fEntries.Count;
             
             entries = fEntries
@@ -165,11 +171,12 @@ public class XmlFileErrorLog : ErrorLog
             errorEntryList.Add(entry);
         }
 
-        return Task.FromResult(totalCount); // Return total
+        return totalCount; // Return total
     }
 
-    private ErrorLogEntry? LoadErrorLogEntry(string path)
+    private async ValueTask<ErrorLogEntry?> LoadErrorLogEntryAsync(string path)
     {
+        ExceptionDispatchInfo? edi = null;
         for (var i = 0; i < 5; i++)
         {
             try
@@ -184,14 +191,15 @@ public class XmlFileErrorLog : ErrorLog
                 var error = ErrorXml.Decode(reader);
                 return new ErrorLogEntry(this, id, error);
             }
-            catch (IOException)
+            catch (IOException ex)
             {
-                //ignored
-                Task.Delay(500).GetAwaiter().GetResult();
+                edi = ExceptionDispatchInfo.Capture(ex);
+                await Task.Delay(500);
             }
         }
 
-        throw new IOException("");
+        edi!.Throw();
+        return null; // just making compiler happy
     }
 
     /// <summary>

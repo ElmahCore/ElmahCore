@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" />
-    <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" />
     <PackageReference Include="MinVer">
       <PrivateAssets>all</PrivateAssets>

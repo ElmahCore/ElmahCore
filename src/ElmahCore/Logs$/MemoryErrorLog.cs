@@ -24,26 +24,20 @@ public sealed class MemoryErrorLog : ErrorLog
     // The collection that provides the actual storage for this log
     // implementation and a lock to guarantee concurrency correctness.
     //
-    private static EntryCollection? _entries;
-    private static readonly ReaderWriterLockSlim Lock = new ReaderWriterLockSlim();
+    private readonly EntryCollection _entries;
+    private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
     /// <summary>
     ///     The maximum number of errors that will ever be allowed to be stored
     ///     in memory.
     /// </summary>
-    private static readonly int MaximumSize = 500;
+    private const int MaximumSize = 500;
 
     /// <summary>
     ///     The maximum number of errors that will be held in memory by default
     ///     if no size is specified.
     /// </summary>
-    private static readonly int DefaultSize = 15;
-
-    //
-    // IMPORTANT! The size must be the same for all instances
-    // for the entries collection to be initialized correctly.
-    //
-    private readonly int _size;
+    private const int DefaultSize = 15;
 
     public MemoryErrorLog(IOptions<MemoryErrorLogOptions> options) : this(options.Value.Size) { }
 
@@ -69,7 +63,7 @@ public sealed class MemoryErrorLog : ErrorLog
             throw new ArgumentOutOfRangeException(nameof(size), size, $"Size must be between 0 and {MaximumSize}.");
         }
 
-        _size = size;
+        _entries = new EntryCollection(size);
     }
 
     /// <summary>
@@ -92,16 +86,15 @@ public sealed class MemoryErrorLog : ErrorLog
         error.ApplicationName = ApplicationName;
         var entry = new ErrorLogEntry(this, id.ToString(), error);
 
-        Lock.EnterWriteLock();
+        _lock.EnterWriteLock();
 
         try
         {
-            var entries = _entries ??= new EntryCollection(_size);
-            entries.Add(entry);
+            _entries.Add(entry);
         }
         finally
         {
-            Lock.ExitWriteLock();
+            _lock.ExitWriteLock();
         }
 
         return Task.CompletedTask;
@@ -113,7 +106,7 @@ public sealed class MemoryErrorLog : ErrorLog
     /// </summary>
     public override Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
     {
-        Lock.EnterReadLock();
+        _lock.EnterReadLock();
 
         ErrorLogEntry? entry;
 
@@ -128,7 +121,7 @@ public sealed class MemoryErrorLog : ErrorLog
         }
         finally
         {
-            Lock.ExitReadLock();
+            _lock.ExitReadLock();
         }
 
         if (entry == null)
@@ -170,7 +163,7 @@ public sealed class MemoryErrorLog : ErrorLog
         ErrorLogEntry[]? selectedEntries = null;
         int totalCount;
 
-        Lock.EnterReadLock();
+        _lock.EnterReadLock();
 
         try
         {
@@ -210,7 +203,7 @@ public sealed class MemoryErrorLog : ErrorLog
         }
         finally
         {
-            Lock.ExitReadLock();
+            _lock.ExitReadLock();
         }
 
         if (errorEntryList != null && selectedEntries != null)

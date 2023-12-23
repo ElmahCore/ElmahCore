@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddElmah(this IServiceCollection services)
     {
-        return services.AddElmah(builder => builder.PersistInMemory());
+        return services.AddElmah(builder => builder.PersistToMemory());
     }
 
     public static IServiceCollection AddElmah(this IServiceCollection services, Action<ElmahBuilder> configureElmah)
@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
         var elmah = new ElmahBuilder(services);
 
         // Set as default because it is required - consumer can replace in configure delegate
-        elmah.PersistInMemory();
+        elmah.PersistToMemory();
 
         configureElmah(elmah);
 
@@ -39,11 +39,11 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpContextAccessor();
         services.AddSingleton<IElmahExceptionLogger, ElmahExceptionLogger>();
-        services.AddSingleton<ILoggerProvider>(provider =>
-            new ElmahLoggerProvider(provider.GetRequiredService<IHttpContextAccessor>()));
+        services.AddSingleton<ILoggerProvider, ElmahLoggerProvider>();
+        services.AddSingleton<ElmahDiagnosticObserver>();
 
 #if USE_GLOBAL_ERROR_HANDLING
-            services.AddExceptionHandler<ElmahExceptionHandler>();
+        services.AddExceptionHandler<ElmahExceptionHandler>();
 #endif
 
         return services;

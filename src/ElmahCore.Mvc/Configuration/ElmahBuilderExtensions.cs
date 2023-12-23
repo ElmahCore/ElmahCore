@@ -18,12 +18,12 @@ public static class ElmahBuilderExtensions
         builder.Services.Configure(configureOptions);
     }
 
-    public static void PersistInMemory(this IElmahBuilder builder)
+    public static void PersistToMemory(this IElmahBuilder builder)
     {
-        builder.PersistInMemory(o => { });
+        builder.PersistToMemory(o => { });
     }
 
-    public static void PersistInMemory(this IElmahBuilder builder, Action<MemoryErrorLogOptions> configureOptions)
+    public static void PersistToMemory(this IElmahBuilder builder, Action<MemoryErrorLogOptions> configureOptions)
     {
         builder.Services.Configure(configureOptions);
         builder.PersistTo(provider => new MemoryErrorLog(provider.GetRequiredService<IOptions<MemoryErrorLogOptions>>()));

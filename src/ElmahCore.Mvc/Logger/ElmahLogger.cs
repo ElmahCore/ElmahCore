@@ -51,7 +51,7 @@ public class ElmahLogger : ILogger
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return _accessor?.HttpContext?.Features.Get<ElmahLogFeature>() != null && logLevel != LogLevel.None &&
+        return _accessor?.HttpContext?.Features.Get<IElmahLogFeature>() != null && logLevel != LogLevel.None &&
                Filter(Name, logLevel);
     }
 
@@ -78,7 +78,7 @@ public class ElmahLogger : ILogger
             Exception = exception?.ToString(),
             Level = logLevel
         };
-        _accessor?.HttpContext?.Features.Get<ElmahLogFeature>()?.AddMessage(entry);
+        _accessor?.HttpContext?.Features.Get<IElmahLogFeature>()?.AddMessage(entry);
     }
 
     // ReSharper disable once UnusedMember.Local

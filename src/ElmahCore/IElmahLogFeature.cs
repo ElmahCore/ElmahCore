@@ -36,4 +36,6 @@ public interface IElmahLogFeature
     void SetSqlDuration(Guid id);
 
     void AddSql(Guid id, ElmahLogSqlEntry entry);
+
+    void AddMessage(ElmahLogMessageEntry entry);
 }
