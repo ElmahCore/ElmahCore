@@ -21,16 +21,16 @@ internal sealed class ElmahDiagnosticObserver : IObserver<DiagnosticListener>, I
     }
 
     [DiagnosticName("System.Data.SqlClient.WriteCommandAfter")]
-    public void OnSystemCommandAfter(Guid operationId, string operation, Guid _, DbCommand command) => this.OnCommandEnd(operationId);
+    public void OnSystemCommandAfter(Guid operationId) => this.OnCommandEnd(operationId);
 
     [DiagnosticName("Microsoft.Data.SqlClient.WriteCommandAfter")]
-    public void OnMicrosoftCommandAfter(Guid operationId, string operation, Guid _, DbCommand command) => this.OnCommandEnd(operationId);
+    public void OnMicrosoftCommandAfter(Guid operationId) => this.OnCommandEnd(operationId);
 
-    [DiagnosticName("System.Data.SqlClient.WriteCommandAfter")]
-    public void OnSystemCommandBefore(Guid operationId, string operation, Guid _, DbCommand command) => this.OnCommandStart(operationId, command);
+    [DiagnosticName("System.Data.SqlClient.WriteCommandBefore")]
+    public void OnSystemCommandBefore(Guid operationId, DbCommand command) => this.OnCommandStart(operationId, command);
 
-    [DiagnosticName("Microsoft.Data.SqlClient.WriteCommandAfter")]
-    public void OnMicrosoftCommandBefore(Guid operationId, string operation, Guid _, DbCommand command) => this.OnCommandStart(operationId, command);
+    [DiagnosticName("Microsoft.Data.SqlClient.WriteCommandBefore")]
+    public void OnMicrosoftCommandBefore(Guid operationId, DbCommand command) => this.OnCommandStart(operationId, command);
 
     public void Dispose() => this.Clear();
 
