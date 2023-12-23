@@ -6,14 +6,16 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        options:
-          - framework: netstandard2.0
+
     steps:
       - uses: actions/checkout@v2
-      - name: DotNetBuild
-        shell: pwsh
-        run: ./ci-build.ps1 "${{matrix.options.framework}}"
+      - uses: actions/setup-dotnet@v3
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
       - name: Test
-        run: dotnet test --verbosity normal
+        run: dotnet test --no-restore --verbosity normal
