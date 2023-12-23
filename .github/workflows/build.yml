@@ -34,3 +34,8 @@ jobs:
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: src/**/Release/*.nupkg
