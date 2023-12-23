@@ -10,7 +10,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
+      - name: NPM Install
+        working-directory: ui
+        run: npm install
+          
+      - name: NPM Lint
+        working-directory: ui
+        run: npm run lint
+          
+      - name: NPM Build
+        working-directory: ui
+        run: npm run build
+          
       - name: Restore
         run: dotnet restore
 
