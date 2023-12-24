@@ -12,7 +12,7 @@ public class ElmahLogger : ILogger
     private readonly IHttpContextAccessor _accessor;
     private Func<string, LogLevel, bool> _filter;
 
-    internal ElmahLogger(string name, Func<string, LogLevel, bool> filter, IExternalScopeProvider? scopeProvider,
+    internal ElmahLogger(string name, Func<string, LogLevel, bool>? filter, IExternalScopeProvider? scopeProvider,
         IHttpContextAccessor accessor)
     {
         _accessor = accessor;
@@ -51,20 +51,15 @@ public class ElmahLogger : ILogger
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return _accessor?.HttpContext?.Features.Get<IElmahLogFeature>() != null && logLevel != LogLevel.None &&
-               Filter(Name, logLevel);
+        return logLevel != LogLevel.None &&
+               Filter(Name, logLevel) &&
+               _accessor.HttpContext?.Features.Get<IElmahLogFeature>() != null;
     }
 
 #if NET6_0
-    public IDisposable BeginScope<TState>(TState state)
-    {
-        return ScopeProvider?.Push(state) ?? NullScope.Instance;
-    }
+    public IDisposable BeginScope<TState>(TState state) => ScopeProvider?.Push(state) ?? NullScope.Instance;
 #else
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
-    {
-        return ScopeProvider?.Push(state);
-    }
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => ScopeProvider?.Push(state);
 #endif
 
     public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message,
@@ -105,19 +100,5 @@ public class ElmahLogger : ILogger
         }
 
         return stringBuilder.ToString();
-    }
-}
-
-public class NullScope : IDisposable
-{
-    private NullScope()
-    {
-    }
-
-    public static NullScope Instance { get; } = new NullScope();
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
     }
 }

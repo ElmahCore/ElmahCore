@@ -1,4 +1,5 @@
 using System;
+using ElmahCore.Mvc;
 using ElmahCore.Mvc.Logger;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,6 +43,14 @@ public static class ElmahBuilderExtensions
 
     public static void SetLogLevel(this IElmahBuilder builder, LogLevel level)
     {
-        builder.Services.AddLogging(builder => { builder.AddFilter<ElmahLoggerProvider>(l => l >= level); });
+        builder.Services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.AddFilter<ElmahLoggerProvider>(l => l >= level); 
+        });
+    }
+
+    public static void AddSqlDiagnostics(this IElmahBuilder builder)
+    {
+        builder.Services.AddSingleton<ElmahDiagnosticObserver>();
     }
 }

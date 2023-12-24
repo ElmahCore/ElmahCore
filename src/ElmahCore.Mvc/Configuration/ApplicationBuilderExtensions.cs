@@ -9,7 +9,11 @@ public static class ApplicationBuilderExtensions
 {
     public static IApplicationBuilder UseElmah(this IApplicationBuilder app)
     {
-        DiagnosticListener.AllListeners.Subscribe(app.ApplicationServices.GetRequiredService<ElmahDiagnosticObserver>());
+        var observer = app.ApplicationServices.GetService<ElmahDiagnosticObserver>();
+        if (observer is not null)
+        {
+            DiagnosticListener.AllListeners.Subscribe(observer);
+        }
 
         app.UseMiddleware<ErrorLogMiddleware>();
         return app;

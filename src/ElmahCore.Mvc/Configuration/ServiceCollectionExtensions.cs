@@ -1,7 +1,5 @@
 ﻿using System;
-using ElmahCore.Mvc;
 using ElmahCore.Mvc.Logger;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -40,8 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddSingleton<IElmahExceptionLogger, ElmahExceptionLogger>();
         services.AddSingleton<ILoggerProvider, ElmahLoggerProvider>();
-        services.AddSingleton<ElmahDiagnosticObserver>();
-
+        
 #if USE_GLOBAL_ERROR_HANDLING
         services.AddExceptionHandler<ElmahExceptionHandler>();
 #endif

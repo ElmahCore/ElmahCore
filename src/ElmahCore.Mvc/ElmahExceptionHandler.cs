@@ -2,11 +2,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ElmahCore.Mvc;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace ElmahCore.Mvc;
+namespace ElmahCore;
 
 internal class ElmahExceptionHandler : IExceptionHandler
 {

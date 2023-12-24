@@ -16,6 +16,7 @@ builder.Services.AddElmah(elmah =>
 
     elmah.PersistToFile("~/log");
     elmah.UseElmahExceptionPage();
+    elmah.SetLogLevel(LogLevel.Information);
 });
 
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>

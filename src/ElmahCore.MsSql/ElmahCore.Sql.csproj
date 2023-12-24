@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-	  <Version>2.1.2</Version>
-	  <AssemblyVersion>2.1.2.0</AssemblyVersion>
-	  <FileVersion>2.1.2.0</FileVersion>
-	  <AssemblyName>ElmahCore.Sql</AssemblyName>
-	  <PackageId>ElmahCore.Sql</PackageId>
-	  <Product>ElmahCore.Sql</Product>
-	  <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
-	  <Description>ELMAH for ASP.NET Core</Description>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<Version>2.1.2</Version>
+	<AssemblyVersion>2.1.2.0</AssemblyVersion>
+	<FileVersion>2.1.2.0</FileVersion>
+	<AssemblyName>ElmahCore.Sql</AssemblyName>
+	<PackageId>ElmahCore.Sql</PackageId>
+	<Product>ElmahCore.Sql</Product>
+	<PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
+	<Description>ELMAH for ASP.NET Core</Description>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup>

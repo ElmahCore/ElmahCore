@@ -19,7 +19,7 @@ public class ElmahLoggerProvider : ILoggerProvider, ISupportExternalScope
 
     public ILogger CreateLogger(string name)
     {
-        return new ElmahLogger(name, (s, l) => true, _scopeProvider, _httpContextAccessor);
+        return new ElmahLogger(name, null, _scopeProvider, _httpContextAccessor);
     }
 
     public void SetScopeProvider(IExternalScopeProvider scopeProvider)
