@@ -73,7 +73,7 @@ internal static class ErrorDetailHelper
 
     private static string? GetPath(string[]? sourcePaths, string filePath)
     {
-        sourcePaths ??= new[] {""};
+        sourcePaths ??= new[] { "" };
         foreach (var source in sourcePaths)
         {
             var sourcePath = source;
@@ -146,16 +146,17 @@ internal static class ErrorDetailHelper
             },
             (t, m) => new
             {
-                Type = new {t.Index, t.End, Html = "<span class='st-type'>" + t.Html + "</span>"},
-                Method = new {m.Index, m.End, Html = "<span class='st-method'>" + m.Html + "</span>"}
+                Type = new { t.Index, t.End, Html = $"<span class='st-type'>{t.Html}</span>" },
+                Method = new { m.Index, m.End, Html = $"<span class='st-method'>{m.Html}</span>" }
             },
             (t, n) => new
             {
-                Type = new {t.Index, t.End, Html = "<span class='st-param-type'>" + t.Html + "</span>"},
-                Name = new {n.Index, n.End, Html = "<span class='st-param-name'>" + n.Html + "</span>"}
+                Type = new { t.Index, t.End, Html = $"<span class='st-param-type'>{t.Html}</span>" },
+                Name = new { n.Index, n.End, Html = $"<span class='st-param-name'>{n.Html}</span>" }
             },
-            (p, ps) => new {List = p, Parameters = ps.ToArray()},
-            (f, l, m, t) =>
+            (p, ps) => new { List = p, Parameters = ps.ToArray() },
+            (f, l) =>
+
             {
                 if (int.TryParse(l.Html, out var line))
                 {
@@ -163,18 +164,16 @@ internal static class ErrorDetailHelper
                     {
                         Source = f.Html,
                         Line = line,
-                        Method = m.Html,
-                        Type = t.Html
                     });
                 }
 
                 return new
                 {
                     File = f.Html.Length > 0
-                        ? new {f.Index, f.End, Html = "<span class='st-file'>" + f.Html + "</span>"}
+                        ? new { f.Index, f.End, Html = $"<span class='st-file'>{f.Html}</span>" }
                         : null,
                     Line = l.Html.Length > 0
-                        ? new {l.Index, l.End, Html = "<span class='st-line'>" + l.Html + "</span>"}
+                        ? new { l.Index, l.End, Html = $"<span class='st-line'>{l.Html}</span>" }
                         : null
                 };
             },
@@ -205,9 +204,9 @@ internal static class ErrorDetailHelper
         );
 
         var markups =
-            from token in Enumerable.Repeat(new {Index = 0, End = 0, Html = string.Empty}, 1)
+            from token in Enumerable.Repeat(new { Index = 0, End = 0, Html = string.Empty }, 1)
                 .Concat(from tokens in frames from token in tokens select token)
-                .Pairwise((prev, curr) => new {Previous = prev, Current = curr})
+                .Pairwise((prev, curr) => new { Previous = prev, Current = curr })
             from m in new object[]
             {
                 text.Substring(token.Previous.End, token.Current.Index - token.Previous.End),
@@ -218,6 +217,6 @@ internal static class ErrorDetailHelper
             where m.Length > 0
             select m;
 
-        return string.Join(String.Empty, markups);
+        return string.Join(string.Empty, markups);
     }
 }
