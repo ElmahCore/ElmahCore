@@ -1,4 +1,4 @@
-name: dotnet package
+name: Build
 
 on: [push]
 
@@ -9,6 +9,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
       - uses: actions/setup-dotnet@v3
       - uses: actions/setup-node@v4
         with:
