@@ -10,12 +10,12 @@ internal class Program
         builder.Services.AddRazorPages();
 
         // Default implementation - will keep an in-memory error log
-        builder.Services.AddElmah();
+        builder.Host.UseElmah();
 
         var app = builder.Build();
 
         app.UseExceptionHandler("/Error");
-        app.UseElmah();
+        app.UseElmahMiddleware();
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();

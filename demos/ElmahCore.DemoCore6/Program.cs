@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 // Register and configure the services used by Elmah.
-builder.Services.AddElmah(elmah =>
+builder.Host.UseElmah((_, elmah) =>
 {
     elmah.Configure(options =>
     {
@@ -44,7 +44,7 @@ app.UseStaticFiles();
 // Adds elmah middleware - the placement of this call is important.
 // All middleware after this has context captured and available to
 // elmah.
-app.UseElmah();
+app.UseElmahMiddleware();
 
 app.UseRouting();
 

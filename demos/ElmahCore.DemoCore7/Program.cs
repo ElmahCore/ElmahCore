@@ -8,7 +8,7 @@ internal class Program
 
         // Add services to the container.
         builder.Services.AddRazorPages();
-        builder.Services.AddElmah(elmah =>
+        builder.Host.UseElmah((_, elmah) =>
         {
             elmah.UseElmahExceptionPage();
         });
@@ -22,7 +22,7 @@ internal class Program
         }
         app.UseStaticFiles();
 
-        app.UseElmah();
+        app.UseElmahMiddleware();
         app.UseRouting();
 
         app.UseAuthorization();

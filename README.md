@@ -1,58 +1,82 @@
-This project is licensed under the terms of the Apache license 2.0.
+# Elmah.AspNetCore
 
-# Using ElmahCore
-ELMAH for Net.Standard and Net.Core (3.1, 5, 6)
+ELMAH (Error Logging Middleware and Handlers) for ASP.NET Core. (dotnet 6, 7, 8)
+
+Features include:
+
+- Logging of unhandled exceptions
+- Hooks to include handled exceptions and other contextual information
+- Captures of logs
+
+This is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore). Credit goes to the owners and contributors of that library. This fork attempts to catch up the library with ongoing changes in the dotnet releases and follow established conventions and practices for integegration.
 
 ![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-new-ui.png)
 
-Add nuget package **elmahcore**
+Add Nuget package **Elmah.AspNetCore**
 
 ## Simple usage
- Startup.cs
-```csharp
-1)	services.AddElmah() in ConfigureServices 
-2)	app.UseElmah(); in Configure
-```
-`app.UseElmah()` must be after initializing other exception handling middleware, such as (UseExceptionHandler, UseDeveloperExceptionPage, etc.)
 
-Default elmah path `~/elmah`.
+*First*, install the _Elmah.AspNetCore_ [Nuget package](https://www.nuget.org/packages/Elmah.AspNetCore) into your app.
 
-## Change URL path
+```shell
+dotnet add package Elmah.AspNetCore
+```
+
+Program.cs
+
 ```csharp
-services.AddElmah(options => options.Path = "you_path_here")
-```
-## Restrict access to the Elmah url
-```csharp
-services.AddElmah(options =>
-{
-        options.OnPermissionCheck = context => context.User.Identity.IsAuthenticated;
-});
-```
-**Note:** `app.UseElmah();` needs to be after 
-```
-app.UseAuthentication();
-app.UseAuthorization();
+var builder = WebApplication.CreateBuilder(args);
+
+// This call wires up services needed by Elmah
+builder.Services.AddElmah();
+
+var app = builder.Build();
+
 app.UseElmah();
+
+app.MapElmah();
 ```
-or the user will be redirected to the sign in screen even if he is authenticated.
+
+`app.UseElmah()` registers the Elmah middleware which will capture any uncaught errors in subsequent middleware. It is recommended that this is included before most other middleware. For best results, call after the built-in `UseExceptionHandler`.
+
+`app.MapElmah()` registers the routes used to serve content for the Elmah UI. By default these will be under `/elmah`, but the method includes an overload which allows overriding the root path. 
+
+## Restrict access to the Elmah url
+
+The `MapElmah()` registers the Elmah endpoints as regular endpoints in the application. As such, it will pick up the default authorization & authentication policies used by the application. Metadata can be applied to the returned endpoint builder to customize this.
+
+```csharp
+// allow all users to access UI
+app.MapElmah().AllowAnonymous();
+
+// require authenticated user
+app.MapElmah().RequireAuthorization();
+```
+
+> See dotnet documentation for [Authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction?view=aspnetcore-8.0) for additional details.
+
 ## Change Error Log type
 You can create your own error log, which will store errors anywhere.
+
 ```csharp
-    class MyErrorLog: ErrorLog
+    class MyErrorLog : ErrorLog
     //implement ErrorLog
 ```
- This ErrorLogs available in board:
- - MemoryErrorLog – store errors in memory (by default)
- - XmlFileErrorLog – store errors in XML files
- - SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
- - MysqlErrorLog - store errors in MySQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
- - PgsqlErrorLog - store errors in PostgreSQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
+
+This ErrorLogs available in board:
+- MemoryErrorLog – store errors in memory (by default)
+- XmlFileErrorLog – store errors in XML files
+- SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
+- MysqlErrorLog - store errors in MySQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
+- PgsqlErrorLog - store errors in PostgreSQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
+
 ```csharp
-services.AddElmah<XmlFileErrorLog>(options =>
+services.AddElmah(elmah =>
 {
-    options.LogPath = "~/log"; // OR options.LogPath = "с:\errors";
+  elmah.PersistToFile("~/log"; /* OR "с:\errors" */);
 });
 ```
+
 ```csharp
 services.AddElmah<SqlErrorLog>(options =>
 {
