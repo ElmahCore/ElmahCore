@@ -13,7 +13,6 @@ jobs:
           fetch-depth: 0
           filter: tree:0
 
-      - uses: actions/setup-dotnet@v3
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -30,6 +29,8 @@ jobs:
         working-directory: ui
         run: npm run build
           
+      - uses: actions/setup-dotnet@v3
+
       - name: Restore
         run: dotnet restore
 
