@@ -13,10 +13,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
-<PropertyGroup>
-  <MinVerDefaultPreReleasePhase>preview</MinVerDefaultPreReleasePhase>
-</PropertyGroup>
-
   <ItemGroup>
 	<None Remove="wwwroot\**\*" />
     <EmbeddedResource Include="wwwroot\**\*" />

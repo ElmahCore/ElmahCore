@@ -13,10 +13,6 @@
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <MinVerDefaultPreReleasePhase>preview</MinVerDefaultPreReleasePhase>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />

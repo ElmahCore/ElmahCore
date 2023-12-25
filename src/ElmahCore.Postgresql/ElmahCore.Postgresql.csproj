@@ -10,11 +10,7 @@
     <Product>ElmahCore.Postgresql</Product>
     <PackageTags>net-core elmah mvc-core asp-net-core asp-net-core-mvc elmah-core netcore netcore2 netcore20 mvc mvc6 aspnetcore aspnetcoremvc</PackageTags>
     <Description>ELMAH for ASP.NET Core</Description>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <MinVerDefaultPreReleasePhase>preview</MinVerDefaultPreReleasePhase>
+  	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
