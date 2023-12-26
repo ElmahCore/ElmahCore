@@ -1,7 +1,12 @@
 const path = require("path");
 
 module.exports = {
-  outputDir: path.resolve(__dirname, process.env.NODE_ENV === "production" ? "../src/ElmahCore.Mvc/wwwroot" : "dist"),
+  outputDir: path.resolve(
+    __dirname,
+    process.env.NODE_ENV === "production"
+      ? "../src/ElmahCore.Mvc/wwwroot"
+      : "dist"
+  ),
   publicPath: "ELMAH_ROOT",
   pages: {
     index: {
