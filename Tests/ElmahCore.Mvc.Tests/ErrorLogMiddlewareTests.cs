@@ -20,7 +20,7 @@ public class ErrorLogMiddlewareTests
     {
         _requestDelegate = httpContext => Task.CompletedTask;
         _options = Options.Create(new ElmahOptions());
-        _elmahLogger = new ElmahExceptionLogger(_errorLog, _options, NullLogger<ElmahExceptionLogger>.Instance);
+        _elmahLogger = new ElmahExceptionLogger(_errorLog, new ErrorFactory(_options), _options, NullLogger<ElmahExceptionLogger>.Instance);
     }
 
     [Fact]

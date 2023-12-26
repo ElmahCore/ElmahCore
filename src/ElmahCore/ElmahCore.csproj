@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<InternalsVisibleTo Include="$(AssemblyName).Mvc.Tests" />
     <InternalsVisibleTo Include="$(AssemblyName).Mvc" />
   </ItemGroup>
   
