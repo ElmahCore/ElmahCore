@@ -11,6 +11,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)/artifacts</PackageOutputPath>
  </PropertyGroup>
 
   <PropertyGroup>

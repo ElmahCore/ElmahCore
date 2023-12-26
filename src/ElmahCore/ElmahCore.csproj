@@ -12,7 +12,7 @@
     <Description>ELMAH for ASP.NET Core</Description>
     <RootNamespace>ElmahCore</RootNamespace>
     <UserSecretsId>c3a38668-74c2-494f-b54d-1a06c261f315</UserSecretsId>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
