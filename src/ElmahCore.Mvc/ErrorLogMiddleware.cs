@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.ExceptionServices;
@@ -72,7 +71,7 @@ internal sealed class ErrorLogMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, ExceptionDispatchInfo exceptionInfo)
     {
-        var entry = await _elmahLogger.LogExceptionAsync(context, exceptionInfo.SourceException, await this.GetAdditionalPropertiesAsync(context));
+        var entry = await _elmahLogger.LogExceptionAsync(context, exceptionInfo.SourceException);
 
         string? location = null;
         if (entry is not null)
@@ -107,25 +106,7 @@ internal sealed class ErrorLogMiddleware
             return;
         }
 
-        var additionalProperties = await this.GetAdditionalPropertiesAsync(context);
         var exception = new HttpRequestException("An error status was returned when processing the request", null, (HttpStatusCode)context.Response.StatusCode);
-        await _elmahLogger.LogExceptionAsync(context, exception, additionalProperties);
-    }
-
-    private async Task<IDictionary<string, string?>?> GetAdditionalPropertiesAsync(HttpContext context)
-    {
-        if (_options.Value.LogRequestBody)
-        {
-            string? body = await context.ReadBodyAsync();
-            if (!string.IsNullOrEmpty(body))
-            {
-                return new Dictionary<string, string?>
-                {
-                    ["$request-body"] = body
-                };
-            }
-        }
-
-        return null;
+        await _elmahLogger.LogExceptionAsync(context, exception);
     }
 }

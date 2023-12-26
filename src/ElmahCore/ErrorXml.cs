@@ -111,7 +111,6 @@ public static class ErrorXml
             : XmlConvert.ToDateTime(timeString, XmlDateTimeSerializationMode.Local);
         var statusCodeString = reader.GetAttribute("statusCode") ?? string.Empty;
         error.StatusCode = statusCodeString.Length == 0 ? 0 : XmlConvert.ToInt32(statusCodeString);
-        error.WebHostHtmlMessage = reader.GetAttribute("webHostHtmlMessage");
     }
 
     /// <summary>
@@ -281,8 +280,6 @@ public static class ErrorXml
         {
             WriteXmlAttribute(writer, "statusCode", XmlConvert.ToString(error.StatusCode));
         }
-
-        WriteXmlAttribute(writer, "webHostHtmlMessage", error.WebHostHtmlMessage);
     }
 
     /// <summary>

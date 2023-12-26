@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddSingleton<IElmahExceptionLogger, ElmahExceptionLogger>();
         services.AddSingleton<ILoggerProvider, ElmahLoggerProvider>();
+        services.AddSingleton<IErrorFactory, ErrorFactory>();
         
 #if USE_GLOBAL_ERROR_HANDLING
         services.AddExceptionHandler<ElmahExceptionHandler>();

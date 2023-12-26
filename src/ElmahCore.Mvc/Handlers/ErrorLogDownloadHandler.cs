@@ -338,7 +338,6 @@ internal static partial class Endpoints
             Member(writer, "user", error.User);
             Member(writer, "time", error.Time, DateTime.MinValue);
             Member(writer, "statusCode", error.StatusCode, 0);
-            Member(writer, "webHostHtmlMessage", error.WebHostHtmlMessage);
             Member(writer, "serverVariables", error.ServerVariables);
             Member(writer, "queryString", error.QueryString);
             Member(writer, "form", error.Form);

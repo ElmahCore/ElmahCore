@@ -51,6 +51,16 @@ public class ElmahOptions
     public bool LogRequestBody { get; set; } = true;
 
     /// <summary>
+    ///     Gets or sets a value indicating whether to log cookies sent with the request. (Default is <c>true</c>)
+    /// </summary>
+    public bool LogRequestCookies { get; set; } = true;
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether to log form values sent with the request. (Default is <c>true</c>)
+    /// </summary>
+    public bool LogRequestForm { get; set; } = true;
+
+    /// <summary>
     ///     Gets or sets a value indicating whether to show the Elmah error page when an error is raised.
     /// </summary>
     public bool ShowElmahErrorPage { get; set; }

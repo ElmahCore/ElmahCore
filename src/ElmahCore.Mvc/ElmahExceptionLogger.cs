@@ -14,14 +14,16 @@ namespace ElmahCore;
 internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
 {
     private readonly ErrorLog _errorLog;
+    private readonly IErrorFactory _errorFactory;
     private readonly ILogger<ElmahExceptionLogger> _logger;
     private readonly List<IErrorFilter> _filters = new List<IErrorFilter>();
     private readonly IEnumerable<IErrorNotifier> _notifiers = Enumerable.Empty<IErrorNotifier>();
     private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
-    public ElmahExceptionLogger(ErrorLog errorLog, IOptions<ElmahOptions> elmahOptions, ILogger<ElmahExceptionLogger> logger)
+    public ElmahExceptionLogger(ErrorLog errorLog, IErrorFactory errorFactory, IOptions<ElmahOptions> elmahOptions, ILogger<ElmahExceptionLogger> logger)
     {
         _errorLog = errorLog;
+        _errorFactory = errorFactory;
         _logger = logger;
 
         var options = elmahOptions.Value;
@@ -49,7 +51,7 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
         }
     }
 
-    public async Task<ErrorLogEntry?> LogExceptionAsync(HttpContext context, Exception e, IDictionary<string, string?>? additionalProperties = null)
+    public async Task<ErrorLogEntry?> LogExceptionAsync(HttpContext context, Exception e)
     {
         ArgumentNullException.ThrowIfNull(e);
 
@@ -75,7 +77,7 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
             //
             // AddMessage away...
             //
-            var error = new Error(e, context, additionalProperties);
+            var error = await _errorFactory.CreateAsync(e, context);
 
             await _onError(context, error);
             var log = _errorLog;

@@ -1,6 +1,5 @@
 ﻿#if USE_GLOBAL_ERROR_HANDLING
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ElmahCore.Mvc;
@@ -23,20 +22,7 @@ internal class ElmahExceptionHandler : IExceptionHandler
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        IDictionary<string, string?>? additionalProperties = null;
-        if (_elmahOptions.Value.LogRequestBody)
-        {
-            string? body = await httpContext.ReadBodyAsync();
-            if (!string.IsNullOrEmpty(body))
-            {
-                additionalProperties = new Dictionary<string, string?>
-                {
-                    ["$request-body"] = body
-                };
-            }
-        }
-
-        var entry = await _elmahLogger.LogExceptionAsync(httpContext, exception, additionalProperties);
+        var entry = await _elmahLogger.LogExceptionAsync(httpContext, exception);
 
         string? location = null;
         if (entry is not null)

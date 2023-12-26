@@ -31,9 +31,7 @@ using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
-using System.Text;
 using System.Threading;
-using MailAttachment = System.Net.Mail.Attachment;
 
 namespace ElmahCore.Mvc.Notifiers;
 
@@ -65,7 +63,6 @@ public class ErrorMailNotifier : IErrorNotifier
         SmtpPort = options.SmtpPort;
         AuthUserName = options.AuthUserName;
         AuthPassword = options.AuthPassword;
-        NoYsod = !options.SendYsod;
         UseSsl = options.UseSsl;
     }
 
@@ -136,13 +133,6 @@ public class ErrorMailNotifier : IErrorNotifier
     ///     authentication.
     /// </summary>
     protected string? AuthPassword { get; }
-
-    /// <summary>
-    ///     Indicates whether <a href="http://en.wikipedia.org/wiki/Screens_of_death#ASP.NET">YSOD</a>
-    ///     is attached to the e-mail or not. If <c>true</c>, the YSOD is
-    ///     not attached.
-    /// </summary>
-    protected bool NoYsod { get; }
 
     /// <summary>
     ///     Determines if SSL will be used to encrypt communication with the
@@ -295,37 +285,15 @@ public class ErrorMailNotifier : IErrorNotifier
         try
         {
             //
-            // If an HTML message was supplied by the web host then attach 
-            // it to the mail if not explicitly told not to do so.
-            //
-
-            if (!NoYsod && error.WebHostHtmlMessage.Length > 0)
-            {
-                var ysodAttachment = CreateHtmlAttachment("YSOD", error.WebHostHtmlMessage);
-
-                if (ysodAttachment != null)
-                {
-                    mail.Attachments.Add(ysodAttachment);
-                }
-            }
-
-            //
             // Send off the mail with some chance to pre- or post-process
             // using event.
             //
-
             SendMail(mail);
         }
         finally
         {
             mail.Dispose();
         }
-    }
-
-    private static MailAttachment CreateHtmlAttachment(string name, string html)
-    {
-        return MailAttachment.CreateAttachmentFromString(html,
-            name + ".html", Encoding.UTF8, MediaTypeNames.Text.Html);
     }
 
     /// <summary>
@@ -392,6 +360,5 @@ public class EmailOptions
     public int SmtpPort { get; set; }
     public string? AuthUserName { get; set; }
     public string? AuthPassword { get; set; }
-    public bool SendYsod { get; set; }
     public bool UseSsl { get; set; }
 }
