@@ -32,7 +32,7 @@ public class PgsqlErrorLog : ErrorLog
     {
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new ArgumentNullException("connectionString");
+            throw new ArgumentNullException(nameof(connectionString));
         }
 
         ConnectionString = connectionString;
@@ -56,7 +56,7 @@ public class PgsqlErrorLog : ErrorLog
     /// <summary>
     ///     Gets the connection string used by the log to connect to the database.
     /// </summary>
-    public override async Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
+    public override async Task LogAsync(Error error, CancellationToken cancellationToken)
     {
         if (error == null)
         {
@@ -66,7 +66,7 @@ public class PgsqlErrorLog : ErrorLog
         var errorXml = ErrorXml.EncodeString(error);
 
         using (var connection = new NpgsqlConnection(ConnectionString))
-        using (var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
+        using (var command = Commands.LogError(error.Id, ApplicationName, error.HostName, error.Type, error.Source,
             error.Message, error.User, error.StatusCode, error.Time, errorXml))
         {
             command.Connection = connection;
@@ -75,33 +75,12 @@ public class PgsqlErrorLog : ErrorLog
         }
     }
 
-    public override async Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
+    public override async Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken)
     {
-        if (id == null)
-        {
-            throw new ArgumentNullException("id");
-        }
-
-        if (id.Length == 0)
-        {
-            throw new ArgumentException(null, "id");
-        }
-
-        Guid errorGuid;
-
-        try
-        {
-            errorGuid = new Guid(id);
-        }
-        catch (FormatException e)
-        {
-            throw new ArgumentException(e.Message, "id", e);
-        }
-
         string? errorXml;
 
         using (var connection = new NpgsqlConnection(ConnectionString))
-        using (var command = Commands.GetErrorXml(ApplicationName, errorGuid))
+        using (var command = Commands.GetErrorXml(ApplicationName, id))
         {
             command.Connection = connection;
             await connection.OpenAsync(cancellationToken);
@@ -113,8 +92,8 @@ public class PgsqlErrorLog : ErrorLog
             return null;
         }
 
-        var error = ErrorXml.DecodeString(errorXml);
-        return new ErrorLogEntry(this, id, error);
+        var error = ErrorXml.DecodeString(id, errorXml);
+        return new ErrorLogEntry(this, error);
     }
 
     public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
@@ -122,12 +101,12 @@ public class PgsqlErrorLog : ErrorLog
     {
         if (errorIndex < 0)
         {
-            throw new ArgumentOutOfRangeException("errorIndex", errorIndex, null);
+            throw new ArgumentOutOfRangeException(nameof(errorIndex), errorIndex, null);
         }
 
         if (pageSize < 0)
         {
-            throw new ArgumentOutOfRangeException("pageSize", pageSize, null);
+            throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
         }
 
         using (var connection = new NpgsqlConnection(ConnectionString))
@@ -143,8 +122,8 @@ public class PgsqlErrorLog : ErrorLog
                 {
                     var id = reader.GetGuid(0);
                     var xml = reader.GetString(1);
-                    var error = ErrorXml.DecodeString(xml);
-                    errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
+                    var error = ErrorXml.DecodeString(id, xml);
+                    errorEntryList.Add(new ErrorLogEntry(this, error));
                 }
             }
 

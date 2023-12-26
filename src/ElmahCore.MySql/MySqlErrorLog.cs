@@ -46,17 +46,14 @@ public class MySqlErrorLog : ErrorLog
     /// </summary>
     public virtual string ConnectionString { get; }
 
-    public override async Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
+    public override async Task LogAsync(Error error, CancellationToken cancellationToken)
     {
-        if (error == null)
-        {
-            throw new ArgumentNullException("error");
-        }
+        ArgumentNullException.ThrowIfNull(error);
 
         var errorXml = ErrorXml.EncodeString(error);
 
         using (var connection = new MySqlConnection(ConnectionString))
-        using (var command = CommandExtension.LogError(id, ApplicationName, error.HostName, error.Type,
+        using (var command = CommandExtension.LogError(error.Id, ApplicationName, error.HostName, error.Type,
             error.Source, error.Message, error.User, error.StatusCode, error.Time, errorXml))
         {
             await connection.OpenAsync(cancellationToken);
@@ -65,33 +62,12 @@ public class MySqlErrorLog : ErrorLog
         }
     }
 
-    public override async Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
+    public override async Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken)
     {
-        if (id == null)
-        {
-            throw new ArgumentNullException("id");
-        }
-
-        if (id.Length == 0)
-        {
-            throw new ArgumentException(null, "id");
-        }
-
-        Guid errorGuid;
-
-        try
-        {
-            errorGuid = new Guid(id);
-        }
-        catch (FormatException e)
-        {
-            throw new ArgumentException(e.Message, "id", e);
-        }
-
         string? errorXml;
 
         using (var connection = new MySqlConnection(ConnectionString))
-        using (var command = CommandExtension.GetErrorXml(ApplicationName, errorGuid))
+        using (var command = CommandExtension.GetErrorXml(ApplicationName, id))
         {
             command.Connection = connection;
             await connection.OpenAsync(cancellationToken);
@@ -103,8 +79,8 @@ public class MySqlErrorLog : ErrorLog
             return null;
         }
 
-        var error = ErrorXml.DecodeString(errorXml);
-        return new ErrorLogEntry(this, id, error);
+        var error = ErrorXml.DecodeString(id, errorXml);
+        return new ErrorLogEntry(this, error);
     }
 
     public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
@@ -134,8 +110,8 @@ public class MySqlErrorLog : ErrorLog
                     {
                         var id = reader.GetGuid(0);
                         var xml = reader.GetString(1);
-                        var error = ErrorXml.DecodeString(xml);
-                        errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
+                        var error = ErrorXml.DecodeString(id, xml);
+                        errorEntryList.Add(new ErrorLogEntry(this, error));
                     }
                 }
             }

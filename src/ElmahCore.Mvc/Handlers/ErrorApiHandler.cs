@@ -22,12 +22,12 @@ internal static partial class Endpoints
             [FromServices] ErrorLog errorLog,
             CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out Guid errorGuid))
             {
                 return Results.Content("{}", MediaTypeNames.Application.Json);
             }
 
-            var error = await GetErrorAsync(errorLog, id, cancellationToken);
+            var error = await GetErrorAsync(errorLog, errorGuid, cancellationToken);
             return Results.Json(error, DefaultJsonSerializerOptions.ApiSerializerOptions);
         });
     }
@@ -52,7 +52,7 @@ internal static partial class Endpoints
     public static IEndpointConventionBuilder MapApiNewErrors(this IEndpointRouteBuilder builder, string prefix = "")
     {
         return builder.MapPost($"{prefix}/api/new-errors", async (
-            [FromQuery] string id,
+            [FromQuery] string? id,
             [FromQuery(Name = "q")] string? searchText,
             [FromServices] ErrorLog errorLog,
             HttpRequest request,
@@ -86,7 +86,7 @@ internal static partial class Endpoints
         return filters;
     }
 
-    private static async Task<ErrorLogEntryWrapper?> GetErrorAsync(ErrorLog errorLog, string id, CancellationToken cancellationToken)
+    private static async Task<ErrorLogEntryWrapper?> GetErrorAsync(ErrorLog errorLog, Guid id, CancellationToken cancellationToken)
     {
         var error = await errorLog.GetErrorAsync(id, cancellationToken);
         return error == null ? null : new ErrorLogEntryWrapper(error);
@@ -112,16 +112,16 @@ internal static partial class Endpoints
         };
     }
 
-    private static async Task<ErrorsList> GetNewErrorsAsync(string? searchText, ErrorLog errorLog, string id,
+    private static async Task<ErrorsList> GetNewErrorsAsync(string? searchText, ErrorLog errorLog, string? id,
         List<ErrorLogFilter> errorFilters, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(id))
+        if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out Guid errorGuid))
         {
             return await GetErrorsAsync(searchText, errorLog, errorFilters, 0, 50, cancellationToken);
         }
 
         var entries = new List<ErrorLogEntry>();
-        var totalCount = await errorLog.GetNewErrorsAsync(searchText, errorFilters, id, entries, cancellationToken);
+        var totalCount = await errorLog.GetNewErrorsAsync(searchText, errorFilters, errorGuid, entries, cancellationToken);
         return new ErrorsList
         {
             Errors = entries.Select(i => new ErrorLogEntryWrapper(i)).ToList(),

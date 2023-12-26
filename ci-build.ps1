@@ -3,6 +3,7 @@ param(
   [string]$targetFramework
 )
 
+
 dotnet clean -c Release
 
 $repositoryUrl = "https://github.com/$env:GITHUB_REPOSITORY"

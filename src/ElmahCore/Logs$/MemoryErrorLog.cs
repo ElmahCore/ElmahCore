@@ -71,7 +71,7 @@ public sealed class MemoryErrorLog : ErrorLog
     /// </summary>
     public override string Name => "In-Memory Error Log";
 
-    public override Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
+    public override Task LogAsync(Error error, CancellationToken cancellationToken)
     {
         if (error == null)
         {
@@ -84,7 +84,7 @@ public sealed class MemoryErrorLog : ErrorLog
         //
         error = error.Clone();
         error.ApplicationName = ApplicationName;
-        var entry = new ErrorLogEntry(this, id.ToString(), error);
+        var entry = new ErrorLogEntry(this, error);
 
         _lock.EnterWriteLock();
 
@@ -104,7 +104,7 @@ public sealed class MemoryErrorLog : ErrorLog
     ///     Returns the specified error from application memory, or null
     ///     if it does not exist.
     /// </summary>
-    public override Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
+    public override Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken)
     {
         _lock.EnterReadLock();
 
@@ -133,7 +133,7 @@ public sealed class MemoryErrorLog : ErrorLog
         // Return a copy that the caller can party on.
         //
         var error = entry.Error.Clone();
-        return Task.FromResult<ErrorLogEntry?>(new ErrorLogEntry(this, entry.Id, error));
+        return Task.FromResult<ErrorLogEntry?>(new ErrorLogEntry(this, error));
     }
 
     /// <summary>
@@ -172,7 +172,7 @@ public sealed class MemoryErrorLog : ErrorLog
                 return Task.FromResult(0);
             }
 
-            var sourceEntries = (KeyedCollection<string, ErrorLogEntry>)_entries;
+            var sourceEntries = (KeyedCollection<Guid, ErrorLogEntry>)_entries;
             totalCount = _entries.Count;
             
             if (filters.Count > 0 || !string.IsNullOrEmpty(searchText))
@@ -215,14 +215,14 @@ public sealed class MemoryErrorLog : ErrorLog
             foreach (var entry in selectedEntries)
             {
                 var error = entry.Error.Clone();
-                errorEntryList.Add(new ErrorLogEntry(this, entry.Id, error));
+                errorEntryList.Add(new ErrorLogEntry(this, error));
             }
         }
 
         return Task.FromResult(totalCount);
     }
 
-    private sealed class EntryCollection : KeyedCollection<string, ErrorLogEntry>
+    private sealed class EntryCollection : KeyedCollection<Guid, ErrorLogEntry>
     {
         private readonly int _size;
 
@@ -239,7 +239,7 @@ public sealed class MemoryErrorLog : ErrorLog
             _size = size;
         }
 
-        protected override string GetKeyForItem(ErrorLogEntry item)
+        protected override Guid GetKeyForItem(ErrorLogEntry item)
         {
             return item.Id;
         }

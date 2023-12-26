@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security;
 using System.Text.Json;
 using System.Xml;
@@ -21,6 +22,13 @@ namespace ElmahCore;
 	[Serializable]
 public sealed class Error : ICloneable
 {
+    private static JsonSerializerOptions SerializerOptions = new()
+    {
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        MaxDepth = 0
+    };
+
     private string? _applicationName;
     private NameValueCollection? _cookies;
     private string? _detail;
@@ -57,11 +65,11 @@ public sealed class Error : ICloneable
         // If this is an HTTP exception, then get the status code
         // and detailed HTML message provided by the host.
         //
-        if (baseException is HttpException httpExc)
+        if (baseException is HttpRequestException { StatusCode: not null } httpExc)
         {
-            StatusCode = httpExc.StatusCode;
+            StatusCode = (int)httpExc.StatusCode;
             baseException = baseException.InnerException;
-            if (baseException == null)
+            if (baseException is null)
             {
                 _typeName = "HTTP";
             }
@@ -102,10 +110,10 @@ public sealed class Error : ICloneable
         // the user.
         //
 
-        if (context != null)
+        if (context is not null)
         {
             var webUser = context.User;
-            if (webUser != null
+            if (webUser is not null
                 && !string.IsNullOrEmpty(webUser.Identity?.Name))
             {
                 _user = webUser.Identity.Name;
@@ -129,7 +137,7 @@ public sealed class Error : ICloneable
             MessageLog = feature?.Log?.ToList() ?? new List<ElmahLogMessageEntry>();
             SqlLog = feature?.LogSql?.ToList() ?? new List<ElmahLogSqlEntry>();
             var paramList = feature?.Params;
-            if (paramList != null)
+            if (paramList is not null)
             {
                 foreach (var param in paramList)
                 {
@@ -162,26 +170,22 @@ public sealed class Error : ICloneable
 
     private string ToJsonString(object? paramValue)
     {
-        if (paramValue == null)
+        if (paramValue is null)
         {
             return "null";
         }
 
         try
         {
-            var jsonResult = JsonSerializer.Serialize(paramValue, new JsonSerializerOptions
-            {
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                MaxDepth = 0
-            });
-            return jsonResult;
+            return JsonSerializer.Serialize(paramValue, SerializerOptions);
         }
         catch
         {
             return paramValue.ToString()!;
         }
     }
+
+    public Guid Id { get; init; } = Guid.NewGuid();
 
     public ICollection<ElmahLogMessageEntry> MessageLog { get; } = new List<ElmahLogMessageEntry>();
 
@@ -238,7 +242,7 @@ public sealed class Error : ICloneable
 
     public string? Body
     {
-        get => _form == null ? null : _form["$request-body"] ?? string.Empty;
+        get => _form is null ? null : _form["$request-body"] ?? string.Empty;
         // ReSharper disable once ValueParameterNotUsed
         set { }
     }
@@ -366,7 +370,7 @@ public sealed class Error : ICloneable
         LoadVariables(serverVariables, () => context.User, "User_");
 
         var ss = context.RequestServices?.GetService(typeof(ISession));
-        if (ss != null)
+        if (ss is not null)
         {
             LoadVariables(serverVariables, () => context.Session, "Session_");
         }
@@ -376,13 +380,13 @@ public sealed class Error : ICloneable
         return serverVariables;
     }
 
-    private void LoadVariables(NameValueCollection serverVariables, Func<object> getObject, string prefix)
+    private void LoadVariables(NameValueCollection serverVariables, Func<object?> getObject, string prefix)
     {
-        object obj;
+        object? obj;
         try
         {
             obj = getObject();
-            if (obj == null)
+            if (obj is null)
             {
                 return;
             }
@@ -406,7 +410,7 @@ public sealed class Error : ICloneable
             }
 
             var isProcessed = false;
-            if (value is IEnumerable en && !(en is string))
+            if (value is IEnumerable en && en is not string)
             {
                 if (value is IDictionary<object, object> dic)
                 {
@@ -423,11 +427,11 @@ public sealed class Error : ICloneable
                         var keyProp = item.GetType().GetProperty("Key");
                         var valueProp = item.GetType().GetProperty("Value");
 
-                        if (keyProp != null && valueProp != null)
+                        if (keyProp is not null && valueProp is not null)
                         {
                             isProcessed = true;
                             var val = valueProp.GetValue(item);
-                            if (val != null && val.GetType().ToString() != val.ToString() &&
+                            if (val is not null && val.GetType().ToString() != val.ToString() &&
                                 !val.GetType().IsSubclassOf(typeof(Stream)))
                             {
                                 var propName =
@@ -453,7 +457,7 @@ public sealed class Error : ICloneable
 
             try
             {
-                if (value != null && value.GetType().ToString() != value.ToString() &&
+                if (value is not null && value.GetType().ToString() != value.ToString() &&
                     !value.GetType().IsSubclassOf(typeof(Stream)))
                 {
                     serverVariables.Add(prefix + prop.Name, value?.ToString());
@@ -469,19 +473,13 @@ public sealed class Error : ICloneable
     /// <summary>
     ///     Returns the value of the <see cref="Message" /> property.
     /// </summary>
-    public override string ToString()
-    {
-        return Message;
-    }
+    public override string ToString() => Message;
 
-    public Error Clone()
-    {
-        return (Error) ((ICloneable) this).Clone();
-    }
+    public Error Clone() => (Error)((ICloneable)this).Clone();
 
     private static NameValueCollection? CopyCollection(NameValueCollection? collection)
     {
-        if (collection == null || collection.Count == 0)
+        if (collection is null || collection.Count == 0)
         {
             return null;
         }
@@ -492,10 +490,11 @@ public sealed class Error : ICloneable
     private static NameValueCollection? CopyCollection(IEnumerable<KeyValuePair<string, StringValues>>? collection)
     {
         // ReSharper disable once PossibleMultipleEnumeration
-        if (collection == null || !collection.Any())
+        if (collection is null || !collection.Any())
         {
             return null;
         }
+
         // ReSharper disable once PossibleMultipleEnumeration
         var keyValuePairs = collection as KeyValuePair<string, StringValues>[] ?? collection.ToArray();
         if (!keyValuePairs.Any())
@@ -514,7 +513,7 @@ public sealed class Error : ICloneable
 
     private static NameValueCollection? CopyCollection(IRequestCookieCollection cookies)
     {
-        if (cookies == null || cookies.Count == 0)
+        if (cookies is null || cookies.Count == 0)
         {
             return null;
         }
@@ -527,15 +526,11 @@ public sealed class Error : ICloneable
             // NOTE: We drop the Path and Domain properties of the 
             // cookie for sake of simplicity.
             //
-
             copy.Add(cookie.Key, cookie.Value);
         }
 
         return copy;
     }
 
-    private static NameValueCollection FaultIn(ref NameValueCollection? collection)
-    {
-        return collection ??= new NameValueCollection();
-    }
+    private static NameValueCollection FaultIn(ref NameValueCollection? collection) => collection ??= new NameValueCollection();
 }

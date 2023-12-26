@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Reflection;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -52,9 +53,9 @@ public sealed class AssertionHelperContext
 
             _statusCodeInitialized = true;
 
-            if (Exception is HttpException exception)
+            if (Exception is HttpRequestException { StatusCode: not null } exception)
             {
-                _httpStatusCode = exception.StatusCode;
+                _httpStatusCode = (int)exception.StatusCode;
             }
 
             return _httpStatusCode;

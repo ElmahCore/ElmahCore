@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -108,7 +110,7 @@ internal sealed class ErrorLogMiddleware
         }
 
         string? body = await this.GetBodyAsync(context);
-        await _elmahLogger.LogExceptionAsync(context, new HttpException(context.Response.StatusCode), body);
+        await _elmahLogger.LogExceptionAsync(context, new HttpRequestException("An error status was returned when processing the request", null, (HttpStatusCode)context.Response.StatusCode), body);
     }
 
     private Task<string?> GetBodyAsync(HttpContext context)

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ElmahCore.Assertions;
 using System.Xml;
-using ElmahCore.Mvc;
+using ElmahCore.Assertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,19 +19,13 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
     private readonly IEnumerable<IErrorNotifier> _notifiers = Enumerable.Empty<IErrorNotifier>();
     private readonly Func<HttpContext, Error, Task> _onError = (context, error) => Task.CompletedTask;
 
-    public event ExceptionFilterEventHandler? Filtering;
-
-    // ReSharper disable once EventNeverSubscribedTo.Global
-    public event ErrorLoggedEventHandler? Logged;
-    public delegate void ErrorLoggedEventHandler(object sender, ErrorLoggedEventArgs args);
-
     public ElmahExceptionLogger(ErrorLog errorLog, IOptions<ElmahOptions> elmahOptions, ILogger<ElmahExceptionLogger> logger)
     {
         _errorLog = errorLog;
         _logger = logger;
 
         var options = elmahOptions.Value;
-        _onError = options.OnError;
+        _onError = options.Error;
 
         //Notifiers
         if (options.Notifiers != null)
@@ -42,11 +35,7 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
 
         //Filters
         _filters = options.Filters.ToList();
-        foreach (var errorFilter in options.Filters)
-        {
-            Filtering += errorFilter.OnErrorModuleFiltering;
-        }
-
+        
         if (!string.IsNullOrEmpty(options.FiltersConfig))
         {
             try
@@ -59,6 +48,7 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
             }
         }
     }
+
     public async Task<ErrorLogEntry?> LogExceptionAsync(HttpContext context, Exception e, string? body = null)
     {
         ArgumentNullException.ThrowIfNull(e);
@@ -90,8 +80,8 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
             await _onError(context, error);
             var log = _errorLog;
             error.ApplicationName = log.ApplicationName;
-            var id = await log.LogAsync(error);
-            entry = new ErrorLogEntry(log, id, error);
+            await log.LogAsync(error);
+            entry = new ErrorLogEntry(log, error);
 
             //Send notification
             foreach (var notifier in _notifiers)
@@ -99,14 +89,7 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
                 if (!args.DismissedNotifiers.Any(i =>
                         i.Equals(notifier.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    if (notifier is IErrorNotifierWithId notifierWithId)
-                    {
-                        notifierWithId.Notify(id, error);
-                    }
-                    else
-                    {
-                        notifier.Notify(error);
-                    }
+                    notifier.Notify(error);
                 }
             }
         }
@@ -121,11 +104,6 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
             // even system ones and potentially let them slip by.
             //
             _logger.LogError(ex, "Elmah local exception");
-        }
-
-        if (entry != null)
-        {
-            OnLogged(new ErrorLoggedEventArgs(entry));
         }
 
         return entry;
@@ -160,7 +138,6 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
                 {
                     var a = AssertionFactory.Create(assertionNode);
                     var filter = new ErrorFilter(a, notList);
-                    Filtering += filter.OnErrorModuleFiltering;
                     _filters.Add(filter);
                 }
             }
@@ -172,14 +149,9 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
     /// </summary>
     private void OnFiltering(ExceptionFilterEventArgs args)
     {
-        Filtering?.Invoke(this, args);
-    }
-
-    /// <summary>
-    ///     Raises the <see cref="Logged" /> event.
-    /// </summary>
-    private void OnLogged(ErrorLoggedEventArgs args)
-    {
-        Logged?.Invoke(this, args);
+        foreach (var filter in _filters)
+        {
+            filter.OnErrorModuleFiltering(this, args);
+        }
     }
 }

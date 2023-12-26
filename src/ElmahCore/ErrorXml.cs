@@ -19,7 +19,7 @@ public static class ErrorXml
     ///     Decodes an <see cref="Error" /> object from its default XML
     ///     representation.
     /// </summary>
-    public static Error DecodeString(string xml)
+    public static Error DecodeString(Guid id, string xml)
     {
         using (var sr = new StringReader(xml))
         using (var reader = XmlReader.Create(sr, new XmlReaderSettings() { CheckCharacters = false }))
@@ -29,14 +29,14 @@ public static class ErrorXml
                 throw new ApplicationException("The error XML is not in the expected format.");
             }
 
-            return Decode(reader);
+            return Decode(id, reader);
         }
     }
 
     /// <summary>
     ///     Decodes an <see cref="Error" /> object from its XML representation.
     /// </summary>
-    public static Error Decode(XmlReader reader)
+    public static Error Decode(Guid id, XmlReader reader)
     {
         if (reader == null)
         {
@@ -53,7 +53,11 @@ public static class ErrorXml
         // typed state.
         //
 
-        var error = new Error();
+        var error = new Error()
+        {
+            Id = id
+        };
+
         ReadXmlAttributes(reader, error);
 
         //

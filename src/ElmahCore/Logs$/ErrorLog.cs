@@ -52,19 +52,7 @@ public abstract class ErrorLog
     ///     does the same as <see cref="Log(Error)" />. An additional parameter
     ///     specifies a <see cref="CancellationToken" /> to use.
     /// </summary>
-    public virtual async Task<string> LogAsync(Error error, CancellationToken cancellationToken)
-    {
-        Guid id = Guid.NewGuid();
-        await this.LogAsync(id, error, cancellationToken);
-        return id.ToString();
-    }
-
-    /// <summary>
-    ///     When overridden in a subclass, starts a task that asynchronously
-    ///     does the same as <see cref="Log(Error)" />. An additional parameter
-    ///     specifies a <see cref="CancellationToken" /> to use.
-    /// </summary>
-    public abstract Task LogAsync(Guid id, Error error, CancellationToken cancellationToken);
+    public abstract Task LogAsync(Error error, CancellationToken cancellationToken);
 
     /// <summary>
     ///     When overridden in a subclass, starts a task that asynchronously
@@ -72,7 +60,7 @@ public abstract class ErrorLog
     ///     specifies a <see cref="CancellationToken" /> to use.
     /// </summary>
     // ReSharper disable once UnusedParameter.Global
-    public abstract Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken);
+    public abstract Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken);
 
     /// <summary>
     ///     When overridden in a subclass, starts a task that asynchronously
@@ -81,7 +69,7 @@ public abstract class ErrorLog
     public abstract Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList,
         CancellationToken cancellationToken);
 
-    public async Task<int> GetNewErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, string id, List<ErrorLogEntry> entries, CancellationToken cancellationToken)
+    public async Task<int> GetNewErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, Guid id, List<ErrorLogEntry> entries, CancellationToken cancellationToken)
     {
         int cnt = 0, count, page = 0;
         do

@@ -5,8 +5,6 @@ using System.Linq;
 
 namespace ElmahCore;
 
-public delegate void ExceptionFilterEventHandler(object sender, ExceptionFilterEventArgs args);
-
 [Serializable]
 public sealed class ExceptionFilterEventArgs : EventArgs
 {

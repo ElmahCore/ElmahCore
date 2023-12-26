@@ -19,12 +19,12 @@ internal static partial class Endpoints
     {
         return builder.MapMethods($"{prefix}/json", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromQuery] string id, [FromServices] ErrorLog errorLog) =>
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out Guid errorGuid))
             {
                 throw new ApplicationException("Missing error identifier specification.");
             }
 
-            var entry = await errorLog.GetErrorAsync(id);
+            var entry = await errorLog.GetErrorAsync(errorGuid);
 
             //
             // Perhaps the error has been deleted from the store? Whatever

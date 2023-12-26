@@ -4,10 +4,6 @@ using System.Text.RegularExpressions;
 
 namespace ElmahCore.Assertions;
 
-#region Imports
-
-#endregion
-
 /// <summary>
 ///     An assertion implementation whose test is based on whether
 ///     the result of an input expression evaluated against a context

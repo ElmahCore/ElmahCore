@@ -55,8 +55,5 @@ public class ElmahOptions
     /// </summary>
     public bool ShowElmahErrorPage { get; set; }
 
-    public virtual Task Error(HttpContext context, Error error)
-    {
-        return OnError(context, error);
-    }
+    public virtual Task Error(HttpContext context, Error error) => OnError(context, error);
 }

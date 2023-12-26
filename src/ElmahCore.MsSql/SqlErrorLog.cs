@@ -78,14 +78,14 @@ public class SqlErrorLog : ErrorLog
     /// </summary>
     public virtual string DatabaseTableName { get; }
 
-    public override async Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
+    public override async Task LogAsync(Error error, CancellationToken cancellationToken)
     {
         try
         {
             var errorXml = ErrorXml.EncodeString(error);
 
             using var connection = new SqlConnection(ConnectionString);
-            using var command = Commands.LogError(id, ApplicationName, error.HostName, error.Type, error.Source,
+            using var command = Commands.LogError(error.Id, ApplicationName, error.HostName, error.Type, error.Source,
                        error.Message, error.User, error.StatusCode, error.Time, errorXml,
                        DatabaseSchemaName, DatabaseTableName);
             command.Connection = connection;
@@ -98,28 +98,12 @@ public class SqlErrorLog : ErrorLog
         }
     }
 
-    public override async Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
+    public override async Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(id))
-        {
-            throw new ArgumentNullException(nameof(id));
-        }
-
-        Guid errorGuid;
-
-        try
-        {
-            errorGuid = new Guid(id);
-        }
-        catch (FormatException e)
-        {
-            throw new ArgumentException(e.Message, nameof(id), e);
-        }
-
         string? errorXml;
 
         using (var connection = new SqlConnection(ConnectionString))
-        using (var command = Commands.GetErrorXml(ApplicationName, errorGuid, DatabaseSchemaName, DatabaseTableName))
+        using (var command = Commands.GetErrorXml(ApplicationName, id, DatabaseSchemaName, DatabaseTableName))
         {
             command.Connection = connection;
             await connection.OpenAsync(cancellationToken);
@@ -131,8 +115,8 @@ public class SqlErrorLog : ErrorLog
             return null;
         }
 
-        var error = ErrorXml.DecodeString(errorXml);
-        return new ErrorLogEntry(this, id, error);
+        var error = ErrorXml.DecodeString(id, errorXml);
+        return new ErrorLogEntry(this, error);
     }
 
     public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
@@ -160,8 +144,8 @@ public class SqlErrorLog : ErrorLog
             {
                 var id = reader.GetGuid(0);
                 var xml = reader.GetString(1);
-                var error = ErrorXml.DecodeString(xml);
-                errorEntryList.Add(new ErrorLogEntry(this, id.ToString(), error));
+                var error = ErrorXml.DecodeString(id, xml);
+                errorEntryList.Add(new ErrorLogEntry(this, error));
             }
         }
 

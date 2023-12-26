@@ -32,8 +32,7 @@ public class XmlFileErrorLog : ErrorLog
         _logPath = options.Value.LogPath;
         if (_logPath.StartsWith("~/"))
         {
-            _logPath = Path.Combine(hostingEnvironment.WebRootPath ?? hostingEnvironment.ContentRootPath,
-                _logPath[2..]);
+            _logPath = Path.Combine(hostingEnvironment.WebRootPath ?? hostingEnvironment.ContentRootPath, _logPath[2..]);
         }
     }
 
@@ -57,7 +56,7 @@ public class XmlFileErrorLog : ErrorLog
     ///     sortable date and a unique identifier. Currently the XML files are stored indefinitely.
     ///     As they are stored as files, they may be managed using standard scheduled jobs.
     /// </remarks>
-    public override Task LogAsync(Guid id, Error error, CancellationToken cancellationToken)
+    public override Task LogAsync(Error error, CancellationToken cancellationToken)
     {
         var logPath = LogPath;
         if (!Directory.Exists(logPath))
@@ -70,7 +69,7 @@ public class XmlFileErrorLog : ErrorLog
         var fileName = string.Format(CultureInfo.InvariantCulture,
             @"error-{0:yyyy-MM-ddHHmmssZ}-{1}.xml",
             /* 0 */ timeStamp.ToUniversalTime(),
-            /* 1 */ id);
+            /* 1 */ error.Id);
 
         var path = Path.Combine(logPath, fileName);
 
@@ -78,7 +77,7 @@ public class XmlFileErrorLog : ErrorLog
         {
             using var writer = new XmlTextWriter(path, Encoding.UTF8) {Formatting = Formatting.Indented};
             writer.WriteStartElement("error");
-            writer.WriteAttributeString("errorId", id.ToString());
+            writer.WriteAttributeString("errorId", error.Id.ToString());
             ErrorXml.Encode(error, writer);
             writer.WriteEndElement();
             writer.Flush();
@@ -146,7 +145,7 @@ public class XmlFileErrorLog : ErrorLog
                 .Skip(errorIndex)
                 .Take(pageSize)
                 .ToAsyncEnumerable()
-                .SelectAwait(LoadErrorLogEntryAsync)
+                .SelectAwait(e => LoadErrorLogEntryAsync(e, cancellationToken))
                 .Where(e => e is not null)
                 .Select(e => e!)
                 .ToListAsync(cancellationToken: cancellationToken);
@@ -156,7 +155,7 @@ public class XmlFileErrorLog : ErrorLog
         {
             var fEntries = await files
                 .ToAsyncEnumerable()
-                .SelectAwait(LoadErrorLogEntryAsync)
+                .SelectAwait(e => LoadErrorLogEntryAsync(e, cancellationToken))
                 .Where(e => e is not null && ErrorLogFilterHelper.IsMatched(e, searchText, filters))
                 .ToListAsync(cancellationToken: cancellationToken);
             totalCount = fEntries.Count;
@@ -174,7 +173,7 @@ public class XmlFileErrorLog : ErrorLog
         return totalCount; // Return total
     }
 
-    private async ValueTask<ErrorLogEntry?> LoadErrorLogEntryAsync(string path)
+    private async ValueTask<ErrorLogEntry?> LoadErrorLogEntryAsync(string path, CancellationToken cancellationToken)
     {
         ExceptionDispatchInfo? edi = null;
         for (var i = 0; i < 5; i++)
@@ -188,13 +187,13 @@ public class XmlFileErrorLog : ErrorLog
                 }
 
                 var id = reader.GetAttribute("errorId")!;
-                var error = ErrorXml.Decode(reader);
-                return new ErrorLogEntry(this, id, error);
+                var error = ErrorXml.Decode(Guid.Parse(id), reader);
+                return new ErrorLogEntry(this, error);
             }
             catch (IOException ex)
             {
                 edi = ExceptionDispatchInfo.Capture(ex);
-                await Task.Delay(500);
+                await Task.Delay(500, cancellationToken);
             }
         }
 
@@ -205,17 +204,8 @@ public class XmlFileErrorLog : ErrorLog
     /// <summary>
     ///     Returns the specified error from the filesystem, or throws an exception if it does not exist.
     /// </summary>
-    public override Task<ErrorLogEntry?> GetErrorAsync(string id, CancellationToken cancellationToken)
+    public override Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken)
     {
-        try
-        {
-            id = new Guid(id).ToString(); // validate GUID
-        }
-        catch (FormatException e)
-        {
-            throw new ArgumentException(e.Message, id, e);
-        }
-
         var file = new DirectoryInfo(LogPath).GetFiles($"error-*-{id}.xml")
             .FirstOrDefault();
 
@@ -230,7 +220,7 @@ public class XmlFileErrorLog : ErrorLog
         }
 
         using var reader = XmlReader.Create(file.FullName, new XmlReaderSettings() { CheckCharacters = false });
-        return Task.FromResult<ErrorLogEntry?>(new ErrorLogEntry(this, id, ErrorXml.Decode(reader)));
+        return Task.FromResult<ErrorLogEntry?>(new ErrorLogEntry(this, ErrorXml.Decode(id, reader)));
     }
 
     private static bool IsUserFile(FileAttributes attributes)

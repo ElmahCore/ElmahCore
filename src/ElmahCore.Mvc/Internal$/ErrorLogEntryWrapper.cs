@@ -26,7 +26,7 @@ internal class ErrorLogEntryWrapper
     ///     in the log.
     /// </summary>
 
-    public string Id { get; }
+    public Guid Id { get; }
 
     /// <summary>
     ///     Gets the <see cref="Error" /> object held in the entry.

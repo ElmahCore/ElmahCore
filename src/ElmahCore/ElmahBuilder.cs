@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace ElmahCore;
@@ -23,7 +24,7 @@ public class ElmahBuilder : IElmahBuilder
         _services.Replace(ServiceDescriptor.Singleton(provider =>
         {
             var log = provider.GetRequiredService<T>();
-            return this.ConfigureErrorLog(provider, log);
+            return ConfigureErrorLog(provider, log);
         }));
     }
 
@@ -31,7 +32,7 @@ public class ElmahBuilder : IElmahBuilder
     {
         _services.Replace(ServiceDescriptor.Singleton(provider =>
         {
-            return this.ConfigureErrorLog(provider, log);
+            return ConfigureErrorLog(provider, log);
         }));
     }
 
@@ -40,17 +41,25 @@ public class ElmahBuilder : IElmahBuilder
         _services.Replace(ServiceDescriptor.Singleton(provider =>
         {
             var log = factory(provider);
-            return this.ConfigureErrorLog(provider, log);
+            return ConfigureErrorLog(provider, log);
         }));
     }
 
-    private ErrorLog ConfigureErrorLog(IServiceProvider provider, ErrorLog log)
+    private static ErrorLog ConfigureErrorLog(IServiceProvider provider, ErrorLog log)
     {
         var options = provider.GetRequiredService<IOptions<ElmahOptions>>().Value;
 
         if (!string.IsNullOrWhiteSpace(options.ApplicationName))
         {
             log.ApplicationName = options.ApplicationName;
+        }
+        else
+        {
+            var env = provider.GetService<IHostEnvironment>();
+            if (!string.IsNullOrEmpty(env?.ApplicationName))
+            {
+                log.ApplicationName = env.ApplicationName;
+            }
         }
 
         if (options.SourcePaths?.Any() ?? false)

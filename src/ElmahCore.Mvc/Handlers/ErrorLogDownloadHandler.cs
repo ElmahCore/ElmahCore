@@ -166,7 +166,7 @@ internal static partial class Endpoints
                 var entry = entries[i];
                 var error = entry.Error;
                 var time = error.Time.ToUniversalTime();
-                var query = "?id=" + Uri.EscapeDataString(entry.Id);
+                var query = "?id=" + Uri.EscapeDataString(entry.Id.ToString());
                 var requestUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}";
 
                 await csv.Field(error.ApplicationName);
@@ -279,7 +279,7 @@ internal static partial class Endpoints
             for (var i = index; i < count; i++)
             {
                 var entry = entries[i];
-                var urlTemplate = $"{requestUrl}?id=" + Uri.EscapeDataString(entry.Id);
+                var urlTemplate = $"{requestUrl}?id=" + Uri.EscapeDataString(entry.Id.ToString());
 
                 json.WriteStartObject();
                 EncodeMembers(entry.Error, json);

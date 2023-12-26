@@ -11,7 +11,8 @@ internal sealed class CallerInfo
 
     private readonly string? _memberName;
 
-    public CallerInfo([CallerMemberName] string? memberName = null,
+    public CallerInfo(
+        [CallerMemberName] string? memberName = null,
         [CallerFilePath] string? filePath = null,
         [CallerLineNumber] int lineNumber = 0)
     {

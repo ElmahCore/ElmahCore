@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 // Register and configure the services used by Elmah.
-builder.Host.UseElmah((_, elmah) =>
+builder.Host.UseElmah((builderContext, elmah) =>
 {
     elmah.Configure(options =>
     {
@@ -14,8 +14,12 @@ builder.Host.UseElmah((_, elmah) =>
         options.Filters.Add(new CmsErrorLogFilter());
     });
 
+    if (builderContext.HostingEnvironment.IsDevelopment())
+    {
+        elmah.UseElmahExceptionPage();
+    }
+
     elmah.PersistToFile("~/log");
-    elmah.UseElmahExceptionPage();
     elmah.SetLogLevel(LogLevel.Information);
 });
 

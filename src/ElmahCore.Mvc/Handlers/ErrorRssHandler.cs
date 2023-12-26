@@ -38,7 +38,7 @@ internal static partial class Endpoints
                     error.Message,
                     "An error of type " + error.Type + " occurred. " + error.Message,
                     error.Time,
-                    baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id));
+                    baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id.ToString()));
 
             var rss = RssXml.Rss(title, link, "AddMessage of recent errors", items);
             return Results.Content(XmlText.StripIllegalXmlCharacters(rss.ToString()), MediaTypeNames.Application.Xml);

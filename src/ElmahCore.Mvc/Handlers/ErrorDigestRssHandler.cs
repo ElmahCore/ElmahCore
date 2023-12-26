@@ -164,7 +164,7 @@ internal static partial class Endpoints
         }
 
         writer.Write("<a href='{0}'>",
-            WebUtility.HtmlEncode(baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id)));
+            WebUtility.HtmlEncode(baseUrl + "detail?id=" + Uri.EscapeDataString(entry.Id.ToString())));
         writer.Write(WebUtility.HtmlEncode(error.Message));
         writer.Write("</a>");
 
