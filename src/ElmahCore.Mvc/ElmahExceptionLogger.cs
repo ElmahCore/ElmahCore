@@ -49,7 +49,7 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
         }
     }
 
-    public async Task<ErrorLogEntry?> LogExceptionAsync(HttpContext context, Exception e, string? body = null)
+    public async Task<ErrorLogEntry?> LogExceptionAsync(HttpContext context, Exception e, IDictionary<string, string?>? additionalProperties = null)
     {
         ArgumentNullException.ThrowIfNull(e);
 
@@ -75,7 +75,7 @@ internal sealed class ElmahExceptionLogger : IElmahExceptionLogger
             //
             // AddMessage away...
             //
-            var error = new Error(e, context, body);
+            var error = new Error(e, context, additionalProperties);
 
             await _onError(context, error);
             var log = _errorLog;

@@ -1,5 +1,6 @@
 ﻿#if USE_GLOBAL_ERROR_HANDLING
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ElmahCore.Mvc;
@@ -12,23 +13,30 @@ namespace ElmahCore;
 internal class ElmahExceptionHandler : IExceptionHandler
 {
     private readonly IElmahExceptionLogger _elmahLogger;
-    private readonly ElmahOptions _elmahOptions;
+    private readonly IOptions<ElmahOptions> _elmahOptions;
 
     public ElmahExceptionHandler(IElmahExceptionLogger elmahLogger, IOptions<ElmahOptions> elmahOptions)
     {
         _elmahLogger = elmahLogger;
-        _elmahOptions = elmahOptions.Value;
+        _elmahOptions = elmahOptions;
     }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        string? body = null;
-        if (_elmahOptions.LogRequestBody)
+        IDictionary<string, string?>? additionalProperties = null;
+        if (_elmahOptions.Value.LogRequestBody)
         {
-            body = await httpContext.ReadBodyAsync();
+            string? body = await httpContext.ReadBodyAsync();
+            if (!string.IsNullOrEmpty(body))
+            {
+                additionalProperties = new Dictionary<string, string?>
+                {
+                    ["$request-body"] = body
+                };
+            }
         }
 
-        var entry = await _elmahLogger.LogExceptionAsync(httpContext, exception, body);
+        var entry = await _elmahLogger.LogExceptionAsync(httpContext, exception, additionalProperties);
 
         string? location = null;
         if (entry is not null)
@@ -37,7 +45,7 @@ internal class ElmahExceptionHandler : IExceptionHandler
             httpContext.Features.Set<IElmahFeature>(new ElmahFeature(entry.Id, location));
         }
 
-        if (!string.IsNullOrEmpty(location) && _elmahOptions.ShowElmahErrorPage)
+        if (!string.IsNullOrEmpty(location) && _elmahOptions.Value.ShowElmahErrorPage)
         {
             httpContext.Response.Redirect(location);
             return true;

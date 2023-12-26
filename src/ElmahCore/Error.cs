@@ -15,14 +15,14 @@ using Microsoft.Extensions.Primitives;
 
 namespace ElmahCore;
 
-	/// <summary>
-	///     Represents a logical application error (as opposed to the actual
-	///     exception it may be representing).
-	/// </summary>
-	[Serializable]
+/// <summary>
+///     Represents a logical application error (as opposed to the actual
+///     exception it may be representing).
+/// </summary>
+[Serializable]
 public sealed class Error : ICloneable
 {
-    private static JsonSerializerOptions SerializerOptions = new()
+    private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -55,7 +55,7 @@ public sealed class Error : ICloneable
     ///     <see cref="HttpContext" /> instance representing the HTTP
     ///     context during the exception.
     /// </summary>
-    public Error(Exception? e, HttpContext? context = null, string? body = null)
+    public Error(Exception? e, HttpContext? context = null, IDictionary<string, string?>? additionalProperties = null)
     {
         var baseException = e?.GetBaseException();
         _message = baseException?.Message;
@@ -126,10 +126,17 @@ public sealed class Error : ICloneable
             _serverVariables.Add("HttpStatusCode", StatusCode.ToString());
             _queryString = CopyCollection(QueryHelpers.ParseQuery(request.QueryString.Value));
             _form = CopyCollection(request.HasFormContentType ? request.Form : null);
-            if (!string.IsNullOrEmpty(body))
+
+            if (additionalProperties is not null)
             {
-                _form ??= new NameValueCollection();
-                _form.Add("$request-body", body);
+                foreach (var (key, value) in additionalProperties)
+                {
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        _form ??= new NameValueCollection();
+                        _form.Add(key, value);
+                    }
+                }
             }
 
             _cookies = CopyCollection(request.Cookies);

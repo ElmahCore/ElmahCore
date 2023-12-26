@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.ExceptionServices;
@@ -11,8 +12,7 @@ namespace ElmahCore.Mvc;
 internal sealed class ErrorLogMiddleware
 {
     private readonly IElmahExceptionLogger _elmahLogger;
-    private readonly bool _logRequestBody;
-    private readonly bool _showDebugPage;
+    private readonly IOptions<ElmahOptions> _options;
     private readonly RequestDelegate _next;
     
     public ErrorLogMiddleware(
@@ -22,8 +22,7 @@ internal sealed class ErrorLogMiddleware
     {
         _next = next;
         _elmahLogger = elmahLogger;
-        _logRequestBody = elmahOptions.Value.LogRequestBody;
-        _showDebugPage = elmahOptions.Value.ShowElmahErrorPage;
+        _options = elmahOptions;
     }
 
     public Task InvokeAsync(HttpContext context)
@@ -73,8 +72,7 @@ internal sealed class ErrorLogMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, ExceptionDispatchInfo exceptionInfo)
     {
-        string? body = await this.GetBodyAsync(context);
-        var entry = await _elmahLogger.LogExceptionAsync(context, exceptionInfo.SourceException, body);
+        var entry = await _elmahLogger.LogExceptionAsync(context, exceptionInfo.SourceException, await this.GetAdditionalPropertiesAsync(context));
 
         string? location = null;
         if (entry is not null)
@@ -84,7 +82,7 @@ internal sealed class ErrorLogMiddleware
         }
 
         //To next middleware
-        if (entry is null || !_showDebugPage)
+        if (entry is null || !_options.Value.ShowElmahErrorPage)
         {
             exceptionInfo.Throw();
             return;
@@ -109,17 +107,25 @@ internal sealed class ErrorLogMiddleware
             return;
         }
 
-        string? body = await this.GetBodyAsync(context);
-        await _elmahLogger.LogExceptionAsync(context, new HttpRequestException("An error status was returned when processing the request", null, (HttpStatusCode)context.Response.StatusCode), body);
+        var additionalProperties = await this.GetAdditionalPropertiesAsync(context);
+        var exception = new HttpRequestException("An error status was returned when processing the request", null, (HttpStatusCode)context.Response.StatusCode);
+        await _elmahLogger.LogExceptionAsync(context, exception, additionalProperties);
     }
 
-    private Task<string?> GetBodyAsync(HttpContext context)
+    private async Task<IDictionary<string, string?>?> GetAdditionalPropertiesAsync(HttpContext context)
     {
-        if (_logRequestBody)
+        if (_options.Value.LogRequestBody)
         {
-            return context.ReadBodyAsync();
+            string? body = await context.ReadBodyAsync();
+            if (!string.IsNullOrEmpty(body))
+            {
+                return new Dictionary<string, string?>
+                {
+                    ["$request-body"] = body
+                };
+            }
         }
 
-        return Task.FromResult<string?>(null);
+        return null;
     }
 }

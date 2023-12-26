@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using ElmahCore.Mvc;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -27,6 +28,28 @@ public static class ApplicationBuilderExtensions
     }
 
     public static IHostBuilder UseElmah(this IHostBuilder host, Action<HostBuilderContext, ElmahBuilder>? configureElmah)
+    {
+        host.ConfigureServices((builderContext, services) =>
+        {
+            services.AddElmahCoreServices();
+
+            var elmah = new ElmahBuilder(services);
+
+            // Set as default because it is required - consumer can replace in configure delegate
+            elmah.PersistToMemory();
+
+            configureElmah?.Invoke(builderContext, elmah);
+        });
+
+        return host;
+    }
+
+    public static IWebHostBuilder UseElmah(this IWebHostBuilder host)
+    {
+        return host.UseElmah(null);
+    }
+
+    public static IWebHostBuilder UseElmah(this IWebHostBuilder host, Action<WebHostBuilderContext, ElmahBuilder>? configureElmah)
     {
         host.ConfigureServices((builderContext, services) =>
         {

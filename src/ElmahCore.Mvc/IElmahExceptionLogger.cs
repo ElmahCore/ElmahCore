@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -12,8 +13,7 @@ public interface IElmahExceptionLogger
     /// </summary>
     /// <param name="ctx">The HTTP context</param>
     /// <param name="ex">The exception</param>
-    /// <param name="onError">The onError delegate</param>
-    /// <param name="body">The HTTP response body (optional)</param>
+    /// <param name="additionalProperties">Additional properties to attach to the error (optional)</param>
     /// <returns>The <see cref="ErrorLogEntry"/> for the created log entry</returns>
-    Task<ErrorLogEntry?> LogExceptionAsync(HttpContext ctx, Exception ex, string? body = null);
+    Task<ErrorLogEntry?> LogExceptionAsync(HttpContext ctx, Exception ex, IDictionary<string, string?>? additionalProperties = null);
 }
