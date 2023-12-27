@@ -135,19 +135,18 @@ internal sealed class ErrorFactory : IErrorFactory
             var feature = context.Features.Get<IElmahLogFeature>();
             if (feature is not null)
             {
-                error.MessageLog = feature.Log.ToList();
-                error.SqlLog = feature.LogSql.ToList();
-
-                foreach (var param in feature.Params.Where(x => x.Params.Any()))
-                {
-                    error.Params.Add(new ElmahLogParamEntry(
-                        param.TimeStamp,
-                        GetStringParams(param.Params),
-                        param.TypeName,
-                        param.MemberName,
-                        param.File,
-                        param.Line));
-                }
+                error.MessageLog = feature.Log.ToArray();
+                error.SqlLog = feature.LogSql.ToArray();
+                error.Params = feature.Params
+                    .Where(x => x.Params.Any())
+                    .Select(x => new ElmahLogParamEntry(
+                        x.TimeStamp,
+                        GetStringParams(x.Params),
+                        x.TypeName,
+                        x.MemberName,
+                        x.File,
+                        x.Line))
+                    .ToArray();
             }
         }
 

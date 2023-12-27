@@ -12,7 +12,7 @@ public static class ApplicationBuilderExtensions
 {
     public static IApplicationBuilder UseElmahMiddleware(this IApplicationBuilder app)
     {
-        var observer = app.ApplicationServices.GetService<ElmahDiagnosticObserver>();
+        var observer = app.ApplicationServices.GetService<ElmahSqlDiagnosticObserver>();
         if (observer is not null)
         {
             DiagnosticListener.AllListeners.Subscribe(observer);

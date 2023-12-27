@@ -29,7 +29,7 @@ internal class ElmahLogFeature : IElmahLogFeature
     {
         if (_map.TryGetValue(id, out ElmahLogSqlEntry? data))
         {
-            data.DurationMs = (int)Math.Round((DateTime.Now - data.TimeStamp).TotalMilliseconds);
+            data.DurationMs = StopwatchExtensions.GetElapsedTime(data.TimerStart).TotalMilliseconds;
         }
     }
 

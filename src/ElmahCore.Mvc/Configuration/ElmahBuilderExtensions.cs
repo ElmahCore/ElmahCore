@@ -51,6 +51,6 @@ public static class ElmahBuilderExtensions
 
     public static void AddSqlDiagnostics(this IElmahBuilder builder)
     {
-        builder.Services.AddSingleton<ElmahDiagnosticObserver>();
+        builder.Services.AddSingleton<ElmahSqlDiagnosticObserver>();
     }
 }

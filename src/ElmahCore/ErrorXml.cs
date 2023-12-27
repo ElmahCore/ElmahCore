@@ -38,11 +38,8 @@ public static class ErrorXml
     /// </summary>
     public static Error Decode(Guid id, XmlReader reader)
     {
-        if (reader == null)
-        {
-            throw new ArgumentNullException(nameof(reader));
-        }
-
+        ArgumentNullException.ThrowIfNull(reader);
+        
         if (!reader.IsStartElement())
         {
             throw new ArgumentException("Reader is not positioned at the start of an element.", nameof(reader));
@@ -52,7 +49,6 @@ public static class ErrorXml
         // Read out the attributes that contain the simple
         // typed state.
         //
-
         var error = new Error()
         {
             Id = id
@@ -88,10 +84,7 @@ public static class ErrorXml
     /// </summary>
     private static void ReadXmlAttributes(XmlReader reader, Error error)
     {
-        if (reader == null)
-        {
-            throw new ArgumentNullException(nameof(reader));
-        }
+        ArgumentNullException.ThrowIfNull(reader);
 
         if (!reader.IsStartElement())
         {
@@ -118,10 +111,7 @@ public static class ErrorXml
     /// </summary>
     private static void ReadInnerXml(XmlReader reader, Error error)
     {
-        if (reader == null)
-        {
-            throw new ArgumentNullException(nameof(reader));
-        }
+        ArgumentNullException.ThrowIfNull(reader);
 
         //
         // Loop through the elements, reading those that we
@@ -129,7 +119,6 @@ public static class ErrorXml
         // this method bails out immediately without
         // consuming it, assuming that it belongs to a subclass.
         //
-
         while (reader.IsStartElement())
         {
             //
@@ -137,7 +126,6 @@ public static class ErrorXml
             // to be more efficient by not causing a collection to be
             // created if the element is going to be empty.
             //
-
             NameValueCollection collection;
             if (reader.Name == "paramsLog")
             {
@@ -220,6 +208,7 @@ public static class ErrorXml
             CheckCharacters = false,
             OmitXmlDeclaration = true // see issue #120: http://code.google.com/p/elmah/issues/detail?id=120
         });
+
         writer.WriteStartElement("error");
         Encode(error, writer);
         writer.WriteEndElement();
@@ -233,10 +222,7 @@ public static class ErrorXml
     /// </summary>
     public static void Encode(Error error, XmlWriter writer)
     {
-        if (writer == null)
-        {
-            throw new ArgumentNullException(nameof(writer));
-        }
+        ArgumentNullException.ThrowIfNull(writer);
 
         if (writer.WriteState != WriteState.Element)
         {
@@ -247,7 +233,6 @@ public static class ErrorXml
         // Write out the basic typed information in attributes
         // followed by collections as inner elements.
         //
-
         WriteXmlAttributes(error, writer);
         WriteInnerXml(error, writer);
     }
@@ -287,11 +272,8 @@ public static class ErrorXml
     /// </summary>
     private static void WriteInnerXml(Error error, XmlWriter writer)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         Debug.Assert(error != null);
-        if (writer == null)
-        {
-            throw new ArgumentNullException(nameof(writer));
-        }
 
         WriteCollection(writer, "serverVariables", error.ServerVariables);
         WriteCollection(writer, "queryString", error.QueryString);
@@ -424,15 +406,8 @@ public static class ErrorXml
     /// </summary>
     private static void Encode(NameValueCollection collection, XmlWriter writer)
     {
-        if (collection == null)
-        {
-            throw new ArgumentNullException(nameof(collection));
-        }
-
-        if (writer == null)
-        {
-            throw new ArgumentNullException(nameof(writer));
-        }
+        ArgumentNullException.ThrowIfNull(collection);
+        ArgumentNullException.ThrowIfNull(writer);
 
         if (collection.Count == 0)
         {
@@ -479,15 +454,8 @@ public static class ErrorXml
     /// </summary>
     private static void UpcodeTo(XmlReader reader, NameValueCollection collection)
     {
-        if (reader == null)
-        {
-            throw new ArgumentNullException(nameof(reader));
-        }
-
-        if (collection == null)
-        {
-            throw new ArgumentNullException(nameof(collection));
-        }
+        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(collection);
 
         Debug.Assert(!reader.IsEmptyElement);
         reader.Read();
@@ -557,15 +525,8 @@ public static class ErrorXml
 
     private static void UpcodeToLog(XmlReader reader, ICollection<ElmahLogMessageEntry> log)
     {
-        if (reader == null)
-        {
-            throw new ArgumentNullException(nameof(reader));
-        }
-
-        if (log == null)
-        {
-            throw new ArgumentNullException(nameof(log));
-        }
+        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(log);
 
         Debug.Assert(!reader.IsEmptyElement);
         reader.Read();
@@ -600,15 +561,8 @@ public static class ErrorXml
 
     private static void UpcodeToParams(XmlReader reader, ICollection<ElmahLogParamEntry> log)
     {
-        if (reader == null)
-        {
-            throw new ArgumentNullException(nameof(reader));
-        }
-
-        if (log == null)
-        {
-            throw new ArgumentNullException(nameof(log));
-        }
+        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(log);
 
         Debug.Assert(!reader.IsEmptyElement);
         reader.Read();
@@ -637,6 +591,7 @@ public static class ErrorXml
                     {
                         reader.Skip();
                     }
+
                     reader.Read(); // <item>
                 }
 
@@ -661,6 +616,7 @@ public static class ErrorXml
 
         reader.ReadEndElement();
     }
+
     private static DateTime LoadTime(string text)
     {
         return text.Length == 0
@@ -670,15 +626,8 @@ public static class ErrorXml
     
     private static void UpcodeToSqlLog(XmlReader reader, ICollection<ElmahLogSqlEntry> log)
     {
-        if (reader == null)
-        {
-            throw new ArgumentNullException(nameof(reader));
-        }
-
-        if (log == null)
-        {
-            throw new ArgumentNullException(nameof(log));
-        }
+        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(log);
 
         Debug.Assert(!reader.IsEmptyElement);
         reader.Read();

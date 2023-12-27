@@ -34,11 +34,11 @@ public sealed class Error : ICloneable
 
     public Guid Id { get; init; } = Guid.NewGuid();
 
-    public ICollection<ElmahLogMessageEntry> MessageLog { get; internal set; } = new List<ElmahLogMessageEntry>();
+    public ElmahLogMessageEntry[] MessageLog { get; internal set; } = Array.Empty<ElmahLogMessageEntry>();
 
-    public ICollection<ElmahLogSqlEntry> SqlLog { get; internal set; } = new List<ElmahLogSqlEntry>();
+    public ElmahLogSqlEntry[] SqlLog { get; internal set; } = Array.Empty<ElmahLogSqlEntry>();
 
-    public ICollection<ElmahLogParamEntry> Params { get; internal set; } = new List<ElmahLogParamEntry>();
+    public ElmahLogParamEntry[] Params { get; internal set; } = Array.Empty<ElmahLogParamEntry>();
 
     /// <summary>
     ///     Gets the <see cref="Exception" /> instance used to initialize this
