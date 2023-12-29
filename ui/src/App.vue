@@ -2,7 +2,7 @@
   <div id="app">
     <div>
       <b-navbar toggleable="lg" type="dark" variant="dark">
-        <b-navbar-brand href="#">ElmahCore</b-navbar-brand>
+        <b-navbar-brand href="#">Elmah</b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -20,7 +20,7 @@
             >
             <b-nav-item
               target="_blank"
-              :href="'https://github.com/ElmahCore/www'"
+              :href="'https://github.com/jrsearles/Elmah.AspNetCore'"
               >Help</b-nav-item
             >
             <b-nav-item :to="{ name: 'About' }">About</b-nav-item>
@@ -60,7 +60,7 @@ export default {
   components: { ErrorListFilter },
   data: function () {
     return {
-      appName: "ElmahCore",
+      appName: "Elmah",
       searchText: "",
     };
   },

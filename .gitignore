@@ -275,4 +275,4 @@ __pycache__/
 
 **/wwwroot/log/
 
-src/ElmahCore.Mvc/wwwroot/
+src/Elmah.AspNetCore/wwwroot/

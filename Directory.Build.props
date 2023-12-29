@@ -1,18 +1,18 @@
 <Project>
- <PropertyGroup>
-    <Authors>ElmahCore</Authors>
-    <Company>ElmahCore</Company>
+  <PropertyGroup>
+    <Authors>Elmah</Authors>
+    <Company>Elmah</Company>
     <NeutralLanguage>en-001</NeutralLanguage>
-    <RepositoryUrl>https://www.nuget.org/packages/ElmahCore</RepositoryUrl>
-    <Copyright>ElmahCore</Copyright>
-    <PackageProjectUrl>https://github.com/ElmahCore/ElmahCore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jrsearles/Elmah.AspNetCore</RepositoryUrl>
+    <Copyright>Elmah</Copyright>
+    <PackageProjectUrl>https://github.com/jrsearles/Elmah.AspNetCore</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
     <PackageOutputPath>$(MSBuildThisFileDirectory)/artifacts</PackageOutputPath>
- </PropertyGroup>
+  </PropertyGroup>
 
   <PropertyGroup>
     <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
