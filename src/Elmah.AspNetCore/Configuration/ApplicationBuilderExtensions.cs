@@ -25,50 +25,43 @@ public static class ApplicationBuilderExtensions
 
     public static IHostBuilder UseElmah(this IHostBuilder host)
     {
-        return host.UseElmah((Action<HostBuilderContext, ElmahBuilder>?)null);
+        return host.UseElmah((Action<HostBuilderContext, ElmahBuilder>)null!);
     }
 
-    public static IHostBuilder UseElmah(this IHostBuilder host, Action<ElmahBuilder>? configureElmah)
+    public static IHostBuilder UseElmah(this IHostBuilder host, Action<ElmahBuilder> configureElmah)
     {
         return host.UseElmah((_, elmah) => configureElmah?.Invoke(elmah));
     }
 
-    public static IHostBuilder UseElmah(this IHostBuilder host, Action<HostBuilderContext, ElmahBuilder>? configureElmah)
+    public static IHostBuilder UseElmah(this IHostBuilder host, Action<HostBuilderContext, ElmahBuilder> configureElmah)
     {
-        host.ConfigureServices((builderContext, services) =>
-        {
-            services.AddElmahCoreServices();
-
-            var elmah = new ElmahBuilder(services);
-
-            // Set as default because it is required - consumer can replace in configure delegate
-            elmah.PersistToMemory();
-
-            configureElmah?.Invoke(builderContext, elmah);
-        });
-
-        return host;
+        return host.ConfigureServices((builderContext, services) => ConfigureElmah(builderContext, services, configureElmah));
     }
 
     public static IWebHostBuilder UseElmah(this IWebHostBuilder host)
     {
-        return host.UseElmah(null);
+        return host.UseElmah((Action<WebHostBuilderContext, ElmahBuilder>)null!);
     }
 
-    public static IWebHostBuilder UseElmah(this IWebHostBuilder host, Action<WebHostBuilderContext, ElmahBuilder>? configureElmah)
+    public static IWebHostBuilder UseElmah(this IWebHostBuilder host, Action<ElmahBuilder> configureElmah)
     {
-        host.ConfigureServices((builderContext, services) =>
-        {
-            services.AddElmahCoreServices();
+        return host.UseElmah((_, elmah) => configureElmah?.Invoke(elmah));
+    }
 
-            var elmah = new ElmahBuilder(services);
+    public static IWebHostBuilder UseElmah(this IWebHostBuilder host, Action<WebHostBuilderContext, ElmahBuilder> configureElmah)
+    {
+        return host.ConfigureServices((builderContext, services) => ConfigureElmah(builderContext, services, configureElmah));
+    }
 
-            // Set as default because it is required - consumer can replace in configure delegate
-            elmah.PersistToMemory();
+    private static void ConfigureElmah<TContext>(TContext context, IServiceCollection services, Action<TContext, ElmahBuilder> configureElmah)
+    {
+        services.AddElmahCoreServices();
 
-            configureElmah?.Invoke(builderContext, elmah);
-        });
+        var elmah = new ElmahBuilder(services);
 
-        return host;
+        // Set as default because it is required - consumer can replace in configure delegate
+        elmah.PersistToMemory();
+
+        configureElmah?.Invoke(context, elmah);
     }
 }

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
 namespace Elmah.AspNetCore;
@@ -14,13 +13,13 @@ internal static class HttpContextExceptions
 
     public static string GetElmahRelativeRoot(this HttpContext context)
     {
-        var options = context.RequestServices.GetRequiredService<IOptions<ElmahOptions>>().Value;
+        var options = context.RequestServices.GetRequiredService<ElmahEnvironment>();
         return context.Request.PathBase.Add(options.Path);
     }
 
     public static string GetElmahAbsoluteRoot(this HttpContext context)
     {
-        var options = context.RequestServices.GetRequiredService<IOptions<ElmahOptions>>().Value;
+        var options = context.RequestServices.GetRequiredService<ElmahEnvironment>();
         return $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase.Add(options.Path)}";
     }
 

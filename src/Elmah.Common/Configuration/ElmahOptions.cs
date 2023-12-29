@@ -11,11 +11,6 @@ namespace Elmah;
 public class ElmahOptions
 {
     /// <summary>
-    ///     ELMAH access url (default = '/elmah')
-    /// </summary>
-    public PathString Path { get; set; }
-
-    /// <summary>
     ///     Filters file path, example: options.LogPath = "~/elmah.xml"; // OR options.LogPath = "с:\elmah.xml"
     /// </summary>
     public string? FiltersConfig { get; set; }

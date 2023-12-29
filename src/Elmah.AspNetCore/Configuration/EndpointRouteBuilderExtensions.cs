@@ -4,23 +4,22 @@ using Elmah.AspNetCore.Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Elmah;
 
 public static class EndpointRouteBuilderExtensions
 {
-    public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder builder) => builder.MapElmah("/elmah");
+    public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder endpoints) => endpoints.MapElmah("/elmah");
 
-    public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder builder, [StringSyntax("Route")]string prefix)
+    public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder endpoints, [StringSyntax("Route")] string prefix)
     {
         // HACK: we're using the options instance as global configuration. It might make more sense to create our
         // own object to store configuration context that is shared.
-        var options = builder.ServiceProvider.GetRequiredService<IOptions<ElmahOptions>>().Value;
+        var options = endpoints.ServiceProvider.GetRequiredService<ElmahEnvironment>();
         options.Path = prefix;
 
 #if NET7_0_OR_GREATER
-        var group = builder.MapGroup(prefix);
+        var group = endpoints.MapGroup(prefix);
         group.MapRoot();
         group.MapApiError();
         group.MapApiErrors();
@@ -34,26 +33,28 @@ public static class EndpointRouteBuilderExtensions
         group.MapDownload();
         group.MapTest();
         group.MapResources();
-        return group;
+        return group
+            .WithDisplayName("Elmah.AspNetCore");
 #else
         var routes = new[]
         {
-            builder.MapRoot(prefix),
-            builder.MapApiError(prefix),
-            builder.MapApiErrors(prefix),
-            builder.MapApiNewErrors(prefix),
-            builder.MapRss(prefix),
-            builder.MapDigestRss(prefix),
-            builder.MapMsdn(prefix),
-            builder.MapMsdnStatus(prefix),
-            builder.MapXml(prefix),
-            builder.MapJson(prefix),
-            builder.MapDownload(prefix),
-            builder.MapTest(prefix),
-            builder.MapResources(prefix)
+            endpoints.MapRoot(prefix),
+            endpoints.MapApiError(prefix),
+            endpoints.MapApiErrors(prefix),
+            endpoints.MapApiNewErrors(prefix),
+            endpoints.MapRss(prefix),
+            endpoints.MapDigestRss(prefix),
+            endpoints.MapMsdn(prefix),
+            endpoints.MapMsdnStatus(prefix),
+            endpoints.MapXml(prefix),
+            endpoints.MapJson(prefix),
+            endpoints.MapDownload(prefix),
+            endpoints.MapTest(prefix),
+            endpoints.MapResources(prefix)
         };
 
-        return new ElmahEndpointCollection(routes);
+        return new ElmahEndpointCollection(routes)
+            .WithDisplayName("Elmah.AspNetCore");
 #endif
     }
 }
