@@ -53,7 +53,7 @@ internal sealed class ErrorFactory : IErrorFactory
         var options = _elmahOptions.Value;
         var baseException = e?.GetBaseException();
         string? typeName = baseException?.GetType().FullName;
-        int statusCode = 500;
+        int statusCode = GetStatusCodeFromExceptionOr500(e);
 
         //
         // If this is an HTTP exception, then get the status code
@@ -150,6 +150,21 @@ internal sealed class ErrorFactory : IErrorFactory
         }
 
         return error;
+    }
+
+    public static int GetStatusCodeFromExceptionOr500(Exception? e)
+    {
+        if (e is BadHttpRequestException bhre)
+        {
+            return bhre.StatusCode;
+        }
+
+        if (e is HttpRequestException { StatusCode: not null } hre)
+        {
+            return (int)hre.StatusCode;
+        }
+
+        return 500;
     }
 
     private static KeyValuePair<string, string>[] GetStringParams((string name, object value)[] paramParams) =>

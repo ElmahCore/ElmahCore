@@ -9,8 +9,7 @@ internal class Program
         // Add services to the container.
         builder.Services.AddRazorPages();
 
-        // Default implementation - will keep an in-memory error log
-        builder.Host.UseElmah();
+        builder.Host.UseElmah(elmah => elmah.UseElmahExceptionPage());
 
         var app = builder.Build();
 

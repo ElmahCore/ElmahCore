@@ -88,7 +88,11 @@ internal sealed class ErrorLogMiddleware
         }
 
         //Show Debug page
-        context.Response.Redirect(location!);
+        context.Response.StatusCode = ErrorFactory.GetStatusCodeFromExceptionOr500(exceptionInfo.SourceException);
+        if (context.RequestAcceptsHtml())
+        {
+            context.Response.Redirect(location!);
+        }
     }
 
     private async Task ExecuteMiddlewareAsync(HttpContext context)
@@ -106,7 +110,7 @@ internal sealed class ErrorLogMiddleware
             return;
         }
 
-        var exception = new HttpRequestException("An error status was returned when processing the request", null, (HttpStatusCode)context.Response.StatusCode);
+        var exception = new BadHttpRequestException("An error status was returned when processing the request", context.Response.StatusCode);
         await _elmahLogger.LogExceptionAsync(context, exception);
     }
 }

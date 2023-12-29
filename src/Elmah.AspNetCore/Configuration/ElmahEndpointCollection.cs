@@ -2,7 +2,7 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 
-namespace Elmah.AspNetCore.Handlers;
+namespace Elmah.AspNetCore;
 
 internal class ElmahEndpointCollection : IEndpointConventionBuilder
 {

@@ -32,7 +32,12 @@ internal class ElmahExceptionHandler : IExceptionHandler
 
         if (!string.IsNullOrEmpty(location) && _elmahOptions.Value.ShowElmahErrorPage)
         {
-            httpContext.Response.Redirect(location);
+            httpContext.Response.StatusCode = ErrorFactory.GetStatusCodeFromExceptionOr500(exception);
+            if (httpContext.RequestAcceptsHtml())
+            {
+                httpContext.Response.Redirect(location);
+            }
+
             return true;
         }
 

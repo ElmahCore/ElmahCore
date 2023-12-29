@@ -12,6 +12,7 @@ public static class ApplicationBuilderExtensions
 {
     public static IApplicationBuilder UseElmahMiddleware(this IApplicationBuilder app)
     {
+        // We don't use an option for this, but registration of the service is opt-in
         var observer = app.ApplicationServices.GetService<ElmahSqlDiagnosticObserver>();
         if (observer is not null)
         {
@@ -24,7 +25,12 @@ public static class ApplicationBuilderExtensions
 
     public static IHostBuilder UseElmah(this IHostBuilder host)
     {
-        return host.UseElmah(null);
+        return host.UseElmah((Action<HostBuilderContext, ElmahBuilder>?)null);
+    }
+
+    public static IHostBuilder UseElmah(this IHostBuilder host, Action<ElmahBuilder>? configureElmah)
+    {
+        return host.UseElmah((_, elmah) => configureElmah?.Invoke(elmah));
     }
 
     public static IHostBuilder UseElmah(this IHostBuilder host, Action<HostBuilderContext, ElmahBuilder>? configureElmah)

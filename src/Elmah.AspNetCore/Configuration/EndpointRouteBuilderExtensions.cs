@@ -1,13 +1,14 @@
-﻿using Elmah.AspNetCore.Handlers;
+﻿using System.Diagnostics.CodeAnalysis;
+using Elmah.AspNetCore;
+using Elmah.AspNetCore.Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Elmah;
 
-public static class ElmahEndpoints
+public static class EndpointRouteBuilderExtensions
 {
     public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder builder) => builder.MapElmah("/elmah");
 
