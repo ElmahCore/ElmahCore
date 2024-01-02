@@ -33,19 +33,24 @@ internal sealed class ElmahLogger : ILogger
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
+        ArgumentNullException.ThrowIfNull(formatter);
+
         if (!IsEnabled(logLevel))
         {
             return;
         }
 
-        ArgumentNullException.ThrowIfNull(formatter);
-
-        var message = formatter(state, exception);
-
-        if (!string.IsNullOrEmpty(message) || exception != null)
+        var feature = _accessor.HttpContext!.Features.Get<IElmahLogFeature>()!;
+        var entry = new ElmahLogMessageEntry<TState>
         {
-            WriteMessage(logLevel, Name, eventId.Id, message, exception);
-        }
+            TimeStamp = DateTime.Now,
+            State = state,
+            Exception = exception,
+            Formatter = formatter,
+            Level = logLevel
+        };
+
+        feature.AddMessage(entry);
     }
 
     public bool IsEnabled(LogLevel logLevel)
@@ -60,17 +65,4 @@ internal sealed class ElmahLogger : ILogger
 #else
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => ScopeProvider?.Push(state);
 #endif
-
-    private void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception? exception)
-    {
-        var entry = new ElmahLogMessageEntry
-        {
-            TimeStamp = DateTime.Now,
-            Message = message,
-            Exception = exception?.ToString(),
-            Level = logLevel
-        };
-
-        _accessor?.HttpContext?.Features.Get<IElmahLogFeature>()?.AddMessage(entry);
-    }
 }

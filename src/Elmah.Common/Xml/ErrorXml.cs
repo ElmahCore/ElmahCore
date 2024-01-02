@@ -26,7 +26,7 @@ public static class ErrorXml
         {
             if (!reader.IsStartElement("error"))
             {
-                throw new ApplicationException("The error XML is not in the expected format.");
+                throw new FormatException("The error XML is not in the expected format.");
             }
 
             return Decode(id, reader);
@@ -347,7 +347,7 @@ public static class ErrorXml
         writer.WriteEndElement();
     }
 
-    private static void WriteMessageLog(XmlWriter writer, string name, IEnumerable<ElmahLogMessageEntry> log)
+    private static void WriteMessageLog(XmlWriter writer, string name, IEnumerable<IElmahLogMessage> log)
     {
         if (log == null)
         {
@@ -523,7 +523,7 @@ public static class ErrorXml
         reader.ReadEndElement();
     }
 
-    private static void UpcodeToLog(XmlReader reader, ICollection<ElmahLogMessageEntry> log)
+    private static void UpcodeToLog(XmlReader reader, ICollection<IElmahLogMessage> log)
     {
         ArgumentNullException.ThrowIfNull(reader);
         ArgumentNullException.ThrowIfNull(log);
@@ -535,7 +535,7 @@ public static class ErrorXml
         {
             if (reader.IsStartElement("message"))
             {
-                var entry = new ElmahLogMessageEntry
+                var entry = new XmlLogMessage
                 {
                     Level = GetLogLevel(reader.GetAttribute("level")),
                     Exception = reader.GetAttribute("exception"),

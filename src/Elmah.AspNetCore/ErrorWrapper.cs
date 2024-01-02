@@ -312,21 +312,20 @@ internal class ErrorWrapper
     public string? Version => _error.ServerVariables["Version"];
 
     [XmlIgnore]
-    public List<ElmahLogMessageEntry> MessageLog
+    public List<IElmahLogMessage> MessageLog
     {
         get => GetMessageLog();
         // ReSharper disable once ValueParameterNotUsed
         set { }
     }
 
-    private List<ElmahLogMessageEntry> GetMessageLog()
+    private List<IElmahLogMessage> GetMessageLog()
     {
         var result = _error.MessageLog.ToList();
         foreach (var param in _error.Params)
         {
-            result.Add(new ElmahLogMessageEntry
+            result.Add(new XmlLogMessage
             {
-                Collapsed = true,
                 TimeStamp = param.TimeStamp,
                 Level = LogLevel.Information,
                 Message = $"Method {param.TypeName}.{param.MemberName} call with parameters:",

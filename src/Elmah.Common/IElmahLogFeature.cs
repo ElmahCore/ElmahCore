@@ -11,7 +11,7 @@ public interface IElmahLogFeature
     /// <summary>
     /// Gets the list of <see cref="ElmahLogMessageEntry"/> instances.
     /// </summary>
-    IReadOnlyCollection<ElmahLogMessageEntry> Log { get; }
+    IReadOnlyCollection<IElmahLogMessage> Log { get; }
     
     /// <summary>
     /// Gets the list of <see cref="ElmahLogParameters"/> instances.
@@ -37,5 +37,5 @@ public interface IElmahLogFeature
 
     void AddSql(Guid id, ElmahLogSqlEntry entry);
 
-    void AddMessage(ElmahLogMessageEntry entry);
+    void AddMessage(IElmahLogMessage entry);
 }

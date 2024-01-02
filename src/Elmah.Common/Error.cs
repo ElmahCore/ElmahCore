@@ -24,7 +24,7 @@ public sealed class Error : ICloneable
     private string? _source;
     private string? _typeName;
     private string? _user;
-    private List<ElmahLogMessageEntry>? _messageLog;
+    private List<IElmahLogMessage>? _messageLog;
     private List<ElmahLogSqlEntry>? _sqlLog;
     private List<ElmahLogParamEntry>? _params;
 
@@ -38,9 +38,9 @@ public sealed class Error : ICloneable
     public Guid Id { get; init; } = Guid.NewGuid();
 
     [AllowNull]
-    public ICollection<ElmahLogMessageEntry> MessageLog
+    public ICollection<IElmahLogMessage> MessageLog
     {
-        get => _messageLog ??= new List<ElmahLogMessageEntry>();
+        get => _messageLog ??= new List<IElmahLogMessage>();
         init => _messageLog = value?.ToList();
     }
 

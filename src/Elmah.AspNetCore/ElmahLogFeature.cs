@@ -8,14 +8,14 @@ namespace Elmah.AspNetCore;
 internal class ElmahLogFeature : IElmahLogFeature
 {
     private readonly ConcurrentDictionary<Guid, ElmahLogSqlEntry> _map = new();
-    private readonly ConcurrentBag<ElmahLogMessageEntry> _logs = new();
+    private readonly ConcurrentBag<IElmahLogMessage> _logs = new();
     private readonly ConcurrentBag<ElmahLogParameters> _params = new();
 
-    public IReadOnlyCollection<ElmahLogMessageEntry> Log => _logs.ToList();
+    public IReadOnlyCollection<IElmahLogMessage> Log => _logs.ToList();
     public IReadOnlyCollection<ElmahLogParameters> Params => _params.ToList();
     public IReadOnlyCollection<ElmahLogSqlEntry> LogSql => _map.Values.OrderBy(i => i.TimeStamp).ToList();
 
-    public void AddMessage(ElmahLogMessageEntry entry)
+    public void AddMessage(IElmahLogMessage entry)
     {
         _logs.Add(entry);
     }
