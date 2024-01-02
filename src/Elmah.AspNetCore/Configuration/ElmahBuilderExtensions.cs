@@ -1,8 +1,8 @@
 using System;
-using Elmah.AspNetCore;
 using Elmah.AspNetCore.Logger;
 using Elmah.Memory;
 using Elmah.Xml;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,6 +19,11 @@ public static class ElmahBuilderExtensions
     public static void Configure(this IElmahBuilder builder, Action<ElmahOptions> configureOptions)
     {
         builder.Services.Configure(configureOptions);
+    }
+
+    public static void Configure(this IElmahBuilder builder, IConfiguration configuration)
+    {
+        builder.Services.Configure<ElmahOptions>(configuration);
     }
 
     public static void PersistToMemory(this IElmahBuilder builder)
@@ -49,16 +54,5 @@ public static class ElmahBuilderExtensions
         {
             loggingBuilder.AddFilter<ElmahLoggerProvider>(l => l >= level); 
         });
-    }
-
-    public static void AddSqlDiagnostics(this IElmahBuilder builder)
-    {
-        builder.AddSqlDiagnostics(_ => { });
-    }
-
-    public static void AddSqlDiagnostics(this IElmahBuilder builder, Action<SqlDiagnosticOptions> configureOptions)
-    {
-        builder.Services.Configure(configureOptions);
-        builder.Services.AddSingleton<ElmahSqlDiagnosticObserver>();
     }
 }

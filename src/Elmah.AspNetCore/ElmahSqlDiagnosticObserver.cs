@@ -13,10 +13,10 @@ namespace Elmah.AspNetCore;
 internal sealed class ElmahSqlDiagnosticObserver : IObserver<DiagnosticListener>, IDisposable
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IOptions<SqlDiagnosticOptions> _options;
+    private readonly IOptions<ElmahOptions> _options;
     private readonly List<IDisposable> _subscriptions = new();
 
-    public ElmahSqlDiagnosticObserver(IHttpContextAccessor httpContextAccessor, IOptions<SqlDiagnosticOptions> options)
+    public ElmahSqlDiagnosticObserver(IHttpContextAccessor httpContextAccessor, IOptions<ElmahOptions> options)
     {
         _httpContextAccessor = httpContextAccessor;
         _options = options;
@@ -44,7 +44,7 @@ internal sealed class ElmahSqlDiagnosticObserver : IObserver<DiagnosticListener>
 
     public void OnNext(DiagnosticListener value)
     {
-        if (value.Name != "SqlClientDiagnosticListener")
+        if (!_options.Value.LogSqlQueries || value.Name != "SqlClientDiagnosticListener")
         {
             return;
         }
@@ -79,7 +79,7 @@ internal sealed class ElmahSqlDiagnosticObserver : IObserver<DiagnosticListener>
             return;
         }
 
-        if (_options.Value.LogSqlParameters)
+        if (_options.Value.LogSqlQueryParameters)
         {
             if (cmd.CommandType == CommandType.StoredProcedure)
             {

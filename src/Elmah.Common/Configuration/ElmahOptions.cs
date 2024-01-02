@@ -60,5 +60,15 @@ public class ElmahOptions
     /// </summary>
     public bool ShowElmahErrorPage { get; set; }
 
+    /// <summary>
+    ///     Gets or sets a value indicating whether to log SQL queries made during the request. (Default is <c>true</c>)
+    /// </summary>
+    public bool LogSqlQueries { get; set; } = true;
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether to log SQL parameter values for queries made during the request. (Default is <c>true</c>)
+    /// </summary>
+    public bool LogSqlQueryParameters { get; set; } = true;
+
     public virtual Task Error(HttpContext context, Error error) => OnError(context, error);
 }

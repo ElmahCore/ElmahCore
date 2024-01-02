@@ -12,7 +12,8 @@ public static class ApplicationBuilderExtensions
 {
     public static IApplicationBuilder UseElmahMiddleware(this IApplicationBuilder app)
     {
-        // We don't use an option for this, but registration of the service is opt-in
+        // This is not related to middleware but need to execute this during startup - rather
+        // than require another method, we're just hitching on to this method.
         var observer = app.ApplicationServices.GetService<ElmahSqlDiagnosticObserver>();
         if (observer is not null)
         {
