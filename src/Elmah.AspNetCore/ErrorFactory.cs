@@ -194,23 +194,23 @@ internal sealed class ErrorFactory : IErrorFactory
         var serverVariables = new NameValueCollection();
         if (context is not null)
         {
-            LoadVariables(serverVariables, () => context.Features, "");
-            LoadVariables(serverVariables, () => context.User, "User_");
+            LoadServerVariables(serverVariables, () => context.Features, string.Empty);
+            LoadServerVariables(serverVariables, () => context.User, "User_");
 
             var ss = context.RequestServices?.GetService(typeof(ISession));
             if (ss is not null)
             {
-                LoadVariables(serverVariables, () => context.Session, "Session_");
+                LoadServerVariables(serverVariables, () => context.Session, "Session_");
             }
 
-            LoadVariables(serverVariables, () => context.Items, "Items_");
-            LoadVariables(serverVariables, () => context.Connection, "Connection_");
+            LoadServerVariables(serverVariables, () => context.Items, "Items_");
+            LoadServerVariables(serverVariables, () => context.Connection, "Connection_");
         }
 
         return serverVariables;
     }
 
-    private static void LoadVariables(NameValueCollection serverVariables, Func<object?> getObject, string prefix)
+    private static void LoadServerVariables(NameValueCollection serverVariables, Func<object?> getObject, string prefix)
     {
         object? obj;
         try
@@ -261,11 +261,19 @@ internal sealed class ErrorFactory : IErrorFactory
                             if (val is not null && val.GetType().ToString() != val.ToString() &&
                                 !val.GetType().IsSubclassOf(typeof(Stream)))
                             {
+                                var keyName = keyProp.GetValue(item)?.ToString();
                                 var propName =
                                     prop.Name.StartsWith("RequestHeaders",
                                         StringComparison.InvariantCultureIgnoreCase)
                                         ? "Header_"
                                         : prop.Name + "_";
+
+                                if (propName == "Header_" && "Cookie".Equals(keyName, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    // Cookies are loaded separately
+                                    continue;
+                                }
+
                                 serverVariables.Add(prefix + propName + keyProp.GetValue(item), val.ToString());
                             }
                         }
