@@ -168,7 +168,7 @@ export default {
           (window.$elmah_root || "/elmah") +
             "/api/new-errors?id=" +
             id +
-            "q=" +
+            "&q=" +
             encodeURIComponent(searchText),
           filterTags
         )
