@@ -13,6 +13,5 @@ public sealed class ElmahLogMessageEntry<TState> : IElmahLogMessage
     public LogLevel? Level { get; init; }
     public TState State { get; init; } = default!;
     public Func<TState, Exception?, string> Formatter { get; init; } = default!;
-    public KeyValuePair<string, string>[]? Params { get; init; }
     public string Render() => this.Formatter(this.State, this.Exception);
 }

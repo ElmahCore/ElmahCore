@@ -12,6 +12,6 @@ public interface IElmahLogMessage
     LogLevel? Level { get; }
     string? Message => this.Render();
     string? Render();
-    KeyValuePair<string, string>[]? Params { get; }
+    KeyValuePair<string, string>[]? Params => null;
     bool Collapsed => true;
 }
