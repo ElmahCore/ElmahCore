@@ -6,17 +6,20 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DiagnosticAdapter;
+using Microsoft.Extensions.Options;
 
 namespace Elmah.AspNetCore;
 
 internal sealed class ElmahSqlDiagnosticObserver : IObserver<DiagnosticListener>, IDisposable
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IOptions<SqlDiagnosticOptions> _options;
     private readonly List<IDisposable> _subscriptions = new();
 
-    public ElmahSqlDiagnosticObserver(IHttpContextAccessor httpContextAccessor)
+    public ElmahSqlDiagnosticObserver(IHttpContextAccessor httpContextAccessor, IOptions<SqlDiagnosticOptions> options)
     {
         _httpContextAccessor = httpContextAccessor;
+        _options = options;
     }
 
     [DiagnosticName("System.Data.SqlClient.WriteCommandAfter")]
@@ -76,18 +79,21 @@ internal sealed class ElmahSqlDiagnosticObserver : IObserver<DiagnosticListener>
             return;
         }
 
-        if (cmd.CommandType == CommandType.StoredProcedure)
+        if (_options.Value.LogSqlParameters)
         {
-            query = (query + " " + string.Join(", ", cmd.Parameters
-                .Cast<DbParameter>()
-                .Select(p => $"{p.ParameterName}={FormatParameterValue(p)}")))
-                .Trim();
-        }
-        else
-        {
-            query = cmd.Parameters
-                .Cast<DbParameter>()
-                .Aggregate(cmd.CommandText, (current, p) => current.Replace(p.ParameterName, $"/*{p.ParameterName}*/ {FormatParameterValue(p)}"));
+            if (cmd.CommandType == CommandType.StoredProcedure)
+            {
+                query = (query + " " + string.Join(", ", cmd.Parameters
+                    .Cast<DbParameter>()
+                    .Select(p => $"{p.ParameterName}={FormatParameterValue(p)}")))
+                    .Trim();
+            }
+            else
+            {
+                query = cmd.Parameters
+                    .Cast<DbParameter>()
+                    .Aggregate(cmd.CommandText, (current, p) => current.Replace(p.ParameterName, $"/*{p.ParameterName}*/ {FormatParameterValue(p)}"));
+            }
         }
 
         context.AddSql(id, new ElmahLogSqlEntry
