@@ -1,21 +1,32 @@
 <Project>
   <PropertyGroup>
-    <Authors>Elmah</Authors>
-    <Company>Elmah</Company>
+    <Authors>Joshua Searles</Authors>
     <NeutralLanguage>en-001</NeutralLanguage>
     <RepositoryUrl>https://github.com/jrsearles/Elmah.AspNetCore</RepositoryUrl>
     <Copyright>Elmah</Copyright>
     <PackageProjectUrl>https://github.com/jrsearles/Elmah.AspNetCore</PackageProjectUrl>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
     <PackageOutputPath>$(MSBuildThisFileDirectory)/artifacts</PackageOutputPath>
+
+    <Copyright>Copyright (C) Joshua Searles and Contributors. All rights reserved.</Copyright>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <GenerateRepositoryUrlAttribute>true</GenerateRepositoryUrlAttribute>
+
+      <EnableSourceLink>true</EnableSourceLink>
+    <EnableSourceControlManagerQueries>true</EnableSourceControlManagerQueries>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <UseSourceLink>true</UseSourceLink>
+
+    <RollForward>LatestMinor</RollForward>
   </PropertyGroup>
 
   <PropertyGroup>
     <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
-    <MinVerTagPrefix>$(AssemblyName)@</MinVerTagPrefix>
   </PropertyGroup>
 </Project>

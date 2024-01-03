@@ -6,6 +6,7 @@
     <PackageId>Elmah.AspNetCore</PackageId>
     <Product>Elmah.AspNetCore</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <MinVerTagPrefix>$(AssemblyName)@</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>

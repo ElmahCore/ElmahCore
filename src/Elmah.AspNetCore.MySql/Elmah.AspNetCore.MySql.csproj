@@ -4,6 +4,7 @@
     <AssemblyName>Elmah.AspNetCore.MySql</AssemblyName>
     <PackageId>Elmah.AspNetCore.MySql</PackageId>
   	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <MinVerTagPrefix>$(AssemblyName)@</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>

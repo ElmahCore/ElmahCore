@@ -6,6 +6,7 @@
     <PackageId>Elmah.AspNetCore.Postgresql</PackageId>
     <Product>Elmah.AspNetCore.Postgresql</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <MinVerTagPrefix>$(AssemblyName)@</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>

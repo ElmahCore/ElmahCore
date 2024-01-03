@@ -6,6 +6,7 @@
     <PackageId>Elmah.Common</PackageId>
     <Product>Elmah.Common</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <MinVerTagPrefix>$(AssemblyName)@</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>
