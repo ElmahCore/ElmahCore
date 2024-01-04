@@ -13,8 +13,6 @@ public static class EndpointRouteBuilderExtensions
 
     public static IEndpointConventionBuilder MapElmah(this IEndpointRouteBuilder endpoints, [StringSyntax("Route")] string prefix)
     {
-        // HACK: we're using the options instance as global configuration. It might make more sense to create our
-        // own object to store configuration context that is shared.
         var options = endpoints.ServiceProvider.GetRequiredService<ElmahEnvironment>();
         options.Path = prefix;
 

@@ -1,12 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net6.0;net7.0;net8.0;</TargetFrameworks>
-    <AssemblyName>Elmah.AspNetCore</AssemblyName>
-    <PackageId>Elmah.AspNetCore</PackageId>
-    <Product>Elmah.AspNetCore</Product>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <MinVerTagPrefix>$(AssemblyName)@</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,10 +11,6 @@
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" />
-    <PackageReference Include="MinVer">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Linq.Async" />
   </ItemGroup>
