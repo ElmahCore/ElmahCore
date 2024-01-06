@@ -31,7 +31,7 @@ public interface IElmahLogFeature
     /// <param name="memberName">The member name</param>
     /// <param name="file">The file name</param>
     /// <param name="line">The line number</param>
-    void LogParameters((string name, object value)[] list, string typeName, string memberName, string file, int line);
+    void LogParameters((string name, object? value)[] list, string typeName, string memberName, string file, int line);
 
     void SetSqlDuration(Guid id);
 

@@ -1,5 +1,6 @@
 [![License](https://img.shields.io/github/license/jrsearles/ElmahCore)](LICENSE)
 [![Build](https://github.com/jrsearles/ElmahCore/actions/workflows/build.yml/badge.svg)](https://github.com/jrsearles/ElmahCore/actions/workflows/build.yml)
+[![Nuget](https://img.shields.io/nuget/v/Elmah.AspNetCore)](https://www.nuget.org/packages/Elmah.AspNetCore)
 
 # Elmah.AspNetCore
 
@@ -10,13 +11,15 @@ Features include:
 - Logging of unhandled exceptions
 - Friendly UI to view captured errors and contextual information
 - Hooks to include handled exceptions and other contextual information
-- Captures of logs
+- [Various ways to persist error logs](#error-persistence)
+- [Supports securing UI via built-in ASP.Net Core functionality](#restrict-access-to-the-elmah-ui)
+- Integrates with `Microsoft.Extensions.Logging` to capture logs made during a request
 
-> This is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore). Credit goes to the owners and contributors of that library. This fork attempts to catch up the library with ongoing changes in the dotnet releases and follow established conventions and practices for integegration.
+> This is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore) which is itself a fork of the original [Elmah](https://elmah.github.io/) library. Credit goes to the owners and contributors of those libraries. This fork attempts to align with modern 
 
 ![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-new-ui.png)
 
-## Simple usage
+## Basic usage
 
 **First**, install the _Elmah.AspNetCore_ [Nuget package](https://www.nuget.org/packages/Elmah.AspNetCore) into your app.
 
@@ -43,19 +46,49 @@ app.MapElmah(); // <- Add this to register Elmah endpoints
 
 `builder.Host.UseElmah()` registers and configures the Elmah services. An overload which accepts an action is available to modify the configuration.
 
-`app.UseElmahMiddleware()` registers the middleware used by Elmah to start capturing errors and contextual information. Only middleware registered after the Elmah middleware will be included in the error capturing. It is recommended that this is included before most other middleware. For best results, call after the built-in `UseExceptionHandler`.
+`app.UseElmahMiddleware()` registers the middleware used by Elmah to start capturing errors and contextual information. Only middleware registered after the Elmah middleware will be included in the error capturing. It is recommended that this is included before most other middleware. For best results, call after the built-in `UseExceptionHandler()`.
 
 `app.MapElmah()` registers the routes used to serve content for the Elmah UI. By default these will be under `/elmah`, but the method includes an overload which allows overriding the root path.
 
+## Elmah Options
+
+| Option                | Type     | Default                                 | Description                                                           |
+| --------------------- | -------- | --------------------------------------- | --------------------------------------------------------------------- |
+| ApplicationName       | string   | ApplicationName from `IHostEnvironment` | Application name captured in error log                                |
+| LogRequestBody        | bool     | `true`                                  | Logs the body of the request                                          |
+| LogRequestCookies     | bool     | `true`                                  | Logs the cookie values for the request                                |
+| LogRequestForm        | bool     | `true`                                  | Logs the form values for the request                                  |
+| LogSqlQueries         | bool     | `true`                                  | Logs SQL queries using "SqlClientDiagnosticListener"                  |
+| LogSqlQueryParameters | bool     | `true`                                  | Logs parameter values for the SQL queries captured by `LogSqlQueries` |
+| ShowElmahErrorPage    | bool     | `false`                                 | Displays the Elmah UI when an error is captured                       |
+| SourcePaths           | string[] | empty                                   | Paths to source code to enrich stack traces                           |
+
+> :information_source: Elmah options work well with environment specific `appsettings` files. A `Configure` method exists on the builder to enable binding configuration to Elmah options.
+
+```json
+{
+    "Elmah": {
+        "ShowElmahErrorPage": true
+    }
+}
+```
+
+```csharp
+builder.Host.UseElmah((builderContext, elmah) =>
+{
+    elmah.Configure(builderContext.Configuration.GetSection("Elmah"));
+});
+```
+
 ## Restrict access to the Elmah UI
 
-The `MapElmah()` registers the Elmah endpoints as regular endpoints in the application. As such, it will use the default authorization & authentication policies for the application. Metadata can be applied to the returned endpoint collection to customize this.
+The `MapElmah()` method registers the Elmah endpoints as regular endpoints in the application. As such, it can accept authorization policies just like any other endpoints in the application. Metadata can be applied to the returned endpoint collection.
 
 ```csharp
 // allow all users to access UI
 app.MapElmah().AllowAnonymous();
 
-// require authenticated user
+// or require authenticated user
 app.MapElmah().RequireAuthorization();
 ```
 
@@ -63,9 +96,9 @@ app.MapElmah().RequireAuthorization();
 
 ## Error Persistence
 
-This ErrorLogs available in board:
+The following persistence options are built into the core package:
 
-- MemoryErrorLog – store errors in memory (by default)
+- MemoryErrorLog – store errors in memory (default)
 - XmlFileErrorLog – store errors in XML files
 
 ```csharp
@@ -91,73 +124,11 @@ builder.Host.UseElmah((builderContext, elmah) =>
 });
 ```
 
-You can create implement your own error log, which will store errors anywhere.
-
-```csharp
-    class MyErrorLog : ErrorLog
-```
-
-## Raise an Exception
-
-```csharp
-public IActionResult Test()
-{
-    HttpContext.RaiseError(new InvalidOperationException("Test"));
-}
-```
-
-## Microsoft.Extensions.Logging support
-
-Since version 2.0 ElmahCore support Microsoft.Extensions.Logging
-![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-log.png)
-
-## Source Preview
-
-Since version 2.0.1 ElmahCore support source preview.
-Just add paths to source files.
-
-```csharp
-services.AddElmah(options =>
-{
-   options.SourcePaths = new []
-   {
-      @"D:\tmp\ElmahCore.DemoCore3",
-      @"D:\tmp\ElmahCore.Mvc",
-      @"D:\tmp\ElmahCore"
-   };
-});
-```
-
-## Log the request body
-
-Since version 2.0.5 ElmahCore can log the request body.
-
-## Logging SQL request body
-
-Since version 2.0.6 ElmahCore can log the SQL request body.
-![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-4.png)
-
-## Logging method parameters
-
-Since version 2.0.6 ElmahCore can log method parameters.
-![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-5.png)
-
-```csharp
-using ElmahCore;
-...
-
-public void TestMethod(string p1, int p2)
-{
-    // Logging method parameters
-    this.LogParams((nameof(p1), p1), (nameof(p2), p2));
-    ...
-}
-
-```
+You can create implement your own error log persistence by implementing the abstract class `Elmah.ErrorLog` and registered it using the builder method `elmah.PersistTo<YourErrorLog>()`.
 
 ## Using UseElmahExceptionPage
 
-You can replace `UseDeveloperExceptionPage` with the Elmah diagnostics page using `UseElmahExceptionPage` (Or the `ShowElmahErrorPage` in Elmah options).
+Use `UseElmahExceptionPage` (Or the `ShowElmahErrorPage` in Elmah options) to automatically display the Elmah UI diagnostics page when an error is captured.
 
 ```csharp
 builder.Host.UseElmah((builderContext, elmah) =>
@@ -169,7 +140,7 @@ builder.Host.UseElmah((builderContext, elmah) =>
 });
 ```
 
-**TIP:** The Elmah diagnosics page can leak sensitive environmental details. Consider limiting the page to development environments or [placing security on the Elmah endpoints](#restrict-access-to-the-elmah-ui).
+> :warning: The Elmah diagnosics page can leak sensitive environmental details. Consider limiting the page to development environments or [placing security on the Elmah endpoints](#restrict-access-to-the-elmah-ui).
 
 ## Using Notifiers
 
@@ -225,20 +196,33 @@ JavaScript filters not yet implemented :(
 Add notifiers to errorFilter node if you do not want to send notifications
 Filtered errors will be logged, but will not be sent.
 
-## Search And Filters
+## Extensions
 
-Since version 2.2.0 tou can use full-text search and multiple filter.
+### Raise an Exception
 
-Full-text search work on analyzed text fields.
+```csharp
+using Elmah.AspNetCore;
 
-![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-filters-1.png)
+public async Task<IActionResult> Test()
+{
+    await HttpContext.RaiseErrorAsync(new InvalidOperationException("Test"));
+}
+```
 
-Filters are available through either the **Add filter** button.
+### Logging method parameters
 
-![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-filters-2.png)
+```csharp
+using Elmah.AspNetCore;
 
-Or you can use **filter icon** to the right of the error field.
+public void TestMethod(string p1, int p2)
+{
+    // Logging method parameters
+    HttpContext.LogParamsToElmah(p1, p2);
+}
+```
 
-![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-filters-3.png)
+## Contributing
 
-Currently supports only Memory and XmlFile error logs.
+The Elmah application contains a small [Vue](https://vuejs.org/) frontend which is bundled and embedded into the application when packaged. The source for the frontend is in the `ui` folder. The bundled content is not included in source control. Run `npm install` and then `npm run build` to generate the bundled content locally, which will place the bundled application into the `wwwroot` folder of the `Elmah.AspNetCore` project. Building the Elmah project will then embed the bundled content.
+
+Running `build.ps1` from the root of the repository will run all of these steps and generate the packages locally.

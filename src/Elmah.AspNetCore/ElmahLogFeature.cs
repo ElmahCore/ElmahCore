@@ -33,7 +33,7 @@ internal class ElmahLogFeature : IElmahLogFeature
         }
     }
 
-    public void LogParameters((string name, object value)[] list, string typeName, string memberName,
+    public void LogParameters((string name, object? value)[] list, string typeName, string memberName,
         string file, int line)
     {
         _params.Add(new ElmahLogParameters(DateTime.Now, list, typeName, memberName, file, line));

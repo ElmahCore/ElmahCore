@@ -20,7 +20,7 @@ public class IndexModel : PageModel
         _logger.LogWarning("Test");
         _logger.LogCritical(new InvalidOperationException("Test"), "Test");
 
-        await this.HttpContext.RaiseError(new Exception("test2"));
+        await this.HttpContext.RaiseErrorAsync(new Exception("test2"));
 
         var r = 0;
         // ReSharper disable once UnusedVariable

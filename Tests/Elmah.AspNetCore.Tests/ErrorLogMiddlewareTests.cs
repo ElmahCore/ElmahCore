@@ -34,7 +34,7 @@ public class ErrorLogMiddlewareTests
         services.AddSingleton(_elmahLogger);
         httpContext.RequestServices = services.BuildServiceProvider();
 
-        Func<Task> act = async () => await ElmahExtensions.RaiseError(httpContext, new Exception());
+        Func<Task> act = async () => await ElmahExtensions.RaiseErrorAsync(httpContext, new Exception());
         act.Should().NotThrowAsync();
     }
 }
