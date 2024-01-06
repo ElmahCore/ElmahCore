@@ -8,6 +8,10 @@ internal static partial class Endpoints
 {
     public static IEndpointConventionBuilder MapTest(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/test", new[] { HttpMethods.Get, HttpMethods.Post }, (HttpContext _) => throw new TestException());
+        var handler = RequestDelegateFactory.Create((HttpContext _) => { throw new TestException(); });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/test", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 }

@@ -13,7 +13,7 @@ internal static partial class Endpoints
 {
     public static IEndpointConventionBuilder MapJson(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/json", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromQuery] string id, [FromServices] ErrorLog errorLog) =>
+        var handler = RequestDelegateFactory.Create(async ([FromQuery] string id, [FromServices] ErrorLog errorLog) =>
         {
             if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out Guid errorGuid))
             {
@@ -37,5 +37,9 @@ internal static partial class Endpoints
             var err = new ErrorWrapper(entry.Error, errorLog.SourcePaths) { HtmlMessage = null };
             return Results.Json(err, DefaultJsonSerializerOptions.IgnoreDefault);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/json", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 }

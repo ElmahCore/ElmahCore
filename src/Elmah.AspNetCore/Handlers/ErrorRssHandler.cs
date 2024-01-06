@@ -18,7 +18,7 @@ internal static partial class Endpoints
 {
     public static IEndpointConventionBuilder MapRss(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapGet($"{prefix}/rss", async ([FromServices] ErrorLog errorLog, HttpContext context) =>
+        var handler = RequestDelegateFactory.Create(async ([FromServices] ErrorLog errorLog, HttpContext context) =>
         {
             const int pageSize = 15;
             var entries = new List<ErrorLogEntry>(pageSize);
@@ -42,5 +42,9 @@ internal static partial class Endpoints
             var rss = RssXml.Rss(title, link, "AddMessage of recent errors", items);
             return Results.Content(XmlText.StripIllegalXmlCharacters(rss.ToString()), MediaTypeNames.Application.Xml);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapGet($"{prefix}/rss", pipeline.Build());
     }
 }

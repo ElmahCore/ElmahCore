@@ -16,7 +16,7 @@ internal static partial class Endpoints
 {
     public static IEndpointConventionBuilder MapApiError(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/api/error", new[] { HttpMethods.Get, HttpMethods.Post }, async (
+        var handler = RequestDelegateFactory.Create(async (
             [FromQuery] string? id,
             [FromServices] ErrorLog errorLog,
             CancellationToken cancellationToken) =>
@@ -29,11 +29,15 @@ internal static partial class Endpoints
             var error = await GetErrorAsync(errorLog, errorGuid, cancellationToken);
             return Results.Json(error, DefaultJsonSerializerOptions.ApiSerializerOptions);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/api/error", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 
     public static IEndpointConventionBuilder MapApiErrors(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/api/errors", new[] { HttpMethods.Get, HttpMethods.Post }, async (
+        var handler = RequestDelegateFactory.Create(async (
             [FromQuery(Name = "i")] int? errorIndex,
             [FromQuery(Name = "s")] int? pageSize,
             [FromQuery(Name = "q")] string? searchText,
@@ -46,11 +50,15 @@ internal static partial class Endpoints
             var entities = await GetErrorsAsync(searchText, errorLog, filters, errorIndex ?? 0, pageSize ?? 0, cancellationToken);
             return Results.Json(entities, DefaultJsonSerializerOptions.ApiSerializerOptions);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/api/errors", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 
     public static IEndpointConventionBuilder MapApiNewErrors(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapPost($"{prefix}/api/new-errors", async (
+        var handler = RequestDelegateFactory.Create(async (
             [FromQuery] string? id,
             [FromQuery(Name = "q")] string? searchText,
             [FromServices] ErrorLog errorLog,
@@ -62,6 +70,10 @@ internal static partial class Endpoints
             var newEntities = await GetNewErrorsAsync(searchText, errorLog, id, filters, cancellationToken);
             return Results.Json(newEntities, DefaultJsonSerializerOptions.ApiSerializerOptions);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapPost($"{prefix}/api/new-errors", pipeline.Build());
     }
 
     private static async Task<List<ErrorLogFilter>> ReadErrorFilters(HttpRequest request)

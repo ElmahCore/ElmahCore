@@ -26,7 +26,7 @@ internal static partial class Endpoints
 
     public static IEndpointConventionBuilder MapDownload(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/download", new[] { HttpMethods.Get, HttpMethods.Post }, async (
+        var handler = RequestDelegateFactory.Create(async (
             [FromQuery] string? format,
             [FromQuery] int? limit,
             [FromServices] ErrorLog errorLog,
@@ -45,6 +45,10 @@ internal static partial class Endpoints
 
             return Results.Ok();
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/download", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 
     private static async Task ProcessRequestAsync(ErrorLog log, HttpContext context, Format format, int maxDownloadCount)

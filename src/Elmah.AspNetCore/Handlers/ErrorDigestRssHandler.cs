@@ -25,7 +25,7 @@ internal static partial class Endpoints
 {
     public static IEndpointConventionBuilder MapDigestRss(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/digestrss", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromServices] ErrorLog errorLog, HttpContext context) =>
+        var handler = RequestDelegateFactory.Create(async ([FromServices] ErrorLog errorLog, HttpContext context) =>
         {
             var log = errorLog;
 
@@ -39,6 +39,10 @@ internal static partial class Endpoints
 
             return Results.Content(XmlText.StripIllegalXmlCharacters(rss.ToString()), MediaTypeNames.Application.Xml);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/digestrss", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 
     private static async IAsyncEnumerable<XElement> GetItems(ErrorLog log, Uri baseUrl, int pageSize, int maxPageLimit)

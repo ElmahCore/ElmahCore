@@ -18,20 +18,28 @@ internal static partial class Endpoints
 
     public static IEndpointConventionBuilder MapMsdn(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/exception/{{*path}}", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromRoute] string path) =>
+        var handler = RequestDelegateFactory.Create(async ([FromRoute] string path) =>
         {
             string json = (await Cache.GetOrCreateAsync(path, LoadAndCacheMsdnEntryAsync))!;
             return Results.Content(json, MediaTypeNames.Application.Json);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/exception/{{*path}}", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 
     public static IEndpointConventionBuilder MapMsdnStatus(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapMethods($"{prefix}/status/{{status}}", new[] { HttpMethods.Get, HttpMethods.Post }, async ([FromRoute] int status) =>
+        var handler = RequestDelegateFactory.Create(async ([FromRoute] int status) =>
         {
             string json = (await Cache.GetOrCreateAsync($"status-{status}", LoadAndCacheStatusAsync))!;
             return Results.Content(json, MediaTypeNames.Application.Json);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapMethods($"{prefix}/status/{{status}}", new[] { HttpMethods.Get, HttpMethods.Post }, pipeline.Build());
     }
 
     private static async Task<string> LoadAndCacheMsdnEntryAsync(ICacheEntry entry)

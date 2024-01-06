@@ -17,7 +17,7 @@ internal static partial class Endpoints
 {
     public static IEndpointConventionBuilder MapXml(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapGet($"{prefix}/xml", async ([FromQuery] string id, [FromServices] ErrorLog errorLog) =>
+        var handler = RequestDelegateFactory.Create(async ([FromQuery] string id, [FromServices] ErrorLog errorLog) =>
         {
             if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out Guid errorGuid))
             {
@@ -45,5 +45,9 @@ internal static partial class Endpoints
             xmlSerializer.Serialize(textWriter, wrappedError);
             return Results.Content(textWriter.ToString(), MediaTypeNames.Application.Xml, Encoding.UTF8);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapGet($"{prefix}/xml", pipeline.Build());
     }
 }

@@ -42,14 +42,18 @@ internal static partial class Endpoints
 
     public static IEndpointConventionBuilder MapRoot(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        return builder.MapGet(prefix, ReturnIndex);
+        var handler = RequestDelegateFactory.Create(ReturnIndex);
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.MapGet(prefix, pipeline.Build());
     }
 
     public static IEndpointConventionBuilder MapResources(this IEndpointRouteBuilder builder, string prefix = "")
     {
         var contentTypeProvider = new FileExtensionContentTypeProvider();
         
-        return builder.Map($"{prefix}/{{*path}}", async ([FromRoute] string path, [FromServices] ILoggerFactory loggerFactory, HttpContext context) =>
+        var handler = RequestDelegateFactory.Create(async ([FromRoute] string path, [FromServices] ILoggerFactory loggerFactory, HttpContext context) =>
         {
             if (!path.Contains('.', StringComparison.Ordinal))
             {
@@ -71,5 +75,9 @@ internal static partial class Endpoints
             contentTypeProvider.TryGetContentType(path, out string? contentType);
             return Results.Stream(resource, contentType);
         });
+
+        var pipeline = builder.CreateApplicationBuilder();
+        pipeline.Run(handler.RequestDelegate);
+        return builder.Map($"{prefix}/{{*path}}", pipeline.Build());
     }
 }
