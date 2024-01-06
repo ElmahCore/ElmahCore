@@ -18,15 +18,9 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jrsearles/Elmah.AspNetCore</PackageProjectUrl>
     
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <GenerateRepositoryUrlAttribute>true</GenerateRepositoryUrlAttribute>
     <RepositoryType>git</RepositoryType>
     <Deterministic>true</Deterministic>
-
-    <EnableSourceLink>true</EnableSourceLink>
-    <EnableSourceControlManagerQueries>true</EnableSourceControlManagerQueries>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <UseSourceLink>true</UseSourceLink>
 
     <RollForward>LatestMinor</RollForward>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
