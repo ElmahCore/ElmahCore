@@ -54,7 +54,7 @@ app.MapElmah(); // <- Add this to register Elmah endpoints
 
 | Option                | Type     | Default                                 | Description                                                           |
 | --------------------- | -------- | --------------------------------------- | --------------------------------------------------------------------- |
-| ApplicationName       | string   | ApplicationName from `IHostEnvironment` | Application name captured in error log                                |
+| ApplicationName       | string   | ApplicationName from [`IHostEnvironment`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.ihostenvironment?view=dotnet-plat-ext-8.0) | Application name captured in error log                                |
 | LogRequestBody        | bool     | `true`                                  | Logs the body of the request                                          |
 | LogRequestCookies     | bool     | `true`                                  | Logs the cookie values for the request                                |
 | LogRequestForm        | bool     | `true`                                  | Logs the form values for the request                                  |
@@ -140,7 +140,7 @@ builder.Host.UseElmah((builderContext, elmah) =>
 });
 ```
 
-> :warning: The Elmah diagnosics page can leak sensitive environmental details. Consider limiting the page to development environments or [placing security on the Elmah endpoints](#restrict-access-to-the-elmah-ui).
+> :warning: The Elmah diagnostics page can leak sensitive environmental details. Consider limiting the page to development environments or [placing security on the Elmah endpoints](#restrict-access-to-the-elmah-ui).
 
 ## Using Notifiers
 

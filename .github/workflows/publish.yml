@@ -1,8 +1,10 @@
-name: Build
+name: Publish
 
 on:
   workflow_dispatch:
   push:
+    tags:
+      - Elmah.**
 
 jobs:
   build:
@@ -39,5 +41,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test --no-restore --verbosity normal
+      - name: Pack & Push
+        run: |
+          fn=${GITHUB_REF_NAME//[@]/.}
+          dotnet nuget push "artifacts/${fn}*.nupkg" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate

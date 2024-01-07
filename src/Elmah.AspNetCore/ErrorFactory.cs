@@ -167,7 +167,7 @@ internal sealed class ErrorFactory : IErrorFactory
         return 500;
     }
 
-    private static KeyValuePair<string, string>[] GetStringParams((string name, object value)[] paramParams) =>
+    private static KeyValuePair<string, string>[] GetStringParams((string name, object? value)[] paramParams) =>
         (from param in paramParams
          where param != default
          select new KeyValuePair<string, string>(param.name, ToJsonString(param.value))).ToArray();
