@@ -24,12 +24,7 @@ jobs:
       - name: NPM Install
         working-directory: ui
         if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore') }}
-        run: npm install
-          
-      - name: NPM Lint
-        working-directory: ui
-        if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore') }}
-        run: npm run lint
+        run: npm ci
           
       - name: NPM Build
         working-directory: ui
