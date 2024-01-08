@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <Authors>Joshua Searles</Authors>
+    <Authors>Joshua Searles,Scott Mitchell,Atif Aziz,others</Authors>
     <NeutralLanguage>en-001</NeutralLanguage>
     <RepositoryUrl>https://github.com/jrsearles/Elmah.AspNetCore</RepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
     
-    <Copyright>Copyright (C) Joshua Searles and Contributors. All rights reserved.</Copyright>
+    <Copyright>Copyright (C) Elmah Contributors. All rights reserved.</Copyright>
     
     <PackageOutputPath>$(MSBuildThisFileDirectory)/artifacts</PackageOutputPath>
     <PackageId>$(MSBuildProjectName)</PackageId>

@@ -4,20 +4,21 @@
 
 # Elmah.AspNetCore
 
-ELMAH (Error Logging Middleware and Handlers) for ASP.NET Core. (Dotnet 6+)
+ELMAH (Error Logging Middleware and Handlers) for ASP.NET Core.
 
 Features include:
 
 - Logging of unhandled exceptions
 - Friendly UI to view captured errors and contextual information
 - Hooks to include handled exceptions and other contextual information
-- [Various ways to persist error logs](#error-persistence)
-- [Supports securing UI via built-in ASP.Net Core functionality](#restrict-access-to-the-elmah-ui)
-- Integrates with `Microsoft.Extensions.Logging` to capture logs made during a request
-
-> This is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore) which is itself a fork of the original [Elmah](https://elmah.github.io/) library. Credit goes to the owners and contributors of those libraries. This fork attempts to align with modern 
+- Various ways to [persist error logs](#error-persistence)
+- Supports [securing UI](#restrict-access-to-the-elmah-ui) via built-in ASP.Net Core functionality
+- [Notifications of errors](#using-notifiers) through email or custom notifiers
+- Integration with `Microsoft.Extensions.Logging` to capture logs made during a request
 
 ![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-new-ui.png)
+
+> This is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore) which is itself a fork of the original [Elmah](https://elmah.github.io/) library. Credit goes to the owners and contributors of those libraries. This fork attempts to align with modern 
 
 ## Basic usage
 
@@ -52,22 +53,27 @@ app.MapElmah(); // <- Add this to register Elmah endpoints
 
 ## Elmah Options
 
-| Option                | Type     | Default                                 | Description                                                           |
-| --------------------- | -------- | --------------------------------------- | --------------------------------------------------------------------- |
-| ApplicationName       | string   | ApplicationName from [`IHostEnvironment`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.ihostenvironment?view=dotnet-plat-ext-8.0) | Application name captured in error log                                |
-| LogRequestBody        | bool     | `true`                                  | Logs the body of the request                                          |
-| LogRequestCookies     | bool     | `true`                                  | Logs the cookie values for the request                                |
-| LogRequestForm        | bool     | `true`                                  | Logs the form values for the request                                  |
-| LogSqlQueries         | bool     | `true`                                  | Logs SQL queries using "SqlClientDiagnosticListener"                  |
-| LogSqlQueryParameters | bool     | `true`                                  | Logs parameter values for the SQL queries captured by `LogSqlQueries` |
-| ShowElmahErrorPage    | bool     | `false`                                 | Displays the Elmah UI when an error is captured                       |
-| SourcePaths           | string[] | empty                                   | Paths to source code to enrich stack traces                           |
+| Option                | Type                           | Default                                 | Description                                                                |
+| --------------------- | ------------------------------ | --------------------------------------- | -------------------------------------------------------------------------- |
+| ApplicationName       | string                         | ApplicationName from [`IHostEnvironment`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.ihostenvironment?view=dotnet-plat-ext-8.0) | Application name captured in error log |
+| Filters               | IErrorFilter[]                 | empty                                   | A collection of [`IErrorFilter`](#using-filters) instances
+| FiltersConfig         | string                         | `null`                                  | Path to XML for filter configuration                                       |
+| LogRequestBody        | bool                           | `true`                                  | Logs the body of the request                                               |
+| LogRequestCookies     | bool                           | `true`                                  | Logs the cookie values for the request                                     |
+| LogRequestForm        | bool                           | `true`                                  | Logs the form values for the request                                       |
+| LogSqlQueries         | bool                           | `true`                                  | Logs SQL queries using "SqlClientDiagnosticListener"                       |
+| LogSqlQueryParameters | bool                           | `true`                                  | Logs parameter values for the SQL queries captured by `LogSqlQueries`      |
+| Notifiers             | IErrorNotifier[]               | empty                                   | A collection of [`IErrorNotifier`](#using-notifiers) instances to send notifications on errors |
+| OnError               | Func<HttpContext, Error, Task> | empty                                   | Callback that is executed before error is logged. Consumer can add or remove content to be logged in this callback. |
+| ShowElmahErrorPage    | bool                           | `false`                                 | Displays the Elmah UI when an error is captured                            |
+| SourcePaths           | string[]                       | empty                                   | Paths to source code to enrich stack traces                                |
 
 > :information_source: Elmah options work well with environment specific `appsettings` files. A `Configure` method exists on the builder to enable binding configuration to Elmah options.
 
 ```json
 {
     "Elmah": {
+        "LogRequestCookies": false,
         "ShowElmahErrorPage": true
     }
 }
@@ -104,31 +110,31 @@ The following persistence options are built into the core package:
 ```csharp
 builder.Host.UseElmah((builderContext, elmah) =>
 {
-  elmah.PersistToFile("~/log"; /* OR "с:\errors" */);
+    elmah.PersistToFile("~/log"; /* OR "с:\errors" */);
 });
 ```
 
-- SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql))
-- MysqlErrorLog - store errors in MySQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql))
-- PgsqlErrorLog - store errors in PostgreSQL (add reference to [ElmahCore.Postgresql](https://www.nuget.org/packages/ElmahCore.Postgresql))
+- SqlErrorLog - store errors in MS SQL (add reference to [ElmahCore.Sql](https://www.nuget.org/packages/ElmahCore.Sql) and use `PersistToSql` method)
+- MysqlErrorLog - store errors in MySQL (add reference to [ElmahCore.MySql](https://www.nuget.org/packages/ElmahCore.MySql) and use `PersistToMySql` method)
+- PgsqlErrorLog - store errors in PostgreSQL (add reference to [ElmahCore.PostgreSql](https://www.nuget.org/packages/ElmahCore.PostgreSql) and use `PersistToPgsql` method)
 
 ```csharp
 builder.Host.UseElmah((builderContext, elmah) =>
 {
-  elmah.PersistToSql(options =>
-  {
-    options.ConnectionString = "connection_string";
-    options.SqlServerDatabaseSchemaName = "Errors"; //Defaults to dbo if not set
-    options.SqlServerDatabaseTableName = "ElmahError"; //Defaults to ELMAH_Error if not set
-  });
+    elmah.PersistToSql(options =>
+    {
+        options.ConnectionString = "connection_string";
+        options.SqlServerDatabaseSchemaName = "Errors"; //Defaults to dbo if not set
+        options.SqlServerDatabaseTableName = "ElmahError"; //Defaults to ELMAH_Error if not set
+    });
 });
 ```
 
-You can create implement your own error log persistence by implementing the abstract class `Elmah.ErrorLog` and registered it using the builder method `elmah.PersistTo<YourErrorLog>()`.
+You can create implement your own error log persistence by implementing the abstract class `Elmah.ErrorLog` and registered it using the builder method `elmah.PersistTo<YourErrorLog>()` (or one of the other `PersistTo` overloads).
 
 ## Using UseElmahExceptionPage
 
-Use `UseElmahExceptionPage` (Or the `ShowElmahErrorPage` in Elmah options) to automatically display the Elmah UI diagnostics page when an error is captured.
+Use `UseElmahExceptionPage` (Or the `ShowElmahErrorPage` in Elmah options) to automatically display the Elmah UI diagnostics page when an uncaught exception occurs.
 
 ```csharp
 builder.Host.UseElmah((builderContext, elmah) =>
@@ -144,57 +150,62 @@ builder.Host.UseElmah((builderContext, elmah) =>
 
 ## Using Notifiers
 
-You can create your own notifiers by implement IErrorNotifier or IErrorNotifierWithId interface and add notifier to Elmah options:
+You can create your own notifiers by implementing `IErrorNotifier` interface and add notifier to Elmah options. Each notifier must have unique name. 
+(A notifier which generates emails is build into the library.)
 
 ```csharp
-services.AddElmah<XmlFileErrorLog>(options =>
+using Elmah;
+using Elmah.AspNetCore.Notifiers;
+
+builder.Host.UseElmah((builderContext, elmah) =>
 {
-    options.Path = @"errors";
-    options.LogPath = "~/logs";
-    options.Notifiers.Add(new ErrorMailNotifier("Email",emailOptions));
+    elmah.Configure(options =>
+    {
+        options.Notifiers.Add(new ErrorMailNotifier("Email", emailOptions));
+    });
 });
 ```
 
-Each notifier must have unique name.
-
 ## Using Filters
 
-You can use Elmah XML filter configuration in separate file, create and add custom filters:
+You can use Elmah XML filter configuration in separate file or define them in code. Implement `IErrorFilter` to define custom filters in code. Filtered errors will be logged, but will not be sent.
 
 ```csharp
-services.AddElmah<XmlFileErrorLog>(options =>
+using Elmah;
+
+builder.Host.UseElmah((builderContext, elmah) =>
 {
-    options.FiltersConfig = "elmah.xml";
-    options.Filters.Add(new MyFilter());
+    elmah.Configure(options =>
+    {
+        // Path to filters defined in XML
+        options.FiltersConfig = "elmah.xml";
+
+        // Add filters defined in code
+        options.Filters.Add(new MyFilter());
+    });
 })
 ```
 
-Custom filter must implement IErrorFilter.
 XML filter config example:
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <elmah>
-	<errorFilter>
-		<notifiers>
-			<notifier name="Email"/>
-		</notifiers>
-		<test>
-			<and>
-				<greater binding="HttpStatusCode" value="399" type="Int32" />
-				<lesser  binding="HttpStatusCode" value="500" type="Int32" />
-			</and> 
-		</test>
-	</errorFilter>
+  <errorFilter>
+    <notifiers>
+      <notifier name="Email"/>
+    </notifiers>
+    <test>
+      <and>
+        <greater binding="HttpStatusCode" value="399" type="Int32" />
+        <lesser binding="HttpStatusCode" value="500" type="Int32" />
+      </and> 
+    </test>
+  </errorFilter>
 </elmah>
 ```
 
-see more [here](https://elmah.github.io/a/error-filtering/examples/)
-
-JavaScript filters not yet implemented :(
-
-Add notifiers to errorFilter node if you do not want to send notifications
-Filtered errors will be logged, but will not be sent.
+See more details in [original documentation](https://elmah.github.io/a/error-filtering/examples/).
 
 ## Extensions
 
@@ -220,6 +231,17 @@ public void TestMethod(string p1, int p2)
     HttpContext.LogParamsToElmah(p1, p2);
 }
 ```
+
+## Migrating from ElmahCore
+
+Although this is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore), it is not quite a drop-in replacement. The core functionality is all here and largely unchanged, however there has been a lot of refactoring. There are numerous breaking changes, including the following. (This is not an exhaustive list.)
+
+- Most bootstrapping is now handled through a `UseElmah` method added to the WebBuilder.Host and a callback which exposes fluent builder methods.
+- Remove custom security through `OnPermissionCheck` option. Instead endpoint routing and standard authorization built into ASP.Net Core are leveraged. This now requires calling `MapElmah` during bootstrapping.
+- With these changes, the middleware no longer handles the UI. The middleware just handles capturing errors. For this reason, it no longer needs to be after authentication/authorization middleware.
+- Dropping support for Dotnet 5 and previous versions. (Feel free to open a ticket if this does become an obstacle for adoption and support will be considered if there is enough demand. Several newer dotnet features have been leveraged which would make back-porting difficult but not impossible.)
+- Removing sync-over-async. ErrorLog and other exposed methods are async when anything within the call stack is async.
+- More options were added to omit logging sensitive details like cookies or SQL queries.
 
 ## Contributing
 

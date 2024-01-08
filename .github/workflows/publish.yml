@@ -23,12 +23,12 @@ jobs:
 
       - name: NPM Install
         working-directory: ui
-        if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore') }}
+        if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore@') }}
         run: npm ci
           
       - name: NPM Build
         working-directory: ui
-        if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore') }}
+        if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore@') }}
         run: npm run build
           
       - uses: actions/setup-dotnet@v3
