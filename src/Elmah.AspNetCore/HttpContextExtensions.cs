@@ -7,7 +7,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Elmah.AspNetCore;
 
-internal static class HttpContextExceptions
+internal static class HttpContextExtensions
 {
     private static readonly MediaTypeHeaderValue TextHtmlMediaType = new(MediaTypeNames.Text.Html);
 

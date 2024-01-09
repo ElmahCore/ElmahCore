@@ -1,5 +1,5 @@
-[![License](https://img.shields.io/github/license/jrsearles/ElmahCore)](LICENSE)
-[![Build](https://github.com/jrsearles/ElmahCore/actions/workflows/build.yml/badge.svg)](https://github.com/jrsearles/ElmahCore/actions/workflows/build.yml)
+[![License](https://img.shields.io/github/license/jrsearles/AspNetCore)](LICENSE)
+[![Build](https://github.com/jrsearles/AspNetCore/actions/workflows/build.yml/badge.svg)](https://github.com/jrsearles/AspNetCore/actions/workflows/build.yml)
 [![Nuget](https://img.shields.io/nuget/v/Elmah.AspNetCore)](https://www.nuget.org/packages/Elmah.AspNetCore)
 
 # Elmah.AspNetCore
@@ -11,14 +11,15 @@ Features include:
 - Logging of unhandled exceptions
 - Friendly UI to view captured errors and contextual information
 - Hooks to include handled exceptions and other contextual information
-- Various ways to [persist error logs](#error-persistence)
+- Various methods to [persist error logs](#error-persistence)
 - Supports [securing UI](#restrict-access-to-the-elmah-ui) via built-in ASP.Net Core functionality
 - [Notifications of errors](#using-notifiers) through email or custom notifiers
 - Integration with `Microsoft.Extensions.Logging` to capture logs made during a request
+- Supports .NET 6+
 
 ![alt text](https://github.com/ElmahCore/ElmahCore/raw/master/images/elmah-new-ui.png)
 
-> This is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore) which is itself a fork of the original [Elmah](https://elmah.github.io/) library. Credit goes to the owners and contributors of those libraries. This fork attempts to align with modern 
+> This is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore) which is itself a fork of the original [Elmah](https://elmah.github.io/) library. Credit goes to the owners and contributors of those libraries. This fork attempts to catch up with features added to .NET.
 
 ## Basic usage
 
@@ -68,7 +69,7 @@ app.MapElmah(); // <- Add this to register Elmah endpoints
 | ShowElmahErrorPage    | bool                           | `false`                                 | Displays the Elmah UI when an error is captured                            |
 | SourcePaths           | string[]                       | empty                                   | Paths to source code to enrich stack traces                                |
 
-> :information_source: Elmah options work well with environment specific `appsettings` files. A `Configure` method exists on the builder to enable binding configuration to Elmah options.
+**TIP**: :information_source: Elmah options work well with environment specific `appsettings` files. A `Configure` method exists on the builder to enable binding configuration to Elmah options.
 
 ```json
 {
@@ -98,7 +99,7 @@ app.MapElmah().AllowAnonymous();
 app.MapElmah().RequireAuthorization();
 ```
 
-> See dotnet documentation for [Authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction?view=aspnetcore-8.0) for additional details.
+> See .NET documentation for [Authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction?view=aspnetcore-8.0) for additional details.
 
 ## Error Persistence
 
@@ -211,6 +212,8 @@ See more details in [original documentation](https://elmah.github.io/a/error-fil
 
 ### Raise an Exception
 
+To log a handled exception, use the `RaiseErrorAsync` extension method.
+
 ```csharp
 using Elmah.AspNetCore;
 
@@ -228,7 +231,7 @@ using Elmah.AspNetCore;
 public void TestMethod(string p1, int p2)
 {
     // Logging method parameters
-    HttpContext.LogParamsToElmah(p1, p2);
+    HttpContext.LogParamsToElmah(this, p1, p2);
 }
 ```
 
@@ -239,7 +242,7 @@ Although this is a fork of [ElmahCore](https://github.com/ElmahCore/ElmahCore), 
 - Most bootstrapping is now handled through a `UseElmah` method added to the WebBuilder.Host and a callback which exposes fluent builder methods.
 - Remove custom security through `OnPermissionCheck` option. Instead endpoint routing and standard authorization built into ASP.Net Core are leveraged. This now requires calling `MapElmah` during bootstrapping.
 - With these changes, the middleware no longer handles the UI. The middleware just handles capturing errors. For this reason, it no longer needs to be after authentication/authorization middleware.
-- Dropping support for Dotnet 5 and previous versions. (Feel free to open a ticket if this does become an obstacle for adoption and support will be considered if there is enough demand. Several newer dotnet features have been leveraged which would make back-porting difficult but not impossible.)
+- Dropping support for .NET 5 and previous versions. (Feel free to open a ticket if this does become an obstacle for adoption and support will be considered if there is enough demand. Several newer .NET features have been leveraged which would make back-porting difficult but not impossible.)
 - Removing sync-over-async. ErrorLog and other exposed methods are async when anything within the call stack is async.
 - More options were added to omit logging sensitive details like cookies or SQL queries.
 
