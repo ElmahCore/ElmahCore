@@ -1,0 +1,38 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Joshua Searles,Scott Mitchell,Atif Aziz,others</Authors>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <RepositoryUrl>https://github.com/jrsearles/Elmah.AspNetCore</RepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Nullable>enable</Nullable>
+    <LangVersion>10.0</LangVersion>
+    
+    <Copyright>Copyright (C) Elmah Contributors. All rights reserved.</Copyright>
+    
+    <PackageOutputPath>$(MSBuildThisFileDirectory)/artifacts</PackageOutputPath>
+    <PackageId>$(MSBuildProjectName)</PackageId>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <Product>$(MSBuildProjectName)</Product>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jrsearles/Elmah.AspNetCore</PackageProjectUrl>
+    
+    <GenerateRepositoryUrlAttribute>true</GenerateRepositoryUrlAttribute>
+    <RepositoryType>git</RepositoryType>
+    <Deterministic>true</Deterministic>
+
+    <RollForward>LatestMinor</RollForward>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+
+    <MinVerTagPrefix>$(MSBuildProjectName)@</MinVerTagPrefix>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Condition="Exists('README.md')" Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+</Project>

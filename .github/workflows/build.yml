@@ -21,7 +21,7 @@ jobs:
 
       - name: NPM Install
         working-directory: ui
-        run: npm install
+        run: npm ci
           
       - name: NPM Lint
         working-directory: ui
@@ -41,14 +41,3 @@ jobs:
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: packages
-          path: artifacts/*.nupkg
-
-      - name: Pack & Push
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        run: |
-          VERSION_WITHOUT_V=${GITHUB_REF_NAME#v}
-          dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate

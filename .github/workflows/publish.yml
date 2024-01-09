@@ -1,0 +1,45 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - Elmah.**
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: NPM Install
+        working-directory: ui
+        if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore@') }}
+        run: npm ci
+          
+      - name: NPM Build
+        working-directory: ui
+        if: ${{ startsWith(github.ref_name, 'Elmah.AspNetCore@') }}
+        run: npm run build
+          
+      - uses: actions/setup-dotnet@v3
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Pack & Push
+        run: |
+          fn=${GITHUB_REF_NAME//[@]/.}
+          dotnet nuget push "artifacts/${fn}*.nupkg" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
