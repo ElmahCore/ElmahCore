@@ -16,7 +16,7 @@ namespace Elmah.AspNetCore.Handlers;
 internal static partial class Endpoints
 {
     private static readonly HashSet<string> ResourceNames =
-        new(typeof(Endpoints).GetTypeInfo().Assembly.GetManifestResourceNames(), StringComparer.OrdinalIgnoreCase);
+        new(typeof(Endpoints).Assembly.GetManifestResourceNames(), StringComparer.OrdinalIgnoreCase);
 
     private static readonly Assembly ThisAssembly = typeof(Endpoints).Assembly;
     private static readonly string ResourcePrefix = $"{ThisAssembly.GetName().Name}.wwwroot.";

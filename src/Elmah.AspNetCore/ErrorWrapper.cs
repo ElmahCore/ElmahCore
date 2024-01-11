@@ -312,25 +312,24 @@ internal class ErrorWrapper
     public string? Version => _error.ServerVariables["Version"];
 
     [XmlIgnore]
-    public List<IElmahLogMessage> MessageLog
+    public List<ErrorLogMessageWrapper> MessageLog
     {
         get => GetMessageLog();
         // ReSharper disable once ValueParameterNotUsed
         set { }
     }
 
-    private List<IElmahLogMessage> GetMessageLog()
+    private List<ErrorLogMessageWrapper> GetMessageLog()
     {
-        var result = _error.MessageLog.ToList();
+        var result = _error.MessageLog.Select(x => new ErrorLogMessageWrapper(x)).ToList();
         foreach (var param in _error.Params)
         {
-            result.Add(new XmlLogMessage
+            result.Add(new ErrorLogMessageWrapper(new XmlLogMessage
             {
                 TimeStamp = param.TimeStamp,
                 Level = LogLevel.Information,
-                Message = $"Method {param.TypeName}.{param.MemberName} call with parameters:",
-                Params = param.Params
-            });
+                Message = $"Method {param.TypeName}.{param.MemberName} call with parameters:"
+            }, param.Params));
         }
 
         return result.OrderBy(i => i.TimeStamp).ToList();
@@ -451,5 +450,32 @@ internal class ErrorWrapper
         }
         // ReSharper disable once ValueParameterNotUsed
         set { }
+    }
+
+    internal sealed class ErrorLogMessageWrapper
+    {
+        private readonly IElmahLogMessage _message;
+        private readonly KeyValuePair<string, string>[]? _parameters;
+
+        public ErrorLogMessageWrapper(IElmahLogMessage message, KeyValuePair<string, string>[]? parameters = null)
+        {
+            _message = message;
+            _parameters = parameters;
+        }
+
+        public DateTime TimeStamp => _message.TimeStamp;
+
+        public string? Exception => _message.Exception;
+
+        public string? Scope => _message.Scope;
+
+        public LogLevel? Level => _message.Level;
+
+        public string? Message => _message.Render();
+
+        public KeyValuePair<string, string>[]? Params => _parameters;
+
+        // This property is used on client side only - passing it down as initial state
+        public bool Collapsed => true;
     }
 }
