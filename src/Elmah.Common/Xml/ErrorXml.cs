@@ -369,7 +369,7 @@ public static class ErrorXml
             WriteXmlAttribute(writer, "time-stamp",
                 XmlConvert.ToString(entry.TimeStamp.ToUniversalTime(), @"yyyy-MM-dd\THH:mm:ss.fffffff\Z"));
             WriteXmlAttribute(writer, "scope", entry.Scope);
-            WriteXmlAttribute(writer, "message", entry.Message);
+            WriteXmlAttribute(writer, "message", entry.Render());
             writer.WriteEndElement();
         }
 

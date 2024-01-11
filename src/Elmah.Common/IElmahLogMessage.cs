@@ -10,8 +10,5 @@ public interface IElmahLogMessage
     string? Exception { get; }
     string? Scope { get; }
     LogLevel? Level { get; }
-    string? Message => this.Render();
     string? Render();
-    KeyValuePair<string, string>[]? Params => null;
-    bool Collapsed => true;
 }

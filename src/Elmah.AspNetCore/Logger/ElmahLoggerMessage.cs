@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
-namespace Elmah;
+namespace Elmah.AspNetCore.Logger;
 
-public sealed class ElmahLogMessageEntry<TState> : IElmahLogMessage
+internal sealed class ElmahLoggerMessage<TState> : IElmahLogMessage
 {
     public DateTime TimeStamp { get; init; }
     public string? Scope { get; init; }
