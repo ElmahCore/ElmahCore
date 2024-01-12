@@ -106,7 +106,8 @@ internal static class ErrorLogFilterHelper
         { "status-code", e => e.Error.StatusCode.ToString() },
         { "type", e => e.Error.Type },
         { "url", e => e.Error.ServerVariables["PathBase"] + e.Error.ServerVariables["Path"] },
-        { "user", e => e.Error.User }
+        { "user", e => e.Error.User },
+        { "hostName", e => e.Error.HostName }
     };
 
     private static readonly Dictionary<ErrorLogFilterCondition, Func<string?, string, bool>> StringConditions =

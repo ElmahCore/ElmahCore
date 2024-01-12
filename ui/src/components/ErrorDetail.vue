@@ -142,6 +142,18 @@
                 </td>
               </tr>
               <tr>
+                <th>Host Name</th>
+                <td class="filter-link-hid">
+                  {{ item.hostName }}
+                  <b-link
+                    class="filter-link"
+                    @click="addFilter('hostName', '=', item.hostName)"
+                  >
+                    <font-awesome-icon icon="filter" class="mr-sm-2" />
+                  </b-link>
+                </td>
+              </tr>
+              <tr>
                 <th>Client IP</th>
                 <td class="filter-link-hid">
                   <flag
