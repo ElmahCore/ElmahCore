@@ -16,6 +16,7 @@ namespace Elmah.AspNetCore.Postgresql;
 public class PgsqlErrorLog : ErrorLog
 {
     private const int MaxAppNameLength = 60;
+    private volatile bool _checkTableExists = false;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="PgsqlErrorLog" /> class
@@ -38,10 +39,7 @@ public class PgsqlErrorLog : ErrorLog
 
         ConnectionString = connectionString;
 
-        if (createTablesIfNotExist)
-        {
-            CreateTableIfNotExists();
-        }
+        _checkTableExists = createTablesIfNotExist;
     }
 
     /// <summary>
@@ -60,24 +58,27 @@ public class PgsqlErrorLog : ErrorLog
     public override async Task LogAsync(Error error, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(error);
+
+        await this.EnsureTableExistsAsync(cancellationToken);
         
         var errorXml = ErrorXml.EncodeString(error);
 
-        using (var connection = new NpgsqlConnection(ConnectionString))
-        using (var command = Commands.LogError(error.Id, ApplicationName, error.HostName, error.Type, error.Source,
-            error.Message, error.User, error.StatusCode, error.Time, errorXml))
-        {
-            command.Connection = connection;
-            await connection.OpenAsync(cancellationToken);
-            await command.ExecuteNonQueryAsync(cancellationToken);
-        }
+        using var connection = new NpgsqlConnection(ConnectionString);
+        using var command = Commands.LogError(error.Id, ApplicationName, error.HostName, error.Type, error.Source,
+            error.Message, error.User, error.StatusCode, error.Time, errorXml);
+        command.Connection = connection;
+
+        await connection.OpenAsync(cancellationToken);
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public override async Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken)
     {
+        await this.EnsureTableExistsAsync(cancellationToken);
+
         string? errorXml;
 
-        using (var connection = new NpgsqlConnection(ConnectionString))
+        using var connection = new NpgsqlConnection(ConnectionString);
         using (var command = Commands.GetErrorXml(ApplicationName, id))
         {
             command.Connection = connection;
@@ -107,56 +108,58 @@ public class PgsqlErrorLog : ErrorLog
             throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
         }
 
-        using (var connection = new NpgsqlConnection(ConnectionString))
+        await this.EnsureTableExistsAsync(cancellationToken);
+
+        using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize))
         {
-            await connection.OpenAsync(cancellationToken);
+            command.Connection = connection;
 
-            using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize))
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
             {
-                command.Connection = connection;
-
-                using var reader = await command.ExecuteReaderAsync(cancellationToken);
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    var id = reader.GetGuid(0);
-                    var xml = reader.GetString(1);
-                    var error = ErrorXml.DecodeString(id, xml);
-                    errorEntryList.Add(new ErrorLogEntry(this, error));
-                }
+                var id = reader.GetGuid(0);
+                var xml = reader.GetString(1);
+                var error = ErrorXml.DecodeString(id, xml);
+                errorEntryList.Add(new ErrorLogEntry(this, error));
             }
+        }
 
-            using (var command = Commands.GetErrorsXmlTotal(ApplicationName))
-            {
-                command.Connection = connection;
-                return (int)(await command.ExecuteScalarAsync(cancellationToken))!;
-            }
+        using (var command = Commands.GetErrorsXmlTotal(ApplicationName))
+        {
+            command.Connection = connection;
+            return Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken));
         }
     }
 
     /// <summary>
     ///     Creates the necessary tables and sequences used by this implementation
     /// </summary>
-    private void CreateTableIfNotExists()
+    private async Task EnsureTableExistsAsync(CancellationToken cancellationToken)
     {
-        using (var connection = new NpgsqlConnection(ConnectionString))
+        if (!_checkTableExists)
         {
-            connection.Open();
+            return;
+        }
 
-            using (var cmdCheck = Commands.CheckTable())
-            {
-                cmdCheck.Connection = connection;
-                // ReSharper disable once PossibleNullReferenceException
-                var exists = (bool) cmdCheck.ExecuteScalar()!;
+        _checkTableExists = false;
 
-                if (!exists)
-                {
-                    using (var cmdCreate = Commands.CreateTable())
-                    {
-                        cmdCreate.Connection = connection;
-                        cmdCreate.ExecuteNonQuery();
-                    }
-                }
-            }
+        using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        using var cmdCheck = Commands.CheckTable();
+        cmdCheck.Connection = connection;
+
+        // ReSharper disable once PossibleNullReferenceException
+        var exists = (bool)(await cmdCheck.ExecuteScalarAsync(cancellationToken))!;
+
+        if (!exists)
+        {
+            using var cmdCreate = Commands.CreateTable();
+            cmdCreate.Connection = connection;
+            await cmdCreate.ExecuteNonQueryAsync(cancellationToken);
         }
     }
 
