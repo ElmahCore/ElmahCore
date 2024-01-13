@@ -23,7 +23,7 @@ internal static partial class Endpoints
             const int pageSize = 15;
             var entries = new List<ErrorLogEntry>(pageSize);
             var log = errorLog;
-            await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), 0, pageSize, entries);
+            await log.GetErrorsAsync(null, Array.Empty<ErrorLogFilter>(), 0, pageSize, entries);
 
             var title = $@"Error log of {log.ApplicationName} on {Environment.MachineName}";
 

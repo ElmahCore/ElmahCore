@@ -66,10 +66,9 @@ public abstract class ErrorLog
     ///     When overridden in a subclass, starts a task that asynchronously
     ///     does the same as <see cref="GetErrors" />.
     /// </summary>
-    public abstract Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList,
-        CancellationToken cancellationToken);
+    public abstract Task<int> GetErrorsAsync(string? searchText, ErrorLogFilter[] errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> entries, CancellationToken cancellationToken);
 
-    public async Task<int> GetNewErrorsAsync(string? searchText, List<ErrorLogFilter> errorLogFilters, Guid id, List<ErrorLogEntry> entries, CancellationToken cancellationToken)
+    public async Task<int> GetNewErrorsAsync(string? searchText, ErrorLogFilter[] errorLogFilters, Guid id, List<ErrorLogEntry> entries, CancellationToken cancellationToken)
     {
         int cnt = 0, count, page = 0;
         do

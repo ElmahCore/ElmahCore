@@ -112,7 +112,7 @@ internal static partial class Endpoints
         var entries = new List<ErrorLogEntry>(pageSize);
         for (var pageIndex = 0;; pageIndex++)
         {
-            await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), pageIndex, pageSize, entries);
+            await log.GetErrorsAsync(null, Array.Empty<ErrorLogFilter>(), pageIndex, pageSize, entries);
             if (!entries.Any())
             {
                 break;

@@ -76,11 +76,11 @@ internal static partial class Endpoints
         return builder.MapPost($"{prefix}/api/new-errors", pipeline.Build());
     }
 
-    private static async Task<List<ErrorLogFilter>> ReadErrorFilters(HttpRequest request)
+    private static async Task<ErrorLogFilter[]> ReadErrorFilters(HttpRequest request)
     {
         if (!HttpMethods.IsPost(request.Method))
         {
-            return new List<ErrorLogFilter>();
+            return Array.Empty<ErrorLogFilter>();
         }
 
         var filters = new List<ErrorLogFilter>();
@@ -94,7 +94,7 @@ internal static partial class Endpoints
             }
         }
 
-        return filters;
+        return filters.ToArray();
     }
 
     private static async Task<ErrorLogEntryWrapper?> GetErrorAsync(ErrorLog errorLog, Guid id, CancellationToken cancellationToken)
@@ -103,7 +103,7 @@ internal static partial class Endpoints
         return error == null ? null : new ErrorLogEntryWrapper(error);
     }
 
-    private static async Task<ErrorsList> GetErrorsAsync(string? searchText, ErrorLog errorLog, List<ErrorLogFilter> errorFilters,
+    private static async Task<ErrorsList> GetErrorsAsync(string? searchText, ErrorLog errorLog, ErrorLogFilter[] errorFilters,
         int errorIndex, int pageSize, CancellationToken cancellationToken)
     {
         errorIndex = Math.Max(0, errorIndex);
@@ -124,7 +124,7 @@ internal static partial class Endpoints
     }
 
     private static async Task<ErrorsList> GetNewErrorsAsync(string? searchText, ErrorLog errorLog, string? id,
-        List<ErrorLogFilter> errorFilters, CancellationToken cancellationToken)
+        ErrorLogFilter[] errorFilters, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out Guid errorGuid))
         {

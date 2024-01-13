@@ -84,7 +84,7 @@ public class MySqlErrorLog : ErrorLog
         return new ErrorLogEntry(this, error);
     }
 
-    public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+    public override async Task<int> GetErrorsAsync(string? searchText, ErrorLogFilter[] filters, int errorIndex, int pageSize,
         ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
     {
         if (errorIndex < 0)
