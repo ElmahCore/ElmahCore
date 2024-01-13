@@ -22,13 +22,11 @@ public abstract class ErrorLog
     /// <summary>
     ///     Get the name of this log.
     /// </summary>
-
     public virtual string Name => GetType().Name;
 
     /// <summary>
     ///     Gets the name of the application to which the log is scoped.
     /// </summary>
-
     public string ApplicationName
     {
         get => _appName ?? Assembly.GetEntryAssembly()?.GetName().Name!;
@@ -66,29 +64,5 @@ public abstract class ErrorLog
     ///     When overridden in a subclass, starts a task that asynchronously
     ///     does the same as <see cref="GetErrors" />.
     /// </summary>
-    public abstract Task<int> GetErrorsAsync(string? searchText, ErrorLogFilter[] errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> entries, CancellationToken cancellationToken);
-
-    public async Task<int> GetNewErrorsAsync(string? searchText, ErrorLogFilter[] errorLogFilters, Guid id, List<ErrorLogEntry> entries, CancellationToken cancellationToken)
-    {
-        int cnt = 0, count, page = 0;
-        do
-        {
-            var errors = new List<ErrorLogEntry>();
-            count = await GetErrorsAsync(searchText, errorLogFilters, page, 10, errors, cancellationToken);
-            foreach (var el in errors)
-            {
-                if (el.Id == id)
-                {
-                    return cnt;
-                }
-
-                cnt += 1;
-                entries.Add(el);
-            }
-
-            page += 1;
-        } while (cnt > 0);
-
-        return count;
-    }
+    public abstract Task<int> GetErrorsAsync(ErrorLogFilterCollection errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> entries, CancellationToken cancellationToken);
 }

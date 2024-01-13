@@ -100,7 +100,7 @@ public class XmlFileErrorLog : ErrorLog
     ///     Returns a page of errors from the folder in descending order
     ///     of logged time as defined by the sortable file names.
     /// </summary>
-    public override async Task<int> GetErrorsAsync(string? searchText, ErrorLogFilter[] filters, int errorIndex, int pageSize,
+    public override async Task<int> GetErrorsAsync(ErrorLogFilterCollection filters, int errorIndex, int pageSize,
         ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
     {
         if (errorIndex < 0)
@@ -139,7 +139,7 @@ public class XmlFileErrorLog : ErrorLog
 
         int totalCount;
         IEnumerable<ErrorLogEntry> entries;
-        if (filters.Length == 0 && string.IsNullOrEmpty(searchText))
+        if (filters.Count == 0)
         {
             entries = await files
                 .Skip(errorIndex)
@@ -156,7 +156,7 @@ public class XmlFileErrorLog : ErrorLog
             var fEntries = await files
                 .ToAsyncEnumerable()
                 .SelectAwait(e => LoadErrorLogEntryAsync(e, cancellationToken))
-                .Where(e => e is not null && ErrorLogFilterHelper.IsMatched(e, searchText, filters))
+                .Where(e => e is not null && filters.IsMatch(e))
                 .ToListAsync(cancellationToken: cancellationToken);
             totalCount = fEntries.Count;
 

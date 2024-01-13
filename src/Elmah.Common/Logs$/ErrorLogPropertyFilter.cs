@@ -3,9 +3,9 @@ using System.Text.RegularExpressions;
 
 namespace Elmah;
 
-public class ErrorLogFilter
+public sealed class ErrorLogPropertyFilter : IErrorLogFilter
 {
-    public ErrorLogFilter(string property, ErrorLogPropertyType propertyType, ErrorLogFilterCondition condition, string value)
+    public ErrorLogPropertyFilter(string property, ErrorLogPropertyType propertyType, ErrorLogFilterCondition condition, string value)
     {
         Property = property;
         PropertyType = propertyType;
@@ -18,7 +18,12 @@ public class ErrorLogFilter
     public ErrorLogFilterCondition Condition { get; }
     public string Value { get; }
 
-    public DateTime? GetValueAsDateTime()
+    public bool IsMatch(ErrorLogEntry entry)
+    {
+        return ErrorLogFilterHelper.DoFilter(entry, this);
+    }
+
+    internal DateTime? GetValueAsDateTime()
     {
         if (string.IsNullOrEmpty(Value))
         {
@@ -29,7 +34,7 @@ public class ErrorLogFilter
             System.Globalization.CultureInfo.InvariantCulture);
     }
 
-    public static ErrorLogFilter? Parse(string str)
+    public static ErrorLogPropertyFilter? Parse(string str)
     {
         var regex = new Regex(@"([^\s]*)\s+([^\s]*)\s+(.*)");
         var match = regex.Match(str);
@@ -57,6 +62,6 @@ public class ErrorLogFilter
             _ => throw new NotSupportedException($"Condition {condition} not supported")
         };
 
-        return new ErrorLogFilter(property, propertyType, con, value);
+        return new ErrorLogPropertyFilter(property, propertyType, con, value);
     }
 }

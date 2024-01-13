@@ -45,9 +45,9 @@ internal static partial class Endpoints
             HttpRequest request,
             CancellationToken cancellationToken) =>
         {
-            var filters = await ReadErrorFilters(request);
+            var filters = await ReadErrorFilters(request, searchText);
 
-            var entities = await GetErrorsAsync(searchText, errorLog, filters, errorIndex ?? 0, pageSize ?? 0, cancellationToken);
+            var entities = await GetErrorsAsync(errorLog, filters, errorIndex ?? 0, pageSize ?? 0, cancellationToken);
             return Results.Json(entities, DefaultJsonSerializerOptions.ApiSerializerOptions);
         });
 
@@ -65,9 +65,9 @@ internal static partial class Endpoints
             HttpRequest request,
             CancellationToken cancellationToken) =>
         {
-            var filters = await ReadErrorFilters(request);
+            var filters = await ReadErrorFilters(request, searchText);
 
-            var newEntities = await GetNewErrorsAsync(searchText, errorLog, id, filters, cancellationToken);
+            var newEntities = await GetNewErrorsAsync(errorLog, id, filters, cancellationToken);
             return Results.Json(newEntities, DefaultJsonSerializerOptions.ApiSerializerOptions);
         });
 
@@ -76,25 +76,28 @@ internal static partial class Endpoints
         return builder.MapPost($"{prefix}/api/new-errors", pipeline.Build());
     }
 
-    private static async Task<ErrorLogFilter[]> ReadErrorFilters(HttpRequest request)
+    private static async Task<ErrorLogFilterCollection> ReadErrorFilters(HttpRequest request, string? searchText)
     {
-        if (!HttpMethods.IsPost(request.Method))
+        var filters = new ErrorLogFilterCollection();
+        if (!string.IsNullOrEmpty(searchText))
         {
-            return Array.Empty<ErrorLogFilter>();
+            filters.Add(new ErrorLogSearchFilter(searchText));
         }
 
-        var filters = new List<ErrorLogFilter>();
-        var strings = await JsonSerializer.DeserializeAsync<string[]>(request.Body) ?? Array.Empty<string>();
-        foreach (var str in strings)
+        if (HttpMethods.IsPost(request.Method))
         {
-            var filter = ErrorLogFilter.Parse(str);
-            if (filter != null)
+            var strings = await JsonSerializer.DeserializeAsync<string[]>(request.Body) ?? Array.Empty<string>();
+            foreach (var str in strings)
             {
-                filters.Add(filter);
+                var filter = ErrorLogPropertyFilter.Parse(str);
+                if (filter is not null)
+                {
+                    filters.Add(filter);
+                }
             }
         }
 
-        return filters.ToArray();
+        return filters;
     }
 
     private static async Task<ErrorLogEntryWrapper?> GetErrorAsync(ErrorLog errorLog, Guid id, CancellationToken cancellationToken)
@@ -103,8 +106,7 @@ internal static partial class Endpoints
         return error == null ? null : new ErrorLogEntryWrapper(error);
     }
 
-    private static async Task<ErrorsList> GetErrorsAsync(string? searchText, ErrorLog errorLog, ErrorLogFilter[] errorFilters,
-        int errorIndex, int pageSize, CancellationToken cancellationToken)
+    private static async Task<ErrorsList> GetErrorsAsync(ErrorLog errorLog, ErrorLogFilterCollection errorFilters, int errorIndex, int pageSize, CancellationToken cancellationToken)
     {
         errorIndex = Math.Max(0, errorIndex);
         pageSize = pageSize switch
@@ -115,7 +117,7 @@ internal static partial class Endpoints
         };
 
         var entries = new List<ErrorLogEntry>(pageSize);
-        var totalCount = await errorLog.GetErrorsAsync(searchText, errorFilters, errorIndex, pageSize, entries, cancellationToken);
+        var totalCount = await errorLog.GetErrorsAsync(errorFilters, errorIndex, pageSize, entries, cancellationToken);
         return new ErrorsList
         {
             Errors = entries.Select(i => new ErrorLogEntryWrapper(i)).ToList(),
@@ -123,20 +125,47 @@ internal static partial class Endpoints
         };
     }
 
-    private static async Task<ErrorsList> GetNewErrorsAsync(string? searchText, ErrorLog errorLog, string? id,
-        ErrorLogFilter[] errorFilters, CancellationToken cancellationToken)
+    private static async Task<ErrorsList> GetNewErrorsAsync(ErrorLog errorLog, string? id, ErrorLogFilterCollection errorFilters, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out Guid errorGuid))
         {
-            return await GetErrorsAsync(searchText, errorLog, errorFilters, 0, 50, cancellationToken);
+            return await GetErrorsAsync(errorLog, errorFilters, 0, 50, cancellationToken);
         }
 
-        var entries = new List<ErrorLogEntry>();
-        var totalCount = await errorLog.GetNewErrorsAsync(searchText, errorFilters, errorGuid, entries, cancellationToken);
+        var (totalCount, errors) = await GetNewErrorsAsync(errorLog, errorGuid, errorFilters, cancellationToken);
         return new ErrorsList
         {
-            Errors = entries.Select(i => new ErrorLogEntryWrapper(i)).ToList(),
+            Errors = errors,
             TotalCount = totalCount
         };
+    }
+
+    private static async Task<(int, List<ErrorLogEntryWrapper>)> GetNewErrorsAsync(ErrorLog errorLog, Guid errorGuid, ErrorLogFilterCollection errorFilters, CancellationToken cancellationToken)
+    {
+        int cnt = 0, count, page = 0;
+
+        var buffer = new List<ErrorLogEntry>(10);
+        var returnList = new List<ErrorLogEntryWrapper>();
+
+        do
+        {
+            buffer.Clear();
+            count = await errorLog.GetErrorsAsync(errorFilters, page, 10, buffer, cancellationToken);
+            
+            foreach (var el in buffer)
+            {
+                if (el.Id == errorGuid)
+                {
+                    return (count, returnList);
+                }
+
+                cnt += 1;
+                returnList.Add(new ErrorLogEntryWrapper(el));
+            }
+
+            page += 1;
+        } while (buffer.Count > 0);
+
+        return (0, returnList);
     }
 }

@@ -139,7 +139,7 @@ public sealed class MemoryErrorLog : ErrorLog
     ///     Returns a page of errors from the application memory in
     ///     descending order of logged time.
     /// </summary>
-    public override Task<int> GetErrorsAsync(string? searchText, ErrorLogFilter[] filters, int errorIndex, int pageSize,
+    public override Task<int> GetErrorsAsync(ErrorLogFilterCollection filters, int errorIndex, int pageSize,
         ICollection<ErrorLogEntry> entries, CancellationToken cancellationToken)
     {
         if (errorIndex < 0)
@@ -174,11 +174,9 @@ public sealed class MemoryErrorLog : ErrorLog
             var sourceEntries = (KeyedCollection<Guid, ErrorLogEntry>)_entries;
             totalCount = _entries.Count;
             
-            if (filters.Length > 0 || !string.IsNullOrEmpty(searchText))
+            if (filters.Count > 0)
             {
-                var items = from e in _entries
-                    where ErrorLogFilterHelper.IsMatched(e, searchText, filters)
-                    select e;
+                var items = _entries.Where(filters.IsMatch);
                 sourceEntries = new EntryCollection(items.ToList());
                 totalCount = sourceEntries.Count;
             }
