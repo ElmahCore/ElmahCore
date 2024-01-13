@@ -17,6 +17,7 @@ namespace Elmah.AspNetCore.MsSql;
 public class SqlErrorLog : ErrorLog
 {
     private const int MaxAppNameLength = 60;
+    private volatile bool _tableCreationChecked = false;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
@@ -52,10 +53,7 @@ public class SqlErrorLog : ErrorLog
         DatabaseSchemaName = !string.IsNullOrWhiteSpace(schemaName) ? schemaName! : "dbo";
         DatabaseTableName = !string.IsNullOrWhiteSpace(tableName) ? tableName! : "ELMAH_Error";
 
-        if (createTablesIfNotExist)
-        {
-            CreateTableIfNotExists();
-        }
+        _tableCreationChecked = !createTablesIfNotExist;
     }
 
     /// <summary>
@@ -83,6 +81,8 @@ public class SqlErrorLog : ErrorLog
     {
         try
         {
+            await this.EnsureTablesExistAsync(cancellationToken);
+
             var errorXml = ErrorXml.EncodeString(error);
 
             using var connection = new SqlConnection(ConnectionString);
@@ -101,6 +101,8 @@ public class SqlErrorLog : ErrorLog
 
     public override async Task<ErrorLogEntry?> GetErrorAsync(Guid id, CancellationToken cancellationToken)
     {
+        await this.EnsureTablesExistAsync(cancellationToken);
+
         string? errorXml;
 
         using (var connection = new SqlConnection(ConnectionString))
@@ -108,7 +110,7 @@ public class SqlErrorLog : ErrorLog
         {
             command.Connection = connection;
             await connection.OpenAsync(cancellationToken);
-            errorXml = (string?)await command.ExecuteScalarAsync();
+            errorXml = (string?)await command.ExecuteScalarAsync(cancellationToken);
         }
 
         if (errorXml == null)
@@ -121,7 +123,7 @@ public class SqlErrorLog : ErrorLog
     }
 
     public override async Task<int> GetErrorsAsync(ErrorLogFilterCollection filters, int errorIndex, int pageSize,
-        ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellation)
+        ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
     {
         if (errorIndex < 0)
         {
@@ -134,14 +136,14 @@ public class SqlErrorLog : ErrorLog
         }
 
         using var connection = new SqlConnection(ConnectionString);
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
         using (var command = Commands.GetErrorsXml(ApplicationName, errorIndex, pageSize, DatabaseSchemaName, DatabaseTableName))
         {
             command.Connection = connection;
 
-            using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
             {
                 var id = reader.GetGuid(0);
                 var xml = reader.GetString(1);
@@ -153,30 +155,37 @@ public class SqlErrorLog : ErrorLog
         using (var command = Commands.GetErrorsXmlTotal(ApplicationName, DatabaseSchemaName, DatabaseTableName))
         {
             command.Connection = connection;
-            return (int)(await command.ExecuteScalarAsync())!;
+            return (int)(await command.ExecuteScalarAsync(cancellationToken))!;
         }
     }
 
     /// <summary>
     ///  Creates the necessary tables and sequences used by this implementation
     /// </summary>
-    private void CreateTableIfNotExists()
+    private async Task EnsureTablesExistAsync(CancellationToken cancellationToken)
     {
+        if (_tableCreationChecked)
+        {
+            return;
+        }
+
+        _tableCreationChecked = true;
+
         using var connection = new SqlConnection(ConnectionString);
-        connection.Open();
+        await connection.OpenAsync(cancellationToken);
 
         using var cmdCheck = Commands.CheckTable(DatabaseSchemaName, DatabaseTableName);
         cmdCheck.Connection = connection;
 
         // ReSharper disable once PossibleNullReferenceException
-        var exists = (int?)cmdCheck.ExecuteScalar();
+        var exists = (int?)(await cmdCheck.ExecuteScalarAsync(cancellationToken));
         if (!exists.HasValue)
         {
-            ExecuteBatchNonQuery(Commands.CreateTableSql(DatabaseSchemaName, DatabaseTableName), connection);
+            await ExecuteBatchNonQueryAsync(Commands.CreateTableSql(DatabaseSchemaName, DatabaseTableName), connection, cancellationToken);
         }
     }
 
-    private void ExecuteBatchNonQuery(string sql, SqlConnection conn)
+    private async Task ExecuteBatchNonQueryAsync(string sql, SqlConnection conn, CancellationToken cancellationToken)
     {
         var sqlBatch = string.Empty;
         using var cmd = new SqlCommand(string.Empty, conn);
@@ -187,7 +196,7 @@ public class SqlErrorLog : ErrorLog
             if (line.ToUpperInvariant().Trim() == "GO")
             {
                 cmd.CommandText = sqlBatch;
-                cmd.ExecuteNonQuery();
+                await cmd.ExecuteNonQueryAsync(cancellationToken);
                 sqlBatch = string.Empty;
             }
             else
@@ -203,6 +212,7 @@ public class SqlErrorLog : ErrorLog
         {
             return
             $@"
+/* elmah */
 CREATE TABLE [{schemaName}].[{tableName}]
 (
     [ErrorId]     UNIQUEIDENTIFIER NOT NULL,
@@ -219,14 +229,17 @@ CREATE TABLE [{schemaName}].[{tableName}]
 ) 
 GO
 
+/* elmah */
 ALTER TABLE [{schemaName}].[{tableName}] WITH NOCHECK ADD 
     CONSTRAINT [PK_{tableName}] PRIMARY KEY NONCLUSTERED ([ErrorId]) ON [PRIMARY] 
 GO
 
+/* elmah */
 ALTER TABLE [{schemaName}].[{tableName}] ADD 
     CONSTRAINT [DF_{tableName}_ErrorId] DEFAULT (NEWID()) FOR [ErrorId]
 GO
 
+/* elmah */
 CREATE NONCLUSTERED INDEX [IX_{tableName}_App_Time_Seq] ON [{schemaName}].[{tableName}] 
 (
     [Application]   ASC,
@@ -241,6 +254,7 @@ ON [PRIMARY]";
             var command = new SqlCommand
             {
                 CommandText = $@"
+/* elmah */
 SELECT 1 
 WHERE EXISTS (
    SELECT 1
@@ -298,6 +312,7 @@ VALUES (@ErrorId, @Application, @Host, @Type, @Source, @Message, @User, @StatusC
             var command = new SqlCommand
             {
                 CommandText = $@"
+/* elmah */
 SELECT AllXml FROM [{schemaName}].[{tableName}]
 WHERE 
     Application = @Application 
@@ -321,6 +336,7 @@ WHERE
             var command = new SqlCommand
             {
                 CommandText = $@"
+/* elmah */
 SELECT ErrorId, AllXml FROM [{schemaName}].[{tableName}]
 WHERE
     Application = @Application
@@ -343,7 +359,7 @@ FETCH NEXT @limit ROWS ONLY;
         {
             var command = new SqlCommand
             {
-                CommandText = $"SELECT COUNT(*) FROM [{schemaName}].[{tableName}] WHERE Application = @Application"
+                CommandText = $"/* elmah */ SELECT COUNT(*) FROM [{schemaName}].[{tableName}] WHERE Application = @Application"
             };
             command.Parameters.Add("@Application", SqlDbType.NVarChar, MaxAppNameLength).Value = appName;
             return command;
