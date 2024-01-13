@@ -25,6 +25,6 @@ public static class ErrorLogExtensions
     ///     does the same as <see cref="GetErrors" />. An additional
     ///     parameter specifies a <see cref="CancellationToken" /> to use.
     /// </summary>
-    public static Task<int> GetErrorsAsync(this ErrorLog log, string? searchText, List<ErrorLogFilter> errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
+    public static Task<int> GetErrorsAsync(this ErrorLog log, string? searchText, ErrorLogFilter[] errorLogFilters, int errorIndex, int pageSize, ICollection<ErrorLogEntry> errorEntryList)
         => log.GetErrorsAsync(searchText, errorLogFilters, errorIndex, pageSize, errorEntryList, default);
 }

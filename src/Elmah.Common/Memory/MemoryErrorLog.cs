@@ -139,8 +139,8 @@ public sealed class MemoryErrorLog : ErrorLog
     ///     Returns a page of errors from the application memory in
     ///     descending order of logged time.
     /// </summary>
-    public override Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
-        ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
+    public override Task<int> GetErrorsAsync(string? searchText, ErrorLogFilter[] filters, int errorIndex, int pageSize,
+        ICollection<ErrorLogEntry> entries, CancellationToken cancellationToken)
     {
         if (errorIndex < 0)
         {
@@ -174,7 +174,7 @@ public sealed class MemoryErrorLog : ErrorLog
             var sourceEntries = (KeyedCollection<Guid, ErrorLogEntry>)_entries;
             totalCount = _entries.Count;
             
-            if (filters.Count > 0 || !string.IsNullOrEmpty(searchText))
+            if (filters.Length > 0 || !string.IsNullOrEmpty(searchText))
             {
                 var items = from e in _entries
                     where ErrorLogFilterHelper.IsMatched(e, searchText, filters)
@@ -205,7 +205,7 @@ public sealed class MemoryErrorLog : ErrorLog
             _lock.ExitReadLock();
         }
 
-        if (errorEntryList != null && selectedEntries != null)
+        if (entries != null && selectedEntries != null)
         {
             //
             // Return copies of fetched entries. If the Error class would 
@@ -214,7 +214,7 @@ public sealed class MemoryErrorLog : ErrorLog
             foreach (var entry in selectedEntries)
             {
                 var error = entry.Error.Clone();
-                errorEntryList.Add(new ErrorLogEntry(this, error));
+                entries.Add(new ErrorLogEntry(this, error));
             }
         }
 

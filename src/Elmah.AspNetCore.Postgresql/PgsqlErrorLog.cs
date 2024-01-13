@@ -59,11 +59,8 @@ public class PgsqlErrorLog : ErrorLog
     /// </summary>
     public override async Task LogAsync(Error error, CancellationToken cancellationToken)
     {
-        if (error == null)
-        {
-            throw new ArgumentNullException("error");
-        }
-
+        ArgumentNullException.ThrowIfNull(error);
+        
         var errorXml = ErrorXml.EncodeString(error);
 
         using (var connection = new NpgsqlConnection(ConnectionString))
@@ -97,7 +94,7 @@ public class PgsqlErrorLog : ErrorLog
         return new ErrorLogEntry(this, error);
     }
 
-    public override async Task<int> GetErrorsAsync(string? searchText, List<ErrorLogFilter> filters, int errorIndex, int pageSize,
+    public override async Task<int> GetErrorsAsync(string? searchText, ErrorLogFilter[] filters, int errorIndex, int pageSize,
         ICollection<ErrorLogEntry> errorEntryList, CancellationToken cancellationToken)
     {
         if (errorIndex < 0)

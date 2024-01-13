@@ -26,24 +26,13 @@ internal static partial class Endpoints
 
     public static IEndpointConventionBuilder MapDownload(this IEndpointRouteBuilder builder, string prefix = "")
     {
-        var handler = RequestDelegateFactory.Create(async (
+        var handler = RequestDelegateFactory.Create((
             [FromQuery] string? format,
             [FromQuery] int? limit,
             [FromServices] ErrorLog errorLog,
             HttpContext context) =>
         {
-            var buffer = new FileBufferingWriteStream();
-
-            //
-            // Determine the desired output format.
-            //
-            var downloadFormat = GetFormat(format?.ToLowerInvariant() ?? "csv", buffer);
-
-            await ProcessRequestAsync(errorLog, context, downloadFormat, limit ?? 0);
-
-            await buffer.DrainBufferAsync(context.Response.Body);
-
-            return Results.Ok();
+            return new DownloadResult(errorLog, format, limit);
         });
 
         var pipeline = builder.CreateApplicationBuilder();
@@ -55,45 +44,31 @@ internal static partial class Endpoints
     {
         await format.WriteHeaderAsync(context.Response);
 
+        int pageIndex = 0;
+        int pageSize = maxDownloadCount == 0 ? PageSize : Math.Min(maxDownloadCount, PageSize);
+        
         var errorEntryList = new List<ErrorLogEntry>(PageSize);
-        var downloadCount = 0;
+        int remaining = await log.GetErrorsAsync(null, Array.Empty<ErrorLogFilter>(), pageIndex++, pageSize, errorEntryList, context.RequestAborted);
 
-        for (var pageIndex = 0; ; pageIndex++)
+        if (maxDownloadCount > 0)
         {
-            var total = await log.GetErrorsAsync(null, new List<ErrorLogFilter>(), pageIndex, PageSize, errorEntryList);
-            var count = errorEntryList.Count;
+            remaining = Math.Min(remaining, maxDownloadCount);
+        }
 
-            if (maxDownloadCount > 0)
+        while (remaining > 0)
+        {
+            await format.WriteEntriesAsync(context, errorEntryList, remaining);
+            remaining -= errorEntryList.Count;
+
+            if (remaining > 0)
             {
-                var remaining = maxDownloadCount - (downloadCount + count);
-                if (remaining < 0)
-                {
-                    count += remaining;
-                }
+                //
+                // Fetch next page of results.
+                //
+                pageSize = Math.Min(remaining, PageSize);
+                errorEntryList.Clear();
+                await log.GetErrorsAsync(null, Array.Empty<ErrorLogFilter>(), pageIndex++, pageSize, errorEntryList, context.RequestAborted);
             }
-
-            await format.WriteEntriesAsync(context, errorEntryList, 0, count, total);
-
-            downloadCount += count;
-
-            //
-            // Done if either the end of the list (no more errors found) or
-            // the requested limit has been reached.
-            //
-            if (count == 0 || downloadCount == maxDownloadCount)
-            {
-                if (count > 0)
-                {
-                    await format.WriteEntriesAsync(context, new ErrorLogEntry[0], total); // Terminator
-                }
-
-                break;
-            }
-
-            //
-            // Fetch next page of results.
-            //
-            errorEntryList.Clear();
         }
     }
 
@@ -108,6 +83,32 @@ internal static partial class Endpoints
         }
     }
 
+    private sealed class DownloadResult : IResult
+    {
+        private readonly ErrorLog _errorLog;
+        private readonly string? _format;
+        private readonly int? _limit;
+
+        public DownloadResult(ErrorLog errorLog, string? format, int? limit)
+        {
+            _errorLog = errorLog;
+            _format = format;
+            _limit = limit;
+        }
+
+        public async Task ExecuteAsync(HttpContext httpContext)
+        {
+            var buffer = new FileBufferingWriteStream();
+            var downloadFormat = GetFormat(_format?.ToLowerInvariant() ?? "csv", buffer);
+
+            await ProcessRequestAsync(_errorLog, httpContext, downloadFormat, _limit ?? 0);
+
+            httpContext.Response.Headers[HeaderNames.ContentType] = downloadFormat.ContentType;
+            httpContext.Response.Headers[HeaderNames.ContentDisposition] = $"attachment; filename={downloadFormat.FileName}";
+            await buffer.DrainBufferAsync(httpContext.Response.Body);
+        }
+    }
+
     private abstract class Format
     {
         protected Format(Stream stream)
@@ -115,16 +116,15 @@ internal static partial class Endpoints
             OutputStream = stream;
         }
 
+        public abstract string ContentType { get; }
+
+        public abstract string FileName { get; }
+
         protected Stream OutputStream { get; }
 
         public abstract Task WriteHeaderAsync(HttpResponse response);
 
-        public Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int total)
-        {
-            return WriteEntriesAsync(context, entries, 0, entries.Count, total);
-        }
-
-        public abstract Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int index, int count, int total);
+        public abstract Task WriteEntriesAsync(HttpContext context, IReadOnlyCollection<ErrorLogEntry> entries, int total);
     }
 
     private sealed class CsvFormat : Format
@@ -133,22 +133,19 @@ internal static partial class Endpoints
         {
         }
 
+        public override string ContentType => "text/csv; header=present";
+
+        public override string FileName => "errorlog.csv";
+
         public override async Task WriteHeaderAsync(HttpResponse response)
         {
-            response.Headers[HeaderNames.ContentType] = "text/csv; header=present";
-            response.Headers[HeaderNames.ContentDisposition] = "attachment; filename=errorlog.csv";
-
             await this.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(
                 "Application,Host,Time,Unix Time,Type,Source,User,Status Code,Message,URL,XMLREF,JSONREF\r\n"));
         }
 
-        public override async Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int index, int count, int total)
+        public override async Task WriteEntriesAsync(HttpContext context, IReadOnlyCollection<ErrorLogEntry> entries, int total)
         {
-            Debug.Assert(entries != null);
-            Debug.Assert(index >= 0);
-            Debug.Assert(index + count <= entries.Count);
-
-            if (count == 0)
+            if (entries.Count == 0)
             {
                 return;
             }
@@ -165,13 +162,12 @@ internal static partial class Endpoints
             //
             // For each error, emit a CSV record.
             //
-            for (var i = index; i < count; i++)
+            foreach (var entry in entries)
             {
-                var entry = entries[i];
                 var error = entry.Error;
                 var time = error.Time.ToUniversalTime();
                 var query = "?id=" + Uri.EscapeDataString(entry.Id.ToString());
-                var requestUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}";
+                var requestUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase.Add(context.Request.Path)}";
 
                 await csv.Field(error.ApplicationName);
                 await csv.Field(error.HostName);
@@ -187,6 +183,8 @@ internal static partial class Endpoints
                 await csv.Field($"{requestUrl}detail{query}");
                 await csv.Record();
             }
+
+            await writer.FlushAsync();
         }
     }
 
@@ -215,6 +213,10 @@ internal static partial class Endpoints
             _wrapped = wrapped;
         }
 
+        public override string ContentType => _wrapped ? MediaTypeNames.Text.Html : MediaTypeNames.Application.Json;
+
+        public override string FileName => "errorlog.js";
+
         public override async Task WriteHeaderAsync(HttpResponse response)
         {
             var callback = response.HttpContext.Request.Query["callback"].FirstOrDefault()
@@ -232,15 +234,8 @@ internal static partial class Endpoints
 
             _callback = callback;
 
-            if (!_wrapped)
+            if (_wrapped)
             {
-                response.Headers[HeaderNames.ContentType] = "text/javascript";
-                response.Headers[HeaderNames.ContentDisposition] = "attachment; filename=errorlog.js";
-            }
-            else
-            {
-                response.Headers[HeaderNames.ContentType] = MediaTypeNames.Text.Html;
-
                 await this.OutputStream.WriteAsync(
                     Encoding.UTF8.GetBytes(
                     "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"));
@@ -256,12 +251,8 @@ internal static partial class Endpoints
             }
         }
 
-        public override async Task WriteEntriesAsync(HttpContext context, IList<ErrorLogEntry> entries, int index, int count, int total)
+        public override async Task WriteEntriesAsync(HttpContext context, IReadOnlyCollection<ErrorLogEntry> entries, int total)
         {
-            Debug.Assert(entries != null);
-            Debug.Assert(index >= 0);
-            Debug.Assert(index + count <= entries.Count);
-
             var writer = new StreamWriter(this.OutputStream) { NewLine = "\n" };
 
             if (_wrapped)
@@ -280,9 +271,8 @@ internal static partial class Endpoints
 
             var requestUrl = context.GetElmahAbsoluteRoot();
 
-            for (var i = index; i < count; i++)
+            foreach (var entry in entries)
             {
-                var entry = entries[i];
                 var urlTemplate = $"{requestUrl}?id=" + Uri.EscapeDataString(entry.Id.ToString());
 
                 json.WriteStartObject();
@@ -312,7 +302,7 @@ internal static partial class Endpoints
             json.WriteEndObject();
             await json.FlushAsync();
 
-            if (count > 0)
+            if (entries.Count > 0)
             {
                 await writer.WriteLineAsync();
             }
@@ -324,7 +314,7 @@ internal static partial class Endpoints
                 await writer.WriteLineAsync("//]]>");
                 await writer.WriteLineAsync("</script>");
 
-                if (count == 0)
+                if (entries.Count == 0)
                 {
                     await writer.WriteLineAsync(@"</body></html>");
                 }
@@ -453,7 +443,10 @@ internal static partial class Endpoints
 
     private sealed class CsvWriter
     {
-        private static readonly char[] Reserved = { '\"', ',', '\r', '\n' };
+        private const string Quote = "\"";
+        private const string DoubleQuote = "\"\"";
+
+        private static readonly char[] Reserved = { '"', ',', '\r', '\n' };
         private readonly TextWriter _writer;
         private int _column;
 
@@ -495,10 +488,9 @@ internal static partial class Endpoints
                 // double-quote appearing inside a field must be escaped by 
                 // preceding it with another double quote. 
                 //
-                const string quote = "\"";
-                await _writer.WriteAsync(quote);
-                await _writer.WriteAsync(value.Replace(quote, quote + quote));
-                await _writer.WriteAsync(quote);
+                await _writer.WriteAsync(Quote);
+                await _writer.WriteAsync(value.Replace(Quote, DoubleQuote));
+                await _writer.WriteAsync(Quote);
             }
 
             _column++;
