@@ -5,18 +5,7 @@ namespace Elmah;
 
 internal static class ErrorLogFilterHelper
 {
-    public static bool IsMatched(ErrorLogEntry entry, string? searchText, IEnumerable<ErrorLogFilter> filters)
-    {
-        var isMatched = DoFilter(entry, filters);
-        if (isMatched)
-        {
-            isMatched = DoSearch(entry, searchText);   
-        }
-
-        return isMatched;
-    }
-
-    private static bool DoSearch(ErrorLogEntry entry, string? searchText)
+    public static bool DoSearch(ErrorLogEntry entry, string? searchText)
     {
         searchText = ("" + searchText).Trim();
         if (searchText == string.Empty)
@@ -41,28 +30,17 @@ internal static class ErrorLogFilterHelper
         return false;
     }
 
-    private static bool DoFilter(ErrorLogEntry entry, IEnumerable<ErrorLogFilter> filters)
+    public static bool DoFilter(ErrorLogEntry entry, ErrorLogPropertyFilter filter)
     {
-        foreach (var filter in filters)
+        return filter.PropertyType switch
         {
-            var isMatched = filter.PropertyType switch
-            {
-                ErrorLogPropertyType.DateTime => Check(entry, filter, filter.GetValueAsDateTime(),
-                    DateTimeConditions),
-                ErrorLogPropertyType.String => Check(entry, filter, filter.Value, StringConditions),
-                _ => throw new NotSupportedException($"ErrorLogPropertyType {filter.PropertyType} not supported")
-            };
-
-            if (!isMatched)
-            {
-                return false;
-            }
-        }
-
-        return true;
+            ErrorLogPropertyType.DateTime => Check(entry, filter, filter.GetValueAsDateTime(), DateTimeConditions),
+            ErrorLogPropertyType.String => Check(entry, filter, filter.Value, StringConditions),
+            _ => throw new NotSupportedException($"ErrorLogPropertyType {filter.PropertyType} not supported")
+        };
     }
 
-    private static bool Check<T>(ErrorLogEntry entry, ErrorLogFilter filter, T value,
+    private static bool Check<T>(ErrorLogEntry entry, ErrorLogPropertyFilter filter, T value,
         IReadOnlyDictionary<ErrorLogFilterCondition, Func<T?, T, bool>> conditions)
     {
         var func = FindFunc(filter.Property);

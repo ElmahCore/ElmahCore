@@ -48,7 +48,7 @@ internal static partial class Endpoints
         int pageSize = maxDownloadCount == 0 ? PageSize : Math.Min(maxDownloadCount, PageSize);
         
         var errorEntryList = new List<ErrorLogEntry>(PageSize);
-        int remaining = await log.GetErrorsAsync(null, Array.Empty<ErrorLogFilter>(), pageIndex++, pageSize, errorEntryList, context.RequestAborted);
+        int remaining = await log.GetErrorsAsync(ErrorLogFilterCollection.Empty, pageIndex++, pageSize, errorEntryList, context.RequestAborted);
 
         if (maxDownloadCount > 0)
         {
@@ -67,7 +67,7 @@ internal static partial class Endpoints
                 //
                 pageSize = Math.Min(remaining, PageSize);
                 errorEntryList.Clear();
-                await log.GetErrorsAsync(null, Array.Empty<ErrorLogFilter>(), pageIndex++, pageSize, errorEntryList, context.RequestAborted);
+                await log.GetErrorsAsync(ErrorLogFilterCollection.Empty, pageIndex++, pageSize, errorEntryList, context.RequestAborted);
             }
         }
     }
