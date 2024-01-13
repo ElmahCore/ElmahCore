@@ -17,7 +17,7 @@ namespace Elmah.AspNetCore.MsSql;
 public class SqlErrorLog : ErrorLog
 {
     private const int MaxAppNameLength = 60;
-    private volatile bool _tableCreationChecked = false;
+    private volatile bool _checkTableExists = false;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="SqlErrorLog" /> class
@@ -53,7 +53,7 @@ public class SqlErrorLog : ErrorLog
         DatabaseSchemaName = !string.IsNullOrWhiteSpace(schemaName) ? schemaName! : "dbo";
         DatabaseTableName = !string.IsNullOrWhiteSpace(tableName) ? tableName! : "ELMAH_Error";
 
-        _tableCreationChecked = !createTablesIfNotExist;
+        _checkTableExists = createTablesIfNotExist;
     }
 
     /// <summary>
@@ -164,12 +164,12 @@ public class SqlErrorLog : ErrorLog
     /// </summary>
     private async Task EnsureTablesExistAsync(CancellationToken cancellationToken)
     {
-        if (_tableCreationChecked)
+        if (!_checkTableExists)
         {
             return;
         }
 
-        _tableCreationChecked = true;
+        _checkTableExists = false;
 
         using var connection = new SqlConnection(ConnectionString);
         await connection.OpenAsync(cancellationToken);
