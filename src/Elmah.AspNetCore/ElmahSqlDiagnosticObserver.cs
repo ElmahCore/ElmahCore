@@ -67,14 +67,14 @@ internal sealed class ElmahSqlDiagnosticObserver : IObserver<DiagnosticListener>
 
     private void OnCommandStart(Guid id, DbCommand cmd)
     {
-        var context = this.GetElmahContext();
-        if (context is null)
+        string query = cmd.CommandText;
+        if (query.Contains("/* elmah */"))
         {
             return;
         }
 
-        string query = cmd.CommandText;
-        if (query.Contains("/* elmah */"))
+        var context = this.GetElmahContext();
+        if (context is null)
         {
             return;
         }

@@ -641,7 +641,7 @@ public static class ErrorXml
                     CommandType = reader.GetAttribute("command-type"),
                     SqlText = reader.GetAttribute("sql-text"),
                     TimeStamp = LoadTime(reader.GetAttribute("time-stamp") ?? string.Empty),
-                    DurationMs = int.Parse(reader.GetAttribute("duration") ?? "0")
+                    DurationMs = double.Parse(reader.GetAttribute("duration") ?? "0")
                 };
 
                 log.Add(entry);
